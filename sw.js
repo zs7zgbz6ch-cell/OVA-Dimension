@@ -1,5 +1,6 @@
-const CACHE='ovad-0031';
+const CACHE='ovad-0032';
 const ASSETS=[
+  './index.html',
   './manifest.webmanifest',
   './assets/landing.png',
   './assets/berklith_mainroom_master.png',

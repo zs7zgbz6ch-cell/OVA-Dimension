@@ -1,11 +1,13 @@
-OVA-D Prototype 0.03.1 — Stew Man Placement Calibration
+OVA-D Prototype 0.03.2 — Scene Image Handling
 
 Changes:
-- Keeps the transparent seated Stew Man asset and immutable Berklith Tavern master background.
-- Moves the occupied character/chair layer left and slightly down.
-- Increases the layer scale slightly to better seat him at the left-side table.
-- Moves his interaction hotspot with the visual layer.
-- No artwork regeneration: this is CSS placement calibration only.
-- Existing event lock, persistence, lamp behavior and J.B. + M.B. discovery are retained.
+- Prevents iOS/Safari long-press image previews and image context menus inside the game.
+- Prevents dragging/selecting scene artwork.
+- Preloads and decodes background plates and character layers before revealing the game.
+- Keeps Stew Man as a separate composited layer while avoiding visible late pop-in on startup/restore.
+- Bumps the service-worker cache to 0.03.2.
 
-Goal: make the occupied chair/table relationship read naturally before freezing Stew Man placement and moving on to Rionne.
+Test:
+1. Open downstairs and long-press the tavern/background/Stew Man. No image Share/Save/Copy preview should appear.
+2. Leave and reopen OVA-D. The tavern and Stew Man should appear as a composed scene rather than background first, character later.
+3. Confirm normal taps, event lock, stairs, lamp persistence and Stew Man interactions still work.
