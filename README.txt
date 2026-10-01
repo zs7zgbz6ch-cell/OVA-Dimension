@@ -1,12 +1,11 @@
-OVA-D Prototype 0.03 — Seated Character Layer Test
+OVA-D Prototype 0.03.1 — Stew Man Placement Calibration
 
 Changes:
-- Stew Man is now a true transparent character layer instead of being baked into the tavern image.
-- His occupied chair, coat and held stew bowl travel with his seated character state.
-- Scale and position target the deeper left-side table composition rather than the foreground sprite look.
-- Master Berklith Tavern background remains untouched.
-- Existing event lock, persistence, landing lamp and J.B. + M.B. hotspot retained.
+- Keeps the transparent seated Stew Man asset and immutable Berklith Tavern master background.
+- Moves the occupied character/chair layer left and slightly down.
+- Increases the layer scale slightly to better seat him at the left-side table.
+- Moves his interaction hotspot with the visual layer.
+- No artwork regeneration: this is CSS placement calibration only.
+- Existing event lock, persistence, lamp behavior and J.B. + M.B. discovery are retained.
 
-This is deliberately a spatial test. If his exact seat alignment needs tuning, future builds only change CSS numbers — not the tavern artwork.
-
-Next: tune depth/occlusion, then begin Rionne layering.
+Goal: make the occupied chair/table relationship read naturally before freezing Stew Man placement and moving on to Rionne.

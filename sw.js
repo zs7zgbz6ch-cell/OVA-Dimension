@@ -1,4 +1,4 @@
-const CACHE='ovad-0030';
+const CACHE='ovad-0031';
 const ASSETS=[
   './manifest.webmanifest',
   './assets/landing.png',
