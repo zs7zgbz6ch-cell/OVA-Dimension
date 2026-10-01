@@ -1,10 +1,12 @@
-OVA-D Prototype 0.02.4 — Event Lock + Beam Fix
+OVA-D Prototype 0.03 — Seated Character Layer Test
 
 Changes:
-- While narration, dialogue or a Moment is active, exploration hotspots are locked.
-- Scene travel cannot be triggered halfway through an active event.
-- Multi-part door response now stays one controlled sequence.
-- J.B. + M.B. hotspot moved to the visible upper beam/post joint.
-- World-space hotspot system and persistent lamp state retained.
+- Stew Man is now a true transparent character layer instead of being baked into the tavern image.
+- His occupied chair, coat and held stew bowl travel with his seated character state.
+- Scale and position target the deeper left-side table composition rather than the foreground sprite look.
+- Master Berklith Tavern background remains untouched.
+- Existing event lock, persistence, landing lamp and J.B. + M.B. hotspot retained.
 
-Next: Prototype 0.03 — character layering / occlusion.
+This is deliberately a spatial test. If his exact seat alignment needs tuning, future builds only change CSS numbers — not the tavern artwork.
+
+Next: tune depth/occlusion, then begin Rionne layering.

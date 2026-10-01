@@ -1,11 +1,9 @@
-const CACHE='ovad-0024';
+const CACHE='ovad-0030';
 const ASSETS=[
   './manifest.webmanifest',
   './assets/landing.png',
   './assets/berklith_mainroom_master.png',
-  './assets/stewman_body.png',
-  './assets/stewman_bowl.png',
-  './assets/stewman_mug.png',
+  './assets/stewman_seated.png',
   './assets/icon-192.png',
   './assets/icon-512.png'
 ];
