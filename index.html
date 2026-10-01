@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#090705"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/icon-192.png">
-<title>OVA-D · Prototype 0.02.1</title>
+<title>OVA-D · Prototype 0.02.2</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090705;color:#fff;font-family:Georgia,serif;overscroll-behavior:none}body{position:fixed;inset:0}#game{position:fixed;inset:0;overflow:hidden;touch-action:none;background:#090705}.scene{position:absolute;inset:0;display:none}.scene.on{display:block}.plate{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-drag:none}.hot{position:absolute;border:0;background:transparent;padding:0;z-index:8}.asset{position:absolute;pointer-events:none;user-select:none;-webkit-user-drag:none;z-index:4}
 #landingDoor{left:82%;top:8%;width:15%;height:68%}#landingLamp{left:69%;top:27%;width:8%;height:24%}#landingWindow{left:35%;top:7%;width:17%;height:38%}#landingStairs{left:1%;top:49%;width:38%;height:49%}#landingBeam{left:46.2%;top:9.5%;width:2.2%;height:7%}#lampGlow{position:absolute;left:65%;top:20%;width:18%;height:42%;pointer-events:none;z-index:2;opacity:0;background:radial-gradient(ellipse at center,rgba(255,190,95,.24) 0%,rgba(255,142,48,.10) 35%,rgba(255,130,30,0) 72%);mix-blend-mode:screen;transition:opacity .55s ease}#landing.lamp-on #lampGlow{opacity:1}
@@ -11,7 +11,7 @@
 </style></head><body><div id="game">
 <section id="landing" class="scene"><img class="plate" src="assets/landing.png"><div id="lampGlow"></div><button class="hot" id="landingDoor"></button><button class="hot" id="landingLamp"></button><button class="hot" id="landingWindow"></button><button class="hot" id="landingStairs"></button><button class="hot" id="landingBeam"></button></section>
 <section id="tavern" class="scene"><img class="plate" src="assets/berklith_mainroom_master.png"><img id="stewman" class="asset" src="assets/stewman_body.png"><img id="bowl" class="asset" src="assets/stewman_bowl.png"><img id="mug" class="asset" src="assets/stewman_mug.png"><button class="hot" id="stewHot"></button><button class="hot" id="stairsUp"></button><button class="hot" id="fireHot"></button><button class="hot" id="barHot"></button></section>
-<div id="title">OVA-D · PROTOTYPE 0.02.1</div><div id="toast"></div><div id="panel"></div><div id="fade"></div><button id="reset">↺</button></div><div id="rotate">OVA-D is framed for landscape.<br><br>Turn your phone sideways. ❤️</div>
+<div id="title">OVA-D · PROTOTYPE 0.02.2</div><div id="toast"></div><div id="panel"></div><div id="fade"></div><button id="reset">↺</button></div><div id="rotate">OVA-D is framed for landscape.<br><br>Turn your phone sideways. ❤️</div>
 <script>
 const $=s=>document.querySelector(s),toast=$('#toast'),panel=$('#panel'),fade=$('#fade');
 let state=JSON.parse(localStorage.getItem('ovad002')||'{"scene":"landing","door":0,"stew":0,"secret":false,"lamp":false}');
@@ -23,5 +23,7 @@ $('#stewHot').onclick=()=>{state.stew++;save();if(state.stew===1)manga('The trav
 $('#reset').onclick=()=>{localStorage.removeItem('ovad002');location.reload()};
 // Stop browser gestures; authored close-ups will replace browser zoom.
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});let last=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-last<300)e.preventDefault();last=n},{passive:false});
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(reg=>reg.update()).catch(()=>{});
+}
 </script></body></html>
