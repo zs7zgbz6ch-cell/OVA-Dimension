@@ -1,23 +1,31 @@
-OVA-D — Prototype 0.01: The Landing
+OVA-D Prototype 0.02 — Downstairs / Layering Test
 
-Files:
-- index.html
-- landing.png
+UPLOAD TO GITHUB
+1. Open your OVA-Dimension repository.
+2. Upload everything from this folder to the repository root, preserving the assets folder.
+3. Replace index.html when GitHub asks/commits the change.
+4. Wait for GitHub Pages to redeploy.
 
-iPhone/GitHub Pages:
-1. Create a new repository (or a folder in your OVA-D repository).
-2. Upload index.html and landing.png into the SAME folder.
-3. Enable GitHub Pages for that repository/branch if needed.
-4. Open the Pages URL in Safari and rotate to landscape.
-5. For the most game-like feel, use Safari's Share > Add to Home Screen.
+PWA / SAFARI BAR TEST
+After the updated site loads in Safari:
+1. Tap Share.
+2. Choose Add to Home Screen.
+3. Open OVA-D from the new Home Screen icon.
+It should launch in standalone landscape presentation without Safari's normal browser bars. iOS may still reserve safe areas around hardware/system UI.
 
-What works:
-- Edge-to-edge cover presentation (controlled cropping instead of black bars)
-- Rionne's door remembers repeated attempts
-- Lamp toggles and persists with localStorage
-- Picture, window, stairs and a hidden beam interaction
-- Idle Rionne moment
-- Portrait rotation message
-- Reset button in lower-right corner
+WHAT TO TEST
+- Landing -> stairs -> downstairs tavern.
+- Stew Man is an independent transparent layer over the untouched master tavern.
+- Tap Stew Man repeatedly.
+- Tap fireplace/bar/stairs.
+- Stairs return to landing.
+- Try pinch zoom / double-tap zoom.
+- Close and reopen: interaction state should persist.
+- Home Screen launch / Safari-bar behavior.
 
-Prototype state is stored only on the device/browser via localStorage.
+IMPORTANT
+The tavern background file is the immutable master plate:
+assets/berklith_mainroom_master.png
+Do not edit/overwrite it with a character composite.
+
+0.02 is still a compositing experiment. Stew Man's fit/perspective may need adjustment; the key test is whether the untouched room and separate character/prop layers work reliably.

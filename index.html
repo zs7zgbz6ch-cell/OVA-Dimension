@@ -1,79 +1,27 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#120d09">
-<title>OVA-D — Prototype 0.01: The Landing</title>
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#090705"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/icon-192.png">
+<title>OVA-D · Prototype 0.02</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090705;font-family:Georgia,serif;color:#fff}
-#game{position:fixed;inset:0;background:#090705;overflow:hidden;touch-action:manipulation}
-#scene{position:absolute;inset:0;background:url("landing.png") center center/cover no-repeat;transform:scale(1.012);transition:filter .35s,transform .35s}
-#scene:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 72% 36%,rgba(255,185,95,.05),transparent 20%),linear-gradient(90deg,rgba(0,0,0,.10),transparent 18%,transparent 82%,rgba(0,0,0,.08))}
-.hot{position:absolute;border:0;background:transparent;cursor:pointer}
-#door{left:82%;top:7%;width:17%;height:72%}
-#lamp{left:68%;top:25%;width:11%;height:31%}
-#picture{left:59%;top:12%;width:14%;height:28%}
-#window{left:34%;top:5%;width:20%;height:45%}
-#stairs{left:0;top:40%;width:47%;height:60%}
-#secret{left:45%;top:8%;width:5%;height:16%}
-#lampFx{position:absolute;left:72.3%;top:32%;width:4.5vw;height:4.5vw;max-width:70px;max-height:70px;border-radius:50%;background:rgba(255,170,70,.20);filter:blur(12px);pointer-events:none;animation:flicker 2.6s infinite alternate;transition:opacity .35s}
-@keyframes flicker{from{transform:scale(.85);opacity:.45}to{transform:scale(1.15);opacity:.8}}
-#toast{position:absolute;left:50%;bottom:max(7vh,calc(env(safe-area-inset-bottom) + 20px));transform:translateX(-50%) translateY(18px);max-width:min(78vw,650px);padding:12px 18px;border-radius:14px;background:rgba(13,9,7,.80);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 5px 30px rgba(0,0,0,.35);font-size:clamp(15px,2vw,21px);line-height:1.3;text-align:center;opacity:0;transition:.22s;pointer-events:none}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#panel{position:absolute;right:max(4vw,env(safe-area-inset-right));top:max(7vh,env(safe-area-inset-top));width:min(30vw,360px);min-height:24vh;border:2px solid rgba(255,245,225,.8);background:linear-gradient(150deg,rgba(36,22,17,.97),rgba(8,7,6,.97));box-shadow:0 10px 40px #000;transform:translateX(130%);transition:.35s cubic-bezier(.2,.8,.2,1);padding:18px;display:flex;align-items:flex-end;font-size:clamp(18px,2.5vw,28px);font-style:italic}
-#panel.show{transform:translateX(0)}
-#title{position:absolute;left:max(18px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));font-size:12px;letter-spacing:.18em;opacity:.62;text-shadow:0 2px 8px #000;pointer-events:none}
-#reset{position:absolute;right:max(12px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));border:0;border-radius:50%;width:36px;height:36px;background:rgba(10,8,6,.42);color:#fff;opacity:.28;font-size:17px}
-#rotate{display:none;position:fixed;inset:0;z-index:20;background:#100c09;align-items:center;justify-content:center;text-align:center;padding:28px;font-size:20px}
-@media (orientation:portrait){#rotate{display:flex}}
-body.lamp-off #lampFx{opacity:0}
-body.lamp-off #scene{filter:brightness(.94)}
-#fade{position:absolute;inset:0;background:#080604;opacity:0;pointer-events:none;transition:opacity .6s;z-index:8}
-#fade.on{opacity:1}
-</style>
-</head>
-<body>
-<div id="game">
-  <div id="scene"></div><div id="lampFx"></div>
-  <button class="hot" id="door" aria-label="Rionne's door"></button>
-  <button class="hot" id="lamp" aria-label="Lamp"></button>
-  <button class="hot" id="picture" aria-label="Old picture"></button>
-  <button class="hot" id="window" aria-label="Window"></button>
-  <button class="hot" id="stairs" aria-label="Stairs"></button>
-  <button class="hot" id="secret" aria-label="Old beam"></button>
-  <div id="title">OVA-D · PROTOTYPE 0.01 · THE LANDING</div>
-  <div id="toast"></div><div id="panel"></div><div id="fade"></div>
-  <button id="reset" aria-label="Reset prototype">↺</button>
-</div>
-<div id="rotate">OVA-D is framed for landscape.<br><br>Turn your phone sideways. ❤️</div>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090705;color:#fff;font-family:Georgia,serif;overscroll-behavior:none}body{position:fixed;inset:0}#game{position:fixed;inset:0;overflow:hidden;touch-action:none;background:#090705}.scene{position:absolute;inset:0;display:none}.scene.on{display:block}.plate{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-drag:none}.hot{position:absolute;border:0;background:transparent;padding:0;z-index:8}.asset{position:absolute;pointer-events:none;user-select:none;-webkit-user-drag:none;z-index:4}
+#landingDoor{left:82%;top:8%;width:15%;height:68%}#landingLamp{left:69%;top:27%;width:8%;height:24%}#landingWindow{left:35%;top:7%;width:17%;height:38%}#landingStairs{left:1%;top:49%;width:38%;height:49%}#landingBeam{left:46%;top:9%;width:3.5%;height:10%}
+#stewman{left:13.5%;top:38.5%;width:25%;height:auto;z-index:3;filter:drop-shadow(0 4px 4px rgba(0,0,0,.28))}#bowl{left:25.8%;top:54.2%;width:5.5%;z-index:6}#mug{left:31.1%;top:51.5%;width:4.1%;z-index:6}#stewHot{left:14%;top:35%;width:24%;height:47%}#stairsUp{right:0;top:13%;width:18%;height:75%}#fireHot{left:0;top:30%;width:14%;height:39%}#barHot{left:25%;top:35%;width:28%;height:29%}
+#toast{position:absolute;z-index:30;left:50%;bottom:max(5vh,calc(env(safe-area-inset-bottom) + 12px));transform:translate(-50%,15px);max-width:min(78vw,650px);padding:11px 17px;border-radius:13px;background:rgba(12,8,6,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 6px 30px #0008;text-align:center;font-size:clamp(15px,2vw,21px);opacity:0;transition:.22s;pointer-events:none}#toast.show{opacity:1;transform:translate(-50%,0)}#panel{position:absolute;z-index:31;right:max(4vw,env(safe-area-inset-right));top:max(7vh,env(safe-area-inset-top));width:min(30vw,360px);min-height:23vh;border:2px solid #fffbd7cc;background:linear-gradient(150deg,#241611f7,#080706f7);box-shadow:0 10px 40px #000;transform:translateX(130%);transition:.35s;padding:18px;display:flex;align-items:flex-end;font-size:clamp(17px,2.3vw,27px);font-style:italic}#panel.show{transform:translateX(0)}#title{position:absolute;z-index:20;left:max(15px,env(safe-area-inset-left));top:max(9px,env(safe-area-inset-top));font:11px system-ui,sans-serif;letter-spacing:.17em;opacity:.55;text-shadow:0 2px 7px #000}#reset{position:absolute;z-index:25;right:max(10px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));width:34px;height:34px;border:0;border-radius:50%;background:#09070566;color:#fff;opacity:.25}#rotate{display:none;position:fixed;z-index:100;inset:0;background:#100c09;align-items:center;justify-content:center;text-align:center;padding:28px;font-size:20px}@media(orientation:portrait){#rotate{display:flex}}#fade{position:absolute;z-index:40;inset:0;background:#080604;opacity:0;pointer-events:none;transition:opacity .45s}#fade.on{opacity:1}
+</style></head><body><div id="game">
+<section id="landing" class="scene"><img class="plate" src="assets/landing.png"><button class="hot" id="landingDoor"></button><button class="hot" id="landingLamp"></button><button class="hot" id="landingWindow"></button><button class="hot" id="landingStairs"></button><button class="hot" id="landingBeam"></button></section>
+<section id="tavern" class="scene"><img class="plate" src="assets/berklith_mainroom_master.png"><img id="stewman" class="asset" src="assets/stewman_body.png"><img id="bowl" class="asset" src="assets/stewman_bowl.png"><img id="mug" class="asset" src="assets/stewman_mug.png"><button class="hot" id="stewHot"></button><button class="hot" id="stairsUp"></button><button class="hot" id="fireHot"></button><button class="hot" id="barHot"></button></section>
+<div id="title">OVA-D · PROTOTYPE 0.02</div><div id="toast"></div><div id="panel"></div><div id="fade"></div><button id="reset">↺</button></div><div id="rotate">OVA-D is framed for landscape.<br><br>Turn your phone sideways. ❤️</div>
 <script>
-const $=s=>document.querySelector(s), toast=$("#toast"), panel=$("#panel"), fade=$("#fade");
-const state=JSON.parse(localStorage.getItem("ovad001")||'{"door":0,"lamp":true,"secret":false}');
-function save(){localStorage.setItem("ovad001",JSON.stringify(state))}
-function say(t,ms=2400){toast.textContent=t;toast.classList.add("show");clearTimeout(say.t);say.t=setTimeout(()=>toast.classList.remove("show"),ms)}
-function manga(t,ms=2600){panel.textContent=t;panel.classList.add("show");setTimeout(()=>panel.classList.remove("show"),ms)}
-function lamp(){document.body.classList.toggle("lamp-off",!state.lamp)}
-lamp();
-
-$("#door").onclick=()=>{
- state.door++; save();
- if(state.door===1){say("The door opens a few centimeters…");setTimeout(()=>manga("Rionne: “Yes?”"),550)}
- else if(state.door===2){manga("Rionne: “You are remarkably bad at leaving.”")}
- else if(state.door===3){say("Click.  She locks the door.");setTimeout(()=>say("Rionne, through the door: “Go downstairs.”"),1200)}
- else {say(state.door%2 ? "Locked." : "…You get the distinct feeling you should stop.");}
-};
-$("#lamp").onclick=()=>{state.lamp=!state.lamp;save();lamp();say(state.lamp?"The lamp warms the landing again.":"You turn the lamp down.")}
-$("#picture").onclick=()=>say("An old drawing of the Berklith Tavern. It used to be much smaller.",3200);
-$("#window").onclick=()=>say("The courtyard is quiet. Evening is beginning to settle over the town.",3200);
-$("#secret").onclick=()=>{state.secret=true;save();say("Two old sets of initials are carved into the beam:  J.B. + M.B.",3400)}
-$("#stairs").onclick=()=>{fade.classList.add("on");setTimeout(()=>{say("Downstairs isn't built yet. But you can already hear the tavern waiting. ❤️",3800);fade.classList.remove("on")},650)}
-$("#reset").onclick=()=>{localStorage.removeItem("ovad001");location.reload()};
-
-let idle=setTimeout(()=>say("From behind Rionne's door:  …thump.   “Ow.”",3000),14000);
-["pointerdown","touchstart"].forEach(e=>document.addEventListener(e,()=>{clearTimeout(idle)},{once:true}));
-</script>
-</body>
-</html>
+const $=s=>document.querySelector(s),toast=$('#toast'),panel=$('#panel'),fade=$('#fade');
+let state=JSON.parse(localStorage.getItem('ovad002')||'{"scene":"landing","door":0,"stew":0,"secret":false}');
+function save(){localStorage.setItem('ovad002',JSON.stringify(state))}function say(t,ms=2500){toast.textContent=t;toast.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>toast.classList.remove('show'),ms)}function manga(t,ms=2800){panel.textContent=t;panel.classList.add('show');clearTimeout(manga.t);manga.t=setTimeout(()=>panel.classList.remove('show'),ms)}function show(s){document.querySelectorAll('.scene').forEach(x=>x.classList.remove('on'));$('#'+s).classList.add('on');state.scene=s;save()}function travel(s){fade.classList.add('on');setTimeout(()=>{show(s);fade.classList.remove('on');if(s==='tavern'&&!state.seenTavern){state.seenTavern=true;save();setTimeout(()=>say('Warm air, firelight… and someone taking his stew very seriously.'),500)}},480)}show(state.scene||'landing');
+$('#landingDoor').onclick=()=>{state.door++;save();if(state.door===1)manga('Rionne: “Yes?”');else if(state.door===2)manga('Rionne: “You are remarkably bad at leaving.”');else if(state.door===3){say('Click. She locks the door.');setTimeout(()=>say('Rionne, through the door: “Go downstairs.”'),1000)}else say('Locked.')};
+$('#landingLamp').onclick=()=>say('The lamp flame shifts under the glass.');$('#landingWindow').onclick=()=>say('Evening is settling over the courtyard.');$('#landingBeam').onclick=()=>{state.secret=true;save();say('J.B. + M.B. — carved into the old beam.')};$('#landingStairs').onclick=()=>travel('tavern');
+$('#stairsUp').onclick=()=>travel('landing');$('#fireHot').onclick=()=>say('The hearth has been fed for the evening.');$('#barHot').onclick=()=>say('Most of the bottles are arranged with suspicious precision. The ledger is not.');
+$('#stewHot').onclick=()=>{state.stew++;save();if(state.stew===1)manga('The traveler glances up. “Evening.”');else if(state.stew===2)say('He returns to the bowl. “Stew’s good.”');else if(state.stew===3)say('Still stew.');else if(state.stew===4)manga('He lowers the spoon. “…Do you need something?”');else say(state.stew%2?'He keeps eating.':'You decide to let the man have his dinner.')};
+$('#reset').onclick=()=>{localStorage.removeItem('ovad002');location.reload()};
+// Stop browser gestures; authored close-ups will replace browser zoom.
+document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});let last=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-last<300)e.preventDefault();last=n},{passive:false});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');
+</script></body></html>
