@@ -1,13 +1,15 @@
-OVA-D Prototype 0.03.2 — Scene Image Handling
+OVA-D Prototype 0.03.3 — Touch Lock Fix
 
 Changes:
-- Prevents iOS/Safari long-press image previews and image context menus inside the game.
-- Prevents dragging/selecting scene artwork.
-- Preloads and decodes background plates and character layers before revealing the game.
-- Keeps Stew Man as a separate composited layer while avoiding visible late pop-in on startup/restore.
-- Bumps the service-worker cache to 0.03.2.
+- Extends iOS selection/callout blocking across the complete game surface.
+- Prevents scene art and character cels from becoming selectable browser objects.
+- Cancels long-hold browser gestures while preserving normal quick hotspot taps.
+- Blocks drag, context-menu and selection-start behavior inside OVA-D.
+- Keeps the existing scene preloading fix so Stew Man remains part of the composed scene.
+- Bumps the service-worker cache to 0.03.3.
 
 Test:
-1. Open downstairs and long-press the tavern/background/Stew Man. No image Share/Save/Copy preview should appear.
-2. Leave and reopen OVA-D. The tavern and Stew Man should appear as a composed scene rather than background first, character later.
-3. Confirm normal taps, event lock, stairs, lamp persistence and Stew Man interactions still work.
+1. Go downstairs and long-press Stew Man, the tavern plate, tables, floor and other artwork.
+2. No blue selection rectangle, handles, loupe, Share/Copy menu or draggable image should appear.
+3. Quick taps should still trigger Stew Man and environmental hotspots normally.
+4. Confirm stairs, event lock, lamp persistence and the landing interactions still work.
