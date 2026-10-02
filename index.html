@@ -96,6 +96,23 @@ font-size:11px;letter-spacing:.08em;opacity:0;pointer-events:none;transition:.3s
  .preview-card{height:82vh}.preview-info{bottom:15px}.preview-title{font-size:20px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
+
+.orientation-guard{
+  position:absolute;inset:0;z-index:9999;display:none;place-items:center;
+  padding:32px;background:
+  radial-gradient(circle at 50% 42%,rgba(82,40,29,.34),transparent 42%),
+  rgba(9,6,6,.97);text-align:center;color:var(--ink)
+}
+.orientation-card{max-width:430px;padding:30px 26px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.orientation-mark{width:48px;height:70px;margin:0 auto 20px;border:2px solid var(--gold);border-radius:8px;position:relative;transform:rotate(90deg)}
+.orientation-mark:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold);left:50%;bottom:5px;transform:translateX(-50%)}
+.orientation-kicker{font-size:10px;letter-spacing:.34em;color:var(--gold);margin-bottom:10px}
+.orientation-title{font-size:25px;line-height:1.2;letter-spacing:.11em;margin-bottom:10px}
+.orientation-copy{font-size:13px;line-height:1.55;color:var(--muted)}
+@media (orientation:portrait){
+  .orientation-guard{display:grid}
+}
+
 </style>
 </head>
 <body>
@@ -177,6 +194,16 @@ font-size:11px;letter-spacing:.08em;opacity:0;pointer-events:none;transition:.3s
   </div>
   <div class="fade" id="fade"></div><div class="toast" id="toast"></div>
 </div>
+
+  <div class="orientation-guard" aria-live="polite">
+    <div class="orientation-card">
+      <div class="orientation-mark" aria-hidden="true"></div>
+      <div class="orientation-kicker">OVA-DIMENSION</div>
+      <div class="orientation-title">DESIGNED FOR LANDSCAPE</div>
+      <div class="orientation-copy">Please rotate your device to continue.</div>
+    </div>
+  </div>
+
 <script>
 (()=>{
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];

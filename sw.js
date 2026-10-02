@@ -1,4 +1,4 @@
-const CACHE = 'ovad-menu-0001';
+const CACHE = 'ovad-menu-0002';
 
 const CORE = [
   './',
