@@ -113,6 +113,20 @@ font-size:11px;letter-spacing:.08em;opacity:0;pointer-events:none;transition:.3s
   .orientation-guard{display:grid}
 }
 
+
+/* OVA-D: prevent iOS webpage selection/callout during play */
+html, body, #app, #app * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
 </style>
 </head>
 <body>
@@ -238,6 +252,10 @@ $('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_s
 $('#motionBtn').addEventListener('click',e=>{motion=!motion;e.currentTarget.textContent='MENU MOTION · '+(motion?'ON':'REDUCED');document.documentElement.style.setProperty('--motion',motion?'1':'0');say(motion?'Full menu motion.':'Reduced menu motion.')});
 showScene(current in locations?current:'tavern');
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
 })();
 </script>
