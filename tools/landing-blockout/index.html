@@ -1,101 +1,74 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>OVA-D Landing Blockout v0.3</title>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>OVA-D Landing Blockout v0.4</title>
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#202226;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;touch-action:none}
-canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#info{position:fixed;z-index:5;top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));background:#111d;padding:9px 11px;border-radius:11px;font-size:12px;line-height:1.35;pointer-events:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#202226;color:#fff;font-family:-apple-system,sans-serif;touch-action:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+.panel{position:fixed;z-index:4;background:#111d;border-radius:11px;padding:9px 11px}
+#info{top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));font-size:12px;line-height:1.35}
+#legend{left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));font-size:10px;line-height:1.35}
 #buttons{position:fixed;z-index:5;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));display:flex;gap:6px}
-button{padding:10px 11px;border:1px solid #ffffff55;border-radius:10px;background:#111e;color:#fff;font-weight:700}
-#legend{position:fixed;z-index:5;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));max-width:48vw;background:#111d;padding:7px 9px;border-radius:9px;font-size:10px;line-height:1.3;pointer-events:none}
-</style>
-</head>
-<body>
-<canvas id="c"></canvas>
-<div id="info"><b>OVA-D · Landing Blockout v0.3</b><br>Drag: orbit · pinch: zoom<br>Compare TOP first, then PLAYER VIEW</div>
-<div id="buttons"><button id="top">Top</button><button id="player">Player view</button><button id="orbit">Orbit</button></div>
-<div id="legend">NORTH / outer wall: Guest hall · Courtyard · Rionne · Chimney · Guest room<br>Center = OPEN VOID · far left = stairs DOWN</div>
+button{padding:10px 11px;border:1px solid #ffffff55;border-radius:10px;background:#111e;color:white;font-weight:700}
+</style></head>
+<body><canvas id="c"></canvas>
+<div id="info" class="panel"><b>OVA-D · Landing Blockout v0.4</b><br>Paper plan = source of truth ❤️<br>Drag: orbit · pinch: zoom</div>
+<div id="legend" class="panel">Center = RECTANGULAR OPENING<br>Left = stairs DOWN · gold post = intended view corner</div>
+<div id="buttons"><button id="topBtn">Top</button><button id="playerBtn">Player view</button><button id="orbitBtn">Orbit</button></div>
 <script>
-(()=>{
-const cv=document.getElementById('c'),ctx=cv.getContext('2d');
-let yaw=0,pitch=.18,zoom=128, target={x:0,y:.72,z:-.55};
-const polys=[], lines=[];
-const col={floor:'#9a7552',wall:'#d4c7af',wood:'#573720',door:'#70462d',stone:'#888077',void:'#121315'};
-function quad(a,b,c,d,color){polys.push({p:[a,b,c,d],color})}
+(()=> {
+const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+let yaw=0,pitch=1.47,zoom=105,target={x:0,y:0,z:0};
+const faces=[], lines=[];
+const K={floor:'#a57b55',wall:'#d8cbb2',wood:'#5b3924',door:'#70462d',stone:'#888077',void:'#111214',stair:'#765039',window:'#587284',marker:'#d8ad4d'};
+function quad(a,b,c,d,color){faces.push({p:[a,b,c,d],color})}
 function box(x,y,z,w,h,d,color){
- let X=w/2,Y=h/2,Z=d/2,v=[
- [x-X,y-Y,z-Z],[x+X,y-Y,z-Z],[x+X,y+Y,z-Z],[x-X,y+Y,z-Z],
- [x-X,y-Y,z+Z],[x+X,y-Y,z+Z],[x+X,y+Y,z+Z],[x-X,y+Y,z+Z]];
- quad(v[4],v[5],v[6],v[7],color);quad(v[1],v[0],v[3],v[2],color);
- quad(v[0],v[4],v[7],v[3],color);quad(v[5],v[1],v[2],v[6],color);
- quad(v[3],v[7],v[6],v[2],color);quad(v[0],v[1],v[5],v[4],color);
+ let X=w/2,Y=h/2,Z=d/2,v=[[x-X,y-Y,z-Z],[x+X,y-Y,z-Z],[x+X,y+Y,z-Z],[x-X,y+Y,z-Z],[x-X,y-Y,z+Z],[x+X,y-Y,z+Z],[x+X,y+Y,z+Z],[x-X,y+Y,z+Z]];
+ quad(v[4],v[5],v[6],v[7],color);quad(v[1],v[0],v[3],v[2],color);quad(v[0],v[4],v[7],v[3],color);quad(v[5],v[1],v[2],v[6],color);quad(v[3],v[7],v[6],v[2],color);quad(v[0],v[1],v[5],v[4],color)
 }
-function floor(x,z,w,d){box(x,-.10,z,w,.2,d,col.floor)}
-function beam(a,b,width=.14,height=.14,y=1,color=col.wood){
- let dx=b.x-a.x,dz=b.z-a.z,L=Math.hypot(dx,dz),ang=Math.atan2(dx,dz);
- // represented as thick 3D line; sufficient for railing
- lines.push({a:[a.x,y,a.z],b:[b.x,y,b.z],width:width*45,color});
- for(let t=.08;t<.96;t+=.11){let x=a.x+dx*t,z=a.z+dz*t;lines.push({a:[x,.08,z],b:[x,y,z],width:5,color})}
-}
-// Landing strips around a REAL open center.
-floor(0,-3.25,11,2.3);floor(-4.45,-.35,2.1,4.1);floor(4.45,-.35,2.1,4.1);
-const tip={x:0,z:3.15},A={x:-4.05,z:1.25},B={x:4.05,z:1.25};
-function rotatedFloor(a,b,w){
- let dx=b.x-a.x,dz=b.z-a.z,L=Math.hypot(dx,dz),nx=-dz/L*w/2,nz=dx/L*w/2;
- quad([a.x+nx,-.2,a.z+nz],[b.x+nx,-.2,b.z+nz],[b.x-nx,0,b.z-nz],[a.x-nx,0,a.z-nz],col.floor);
-}
-rotatedFloor(A,tip,1.25);rotatedFloor(tip,B,1.25);
-box(0,-2.55,0,7.0,.1,5.7,col.void);
-// Walls
-box(0,1.5,-4.42,11.2,3,.22,col.wall);box(-5.48,1.5,-.6,.22,3,7.6,col.wall);box(5.48,1.5,-.6,.22,3,7.6,col.wall);
-// Visual door panels/openings
-box(-2.5,1.05,-4.28,1.05,2.1,.10,col.door); // guest hall
-box(-.45,1.05,-4.27,1.25,2.1,.10,col.void); // courtyard/balcony
-box(1.25,1.05,-4.28,1.05,2.1,.10,col.door); // Rionne
-box(2.45,1.5,-4.05,.75,3,.75,col.stone); // chimney
-box(3.65,1.05,-4.28,1.05,2.1,.10,col.door); // lucky guest
-// right-hand turn
-floor(5.95,-2.75,1.2,2);box(6.55,1.5,-2.75,.22,3,2.2,col.wall);
-// V and side railings
-beam(A,tip);beam(tip,B);beam(A,{x:-4.05,z:-2.05});beam({x:4.05,z:-2.05},B);
-// descending stairs at distant left
-for(let i=0;i<10;i++)box(-4.55,-.02-i*.18,-2.15+i*.30,1.35,.16,.32,col.wood);
+function floor(x,z,w,d){box(x,-.1,z,w,.2,d,K.floor)}
+// Paper plan: one rectangular tavern opening. Landing surrounds it.
+const xL=-3.0,xR=3.0,zN=-2.55,zS=2.05;
+floor(0,-3.35,10.2,1.6); floor(0,2.9,10.2,1.7); floor(-4.0,-.25,2.0,4.6); floor(4.0,-.25,2.0,4.6);
+box(0,-2.6,-.25,6,.1,4.6,K.void);
+// Outer walls.
+box(0,1.5,-4.18,10.3,3,.22,K.wall); box(-5.12,1.5,-.25,.22,3,8.0,K.wall); box(5.12,1.5,-.25,.22,3,8.0,K.wall); box(0,1.5,3.82,10.3,3,.22,K.wall);
+// Balcony/courtyard door opposite side.
+box(0,1.05,-4.05,1.25,2.1,.10,K.door);
+// Rionne side: Rionne -> chimney -> guest room.
+box(5.00,1.05,-1.65,.10,2.1,1.05,K.door);
+box(4.82,1.5,-.05,.62,3,.82,K.stone);
+box(5.00,1.05,1.25,.10,2.1,1.05,K.door);
+// Closed guest hallway on left side.
+box(-5.00,1.05,-1.7,.10,2.1,1.35,K.door);
+// Window on lower wall from sketch.
+box(0,1.25,3.69,1.8,1.3,.08,K.window);
+// Rail around rectangular void. Gap on left for stair.
+function rail(a,b){let dx=b.x-a.x,dz=b.z-a.z;lines.push({a:[a.x,1,a.z],b:[b.x,1,b.z],w:7});for(let t=.05;t<.98;t+=.1){let x=a.x+dx*t,z=a.z+dz*t;lines.push({a:[x,.08,z],b:[x,1,z],w:4})}}
+rail({x:xL,z:zN},{x:xR,z:zN}); rail({x:xR,z:zN},{x:xR,z:zS}); rail({x:xR,z:zS},{x:xL,z:zS});
+rail({x:xL,z:zN},{x:xL,z:-.9}); rail({x:xL,z:1.0},{x:xL,z:zS});
+// Stairs descend from left landing into opening.
+for(let i=0;i<10;i++) box(-3.45,-.02-i*.18,.05-i*.25,1.35,.16,.31,K.stair);
+// Gold marker = paper's "View" corner, just outside lower-right opening.
+box(3.55,.55,2.55,.16,1.1,.16,K.marker);
 
-function size(){let d=Math.min(devicePixelRatio||1,2);cv.width=innerWidth*d;cv.height=innerHeight*d;ctx.setTransform(d,0,0,d,0,0);draw()}addEventListener('resize',size);
-
-function cam(p){
- let x=p[0]-target.x,y=p[1]-target.y,z=p[2]-target.z;
- let cy=Math.cos(yaw),sy=Math.sin(yaw),x1=x*cy-z*sy,z1=x*sy+z*cy;
- let cp=Math.cos(pitch),sp=Math.sin(pitch),y1=y*cp-z1*sp,z2=y*sp+z1*cp;
- return [x1,y1,z2+11];
-}
-function proj(p){let q=cam(p),s=zoom/Math.max(q[2],.15);return [innerWidth/2+q[0]*s,innerHeight*.53-q[1]*s,q[2]]}
-function shade(hex,k){let n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;return `rgb(${r*k|0},${g*k|0},${b*k|0})`}
+function cam(p){let x=p[0]-target.x,y=p[1]-target.y,z=p[2]-target.z,cy=Math.cos(yaw),sy=Math.sin(yaw),x1=x*cy-z*sy,z1=x*sy+z*cy,cp=Math.cos(pitch),sp=Math.sin(pitch),y1=y*cp-z1*sp,z2=y*sp+z1*cp;return[x1,y1,z2+11]}
+function proj(p){let q=cam(p),s=zoom/Math.max(q[2],.2);return[innerWidth/2+q[0]*s,innerHeight*.52-q[1]*s,q[2]]}
+function shade(h,k){let n=parseInt(h.slice(1),16);return `rgb(${(n>>16)*k|0},${((n>>8)&255)*k|0},${(n&255)*k|0})`}
 function draw(){
- ctx.clearRect(0,0,innerWidth,innerHeight);ctx.fillStyle='#202226';ctx.fillRect(0,0,innerWidth,innerHeight);
- let faces=polys.map((f,i)=>{let q=f.p.map(cam),depth=q.reduce((s,p)=>s+p[2],0)/q.length;return {...f,depth,i}}).filter(f=>f.depth>.2).sort((a,b)=>b.depth-a.depth);
- for(let f of faces){let pts=f.p.map(proj);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();ctx.fillStyle=shade(f.color,.82+(f.i%3)*.08);ctx.fill();ctx.strokeStyle='#0005';ctx.lineWidth=1;ctx.stroke()}
- let ls=lines.map(l=>({...l,d:(cam(l.a)[2]+cam(l.b)[2])/2})).sort((a,b)=>b.d-a.d);
- for(let l of ls){let a=proj(l.a),b=proj(l.b);if(a[2]<.2||b[2]<.2)continue;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.strokeStyle=l.color;ctx.lineWidth=Math.max(2,l.width*zoom/Math.max(l.d,2)/8);ctx.stroke()}
+ ctx.fillStyle='#202226';ctx.fillRect(0,0,innerWidth,innerHeight);
+ let f=faces.map((v,i)=>({...v,d:v.p.map(cam).reduce((s,q)=>s+q[2],0)/4,i})).filter(v=>v.d>.2).sort((a,b)=>b.d-a.d);
+ for(let v of f){let q=v.p.map(proj);ctx.beginPath();ctx.moveTo(q[0][0],q[0][1]);for(let i=1;i<q.length;i++)ctx.lineTo(q[i][0],q[i][1]);ctx.closePath();ctx.fillStyle=shade(v.color,.84+(v.i%3)*.06);ctx.fill();ctx.strokeStyle='#0006';ctx.lineWidth=1;ctx.stroke()}
+ for(let l of lines){let a=proj(l.a),b=proj(l.b);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.strokeStyle=K.wood;ctx.lineWidth=l.w;ctx.stroke()}
 }
-let touches=[],lastDist=0,lastMid=null;
-cv.addEventListener('touchstart',e=>{e.preventDefault();touches=[...e.touches];if(touches.length==2){lastDist=Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);lastMid=[(touches[0].clientX+touches[1].clientX)/2,(touches[0].clientY+touches[1].clientY)/2]}},{passive:false});
-cv.addEventListener('touchmove',e=>{e.preventDefault();let t=[...e.touches];
- if(t.length==1&&touches.length==1){yaw+=(t[0].clientX-touches[0].clientX)*.008;pitch+=(t[0].clientY-touches[0].clientY)*.006;pitch=Math.max(.04,Math.min(1.42,pitch))}
- if(t.length==2){let d=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);if(lastDist)zoom=Math.max(35,Math.min(150,zoom*d/lastDist));lastDist=d}
- touches=t;draw()},{passive:false});
-cv.addEventListener('touchend',e=>{touches=[...e.touches];lastDist=0},{passive:false});
-let down=false,lx=0,ly=0;cv.onpointerdown=e=>{if(e.pointerType==='touch')return;down=true;lx=e.clientX;ly=e.clientY};cv.onpointermove=e=>{if(!down)return;yaw+=(e.clientX-lx)*.008;pitch+=(e.clientY-ly)*.006;lx=e.clientX;ly=e.clientY;draw()};cv.onpointerup=()=>down=false;
-function orbitView(){yaw=-.58;pitch=.48;zoom=118;target={x:0,y:.55,z:-.45};draw()}
-function topView(){yaw=0;pitch=1.42;zoom=105;target={x:0,y:0,z:-.45};draw()}
-function playerView(){yaw=0;pitch=.12;zoom=145;target={x:0,y:.72,z:-1.0};draw()}
-document.getElementById('top').onclick=topView;
-document.getElementById('player').onclick=playerView;
-document.getElementById('orbit').onclick=orbitView;
-size();topView();
+function resize(){let d=Math.min(devicePixelRatio||1,2);cv.width=innerWidth*d;cv.height=innerHeight*d;ctx.setTransform(d,0,0,d,0,0);draw()} addEventListener('resize',resize);
+let t0=[],dist=0;
+cv.addEventListener('touchstart',e=>{e.preventDefault();t0=[...e.touches];if(t0.length==2)dist=Math.hypot(t0[0].clientX-t0[1].clientX,t0[0].clientY-t0[1].clientY)},{passive:false});
+cv.addEventListener('touchmove',e=>{e.preventDefault();let t=[...e.touches];if(t.length==1&&t0.length==1){yaw+=(t[0].clientX-t0[0].clientX)*.008;pitch=Math.max(.04,Math.min(1.48,pitch+(t[0].clientY-t0[0].clientY)*.006))}if(t.length==2){let d=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);if(dist)zoom=Math.max(35,Math.min(200,zoom*d/dist));dist=d}t0=t;draw()},{passive:false});
+cv.addEventListener('touchend',e=>{t0=[...e.touches];dist=0},{passive:false});
+function top(){yaw=0;pitch=1.48;zoom=112;target={x:0,y:0,z:-.15};draw()}
+function player(){yaw=-.68;pitch=.12;zoom=155;target={x:-.2,y:.7,z:-.7};draw()}
+function orbit(){yaw=-.55;pitch=.52;zoom=115;target={x:0,y:.45,z:-.2};draw()}
+document.getElementById('topBtn').onclick=top;document.getElementById('playerBtn').onclick=player;document.getElementById('orbitBtn').onclick=orbit;
+resize();top();
 })();
 </script></body></html>
