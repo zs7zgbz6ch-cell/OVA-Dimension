@@ -4,22 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>OVA-D Landing Blockout v0.2</title>
+<title>OVA-D Landing Blockout v0.3</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#202226;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;touch-action:none}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 #info{position:fixed;z-index:5;top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));background:#111d;padding:9px 11px;border-radius:11px;font-size:12px;line-height:1.35;pointer-events:none}
-#reset{position:fixed;z-index:5;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));padding:10px 13px;border:1px solid #ffffff55;border-radius:10px;background:#111e;color:#fff;font-weight:700}
+#buttons{position:fixed;z-index:5;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));display:flex;gap:6px}
+button{padding:10px 11px;border:1px solid #ffffff55;border-radius:10px;background:#111e;color:#fff;font-weight:700}
+#legend{position:fixed;z-index:5;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));max-width:48vw;background:#111d;padding:7px 9px;border-radius:9px;font-size:10px;line-height:1.3;pointer-events:none}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="info"><b>OVA-D · Landing Blockout v0.2</b><br>Drag: orbit · pinch: zoom<br>Zero external libraries 😅</div>
-<button id="reset">Reset view</button>
+<div id="info"><b>OVA-D · Landing Blockout v0.3</b><br>Drag: orbit · pinch: zoom<br>Compare TOP first, then PLAYER VIEW</div>
+<div id="buttons"><button id="top">Top</button><button id="player">Player view</button><button id="orbit">Orbit</button></div>
+<div id="legend">NORTH / outer wall: Guest hall · Courtyard · Rionne · Chimney · Guest room<br>Center = OPEN VOID · far left = stairs DOWN</div>
 <script>
 (()=>{
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
-let yaw=-0.58,pitch=0.43,zoom=72, target={x:0,y:.55,z:-.45};
+let yaw=0,pitch=.18,zoom=128, target={x:0,y:.72,z:-.55};
 const polys=[], lines=[];
 const col={floor:'#9a7552',wall:'#d4c7af',wood:'#573720',door:'#70462d',stone:'#888077',void:'#121315'};
 function quad(a,b,c,d,color){polys.push({p:[a,b,c,d],color})}
@@ -82,12 +85,17 @@ function draw(){
 let touches=[],lastDist=0,lastMid=null;
 cv.addEventListener('touchstart',e=>{e.preventDefault();touches=[...e.touches];if(touches.length==2){lastDist=Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);lastMid=[(touches[0].clientX+touches[1].clientX)/2,(touches[0].clientY+touches[1].clientY)/2]}},{passive:false});
 cv.addEventListener('touchmove',e=>{e.preventDefault();let t=[...e.touches];
- if(t.length==1&&touches.length==1){yaw+=(t[0].clientX-touches[0].clientX)*.008;pitch+=(t[0].clientY-touches[0].clientY)*.006;pitch=Math.max(-.1,Math.min(1.2,pitch))}
+ if(t.length==1&&touches.length==1){yaw+=(t[0].clientX-touches[0].clientX)*.008;pitch+=(t[0].clientY-touches[0].clientY)*.006;pitch=Math.max(.04,Math.min(1.42,pitch))}
  if(t.length==2){let d=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);if(lastDist)zoom=Math.max(35,Math.min(150,zoom*d/lastDist));lastDist=d}
  touches=t;draw()},{passive:false});
 cv.addEventListener('touchend',e=>{touches=[...e.touches];lastDist=0},{passive:false});
 let down=false,lx=0,ly=0;cv.onpointerdown=e=>{if(e.pointerType==='touch')return;down=true;lx=e.clientX;ly=e.clientY};cv.onpointermove=e=>{if(!down)return;yaw+=(e.clientX-lx)*.008;pitch+=(e.clientY-ly)*.006;lx=e.clientX;ly=e.clientY;draw()};cv.onpointerup=()=>down=false;
-function reset(){yaw=-.58;pitch=.43;zoom=72;draw()}document.getElementById('reset').onclick=reset;
-size();
+function orbitView(){yaw=-.58;pitch=.48;zoom=118;target={x:0,y:.55,z:-.45};draw()}
+function topView(){yaw=0;pitch=1.42;zoom=105;target={x:0,y:0,z:-.45};draw()}
+function playerView(){yaw=0;pitch=.12;zoom=145;target={x:0,y:.72,z:-1.0};draw()}
+document.getElementById('top').onclick=topView;
+document.getElementById('player').onclick=playerView;
+document.getElementById('orbit').onclick=orbitView;
+size();topView();
 })();
 </script></body></html>
