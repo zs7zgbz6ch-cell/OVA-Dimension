@@ -1,4 +1,4 @@
-const CACHE = 'ovad-menu-0003';
+const CACHE = 'ovad-worldtime-0001';
 
 const CORE = [
   './',

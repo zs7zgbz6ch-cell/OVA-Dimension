@@ -150,6 +150,7 @@ img {
           <button type="button" data-page="extraPage">EXTRA<small>Art, characters and discovered places.</small></button>
         </div>
         <div class="dev"><div class="devlabel">DEVELOPMENT</div>
+          <div id="worldTimeReadout" style="margin:0 0 8px;padding:9px 12px;border:1px solid rgba(212,173,100,.16);color:#b9a78e;font-size:10px;letter-spacing:.16em">WORLD TIME · DAY 1 · 17:20</div>
           <button class="subbtn reset" id="resetBtn" type="button">RESET PROTOTYPE</button>
         </div>
       </section>
@@ -227,10 +228,21 @@ const locations={
  tavern:{title:'MAIN TAVERN',sub:'BERKLITH TAVERN · EARLY EVENING',img:'assets/berklith-tavern.jpg'},
  room:{title:"RIONNE'S ROOM",sub:'UPSTAIRS · PRIVATE QUARTERS',img:'assets/rionnes-room.jpg'}
 };
+const WORLD_START=17*60+20;
+let worldMinute=Number.parseInt(localStorage.getItem('ovad_world_time')||WORLD_START,10);
+if(!Number.isFinite(worldMinute)||worldMinute<WORLD_START) worldMinute=WORLD_START;
 let current=localStorage.getItem('ovad_current')||'tavern', target=current, motion=true, toastTimer;
+function formatWorldTime(){
+ const day=Math.floor(worldMinute/1440)+1, minuteOfDay=((worldMinute%1440)+1440)%1440;
+ const h=Math.floor(minuteOfDay/60), m=minuteOfDay%60;
+ return `DAY ${day} · ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+function updateWorldTimeReadout(){const el=$('#worldTimeReadout');if(el)el.textContent='WORLD TIME · '+formatWorldTime()}
+function setWorldTime(minute){worldMinute=minute;localStorage.setItem('ovad_world_time',String(worldMinute));updateWorldTimeReadout()}
+function advanceTime(minutes=1){setWorldTime(worldMinute+Math.max(0,Math.floor(minutes)))}
 function showScene(id){Object.entries(scenes).forEach(([k,v])=>v.classList.toggle('hidden',k!==id));current=id;localStorage.setItem('ovad_current',id)}
 function page(id){$$('.page').forEach(p=>p.classList.toggle('active',p.id===id))}
-function openMenu(){page('mainPage');overlay.classList.add('open')}
+function openMenu(){page('mainPage');updateWorldTimeReadout();overlay.classList.add('open')}
 function closeMenu(){overlay.classList.remove('open')}
 function say(t){toast.textContent=t;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),1800)}
 $('#menuBtn').addEventListener('click',openMenu); $('#closeBtn').addEventListener('click',closeMenu);
@@ -239,18 +251,18 @@ $$('[data-page]').forEach(b=>b.addEventListener('click',()=>page(b.dataset.page)
 $$('.loc').forEach(b=>b.addEventListener('click',()=>{target=b.dataset.location;let d=locations[target];
  $('#previewImg').src=d.img;$('#previewTitle').textContent=d.title;$('#previewSub').textContent=d.sub;preview.classList.add('open')}));
 $('#previewBack').addEventListener('click',()=>preview.classList.remove('open'));
-$('#goBtn').addEventListener('click',()=>{preview.classList.remove('open');closeMenu();fade.classList.add('on');
- setTimeout(()=>{showScene(target);setTimeout(()=>fade.classList.remove('on'),160)},420)});
+$('#goBtn').addEventListener('click',()=>{const moved=target!==current;preview.classList.remove('open');closeMenu();fade.classList.add('on');
+ setTimeout(()=>{showScene(target);if(moved)advanceTime(1);setTimeout(()=>fade.classList.remove('on'),160)},420)});
 $$('[data-action]').forEach(b=>b.addEventListener('click',()=>{
- if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,metRionne:false}));say('Prototype saved.')}
- if(b.dataset.action==='load'){let s;try{s=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(s&&locations[s.location]){showScene(s.location);closeMenu();say('Save loaded.')}else say('No save data yet.')}
+ if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:false}));say('Prototype saved.')}
+ if(b.dataset.action==='load'){let s;try{s=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(s&&locations[s.location]){showScene(s.location);setWorldTime(Number.isFinite(s.worldMinute)?s.worldMinute:WORLD_START);closeMenu();say('Save loaded.')}else say('No save data yet.')}
  if(b.dataset.action==='extra')say('Archive section coming later.')
 }));
 $('#resetBtn').addEventListener('click',()=>$('#confirm').classList.add('open'));
 $('#cancelReset').addEventListener('click',()=>$('#confirm').classList.remove('open'));
-$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');showScene('tavern');$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
+$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');setWorldTime(WORLD_START);showScene('tavern');$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
 $('#motionBtn').addEventListener('click',e=>{motion=!motion;e.currentTarget.textContent='MENU MOTION · '+(motion?'ON':'REDUCED');document.documentElement.style.setProperty('--motion',motion?'1':'0');say(motion?'Full menu motion.':'Reduced menu motion.')});
-showScene(current in locations?current:'tavern');
+showScene(current in locations?current:'tavern');updateWorldTimeReadout();
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('selectstart', e => e.preventDefault());
