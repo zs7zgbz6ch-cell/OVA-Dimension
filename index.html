@@ -100,10 +100,11 @@ font-size:11px;letter-spacing:.08em;opacity:0;pointer-events:none;transition:.3s
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 
 .orientation-guard{
-  position:fixed;inset:-16px;z-index:9999;display:none;place-items:center;overflow:hidden;
-  padding:48px;background:#090606;text-align:center;color:var(--ink);opacity:1;transition:opacity .24s ease
+  position:fixed;z-index:9999;display:none;place-items:center;overflow:hidden;
+  top:-32px;left:-24px;width:calc(100vw + 48px);height:calc(100lvh + 64px);min-height:calc(100vh + 64px);
+  padding:80px 72px;background:#090606;text-align:center;color:var(--ink);opacity:1;transition:opacity .24s ease
 }
-.orientation-guard:before{content:"";position:absolute;inset:-18px;background:url('assets/intro-portrait.jpg') center center/cover no-repeat;filter:blur(5px) saturate(.82);transform:scale(1.035)}
+.orientation-guard:before{content:"";position:absolute;inset:-24px;background:url('assets/intro-portrait.jpg') center center/cover no-repeat;filter:blur(5px) saturate(.82);transform:scale(1.035)}
 .orientation-guard:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(82,40,29,.25),transparent 43%),rgba(9,6,6,.72)}
 .orientation-card{position:relative;z-index:1}
 .orientation-card{max-width:430px;padding:30px 26px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -113,6 +114,7 @@ font-size:11px;letter-spacing:.08em;opacity:0;pointer-events:none;transition:.3s
 .orientation-title{font-size:25px;line-height:1.2;letter-spacing:.11em;margin-bottom:10px}
 .orientation-copy{font-size:13px;line-height:1.55;color:var(--muted)}
 @media (orientation:portrait){
+  html,body{min-height:100lvh;background:#120d0b}
   .orientation-guard{display:grid}
 }
 
