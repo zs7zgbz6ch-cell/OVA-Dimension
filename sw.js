@@ -1,11 +1,13 @@
-const CACHE = 'ovad-intro-hold-0003';
+const CACHE = 'ovad-startup-presentation-0004';
 
 const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
   './assets/berklith-tavern.jpg',
-  './assets/rionnes-room.jpg'
+  './assets/rionnes-room.jpg',
+  './assets/intro-portrait.jpg',
+  './assets/intro-landscape.jpg'
 ];
 
 self.addEventListener('install', event => {

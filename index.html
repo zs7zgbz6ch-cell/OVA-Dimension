@@ -18,7 +18,9 @@ font-family:Georgia,"Times New Roman",serif;touch-action:manipulation}
 button{font:inherit;color:inherit}
 #app{position:fixed;inset:0;overflow:hidden;background:#080605}
 .scene{position:absolute;inset:0;background-position:center;background-size:cover;
-transition:opacity .7s ease,transform 1.1s cubic-bezier(.2,.8,.2,1);transform:scale(1.012)}
+transition:opacity 1.45s ease,transform 1.45s cubic-bezier(.2,.8,.2,1);transform:scale(1.012)}
+#app.startup .scene,#app.startup .vignette{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+#app.scene-reveal .scene:not(.hidden),#app.scene-reveal .vignette{visibility:visible!important;opacity:1!important}
 .scene.hidden{opacity:0;pointer-events:none;transform:scale(1.04)}
 .vignette{position:absolute;inset:0;pointer-events:none;background:
 linear-gradient(to bottom,rgba(0,0,0,.15),transparent 30%,transparent 68%,rgba(0,0,0,.25)),
@@ -98,11 +100,12 @@ font-size:11px;letter-spacing:.08em;opacity:0;pointer-events:none;transition:.3s
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 
 .orientation-guard{
-  position:absolute;inset:0;z-index:9999;display:none;place-items:center;
-  padding:32px;background:
-  radial-gradient(circle at 50% 42%,rgba(82,40,29,.34),transparent 42%),
-  rgba(9,6,6,.97);text-align:center;color:var(--ink)
+  position:fixed;inset:0;z-index:9999;display:none;place-items:center;overflow:hidden;
+  padding:32px;background:#090606;text-align:center;color:var(--ink);opacity:1;transition:opacity .24s ease
 }
+.orientation-guard:before{content:"";position:absolute;inset:-18px;background:url('assets/intro-portrait.jpg') center center/cover no-repeat;filter:blur(5px) saturate(.82);transform:scale(1.035)}
+.orientation-guard:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(82,40,29,.25),transparent 43%),rgba(9,6,6,.72)}
+.orientation-card{position:relative;z-index:1}
 .orientation-card{max-width:430px;padding:30px 26px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .orientation-mark{width:48px;height:70px;margin:0 auto 20px;border:2px solid var(--gold);border-radius:8px;position:relative;transform:rotate(90deg)}
 .orientation-mark:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold);left:50%;bottom:5px;transform:translateX(-50%)}
@@ -129,18 +132,24 @@ img {
 
 
 /* OVA-D clean-scene startup + hold-for-menu gesture */
-.welcome-screen{position:absolute;inset:0;z-index:9000;display:grid;place-items:center;padding:32px;background:radial-gradient(circle at 50% 42%,rgba(82,40,29,.30),transparent 43%),rgba(9,6,6,.955);text-align:center;opacity:1;visibility:visible;transition:opacity 1.3s ease,visibility 1.3s ease}
+.welcome-screen{position:absolute;inset:0;z-index:9000;display:grid;place-items:center;overflow:hidden;padding:32px;background:#090606;text-align:center;opacity:1;visibility:visible;transition:opacity .9s ease,visibility .9s ease}
+.welcome-screen:before{content:"";position:absolute;inset:-18px;background:url('assets/intro-landscape.jpg') center center/cover no-repeat;filter:blur(4px) saturate(.82);transform:scale(1.025)}
+.welcome-screen:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(82,40,29,.23),transparent 44%),rgba(9,6,6,.66)}
 .welcome-screen.dismissed{opacity:0;visibility:hidden;pointer-events:none}
+.welcome-card{position:relative;z-index:1}
 .welcome-card{width:min(520px,82vw);padding:28px 30px 24px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .welcome-kicker{font-size:10px;letter-spacing:.36em;color:var(--gold);margin-bottom:10px}.welcome-title{font-size:30px;letter-spacing:.13em;margin-bottom:9px}.welcome-line{font-size:14px;color:#dfcba8;font-style:italic;margin-bottom:23px}.welcome-help{font-size:11px;line-height:1.6;letter-spacing:.08em;color:var(--muted);margin-bottom:20px}.welcome-tap{font-size:10px;letter-spacing:.28em;color:var(--gold);animation:welcomePulse 2s ease-in-out infinite}@keyframes welcomePulse{0%,100%{opacity:.58}50%{opacity:1}}
 .hold-ring{position:absolute;z-index:8500;width:68px;height:68px;margin:-34px 0 0 -34px;border-radius:50%;pointer-events:none;opacity:0;transform:scale(.82);transition:opacity .15s ease,transform .15s ease;filter:drop-shadow(0 0 8px rgba(224,184,105,.8)) drop-shadow(0 0 18px rgba(224,184,105,.42))}
 .hold-ring.visible{opacity:1;transform:scale(1)}.hold-ring svg{width:100%;height:100%;transform:rotate(-90deg)}.hold-ring .track{fill:none;stroke:rgba(245,211,143,.32);stroke-width:2.8}.hold-ring .progress{fill:none;stroke:#f1cc7c;stroke-width:3.2;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100}.hold-ring.complete{animation:ringFinish .22s ease}@keyframes ringFinish{50%{transform:scale(1.18);filter:drop-shadow(0 0 12px rgba(255,220,145,1)) drop-shadow(0 0 26px rgba(239,190,92,.9))}}
 @media (orientation:portrait){.welcome-screen{visibility:hidden;opacity:0;pointer-events:none}}
+.startup-black{position:absolute;inset:0;z-index:9200;background:#050303;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .9s ease,visibility .9s ease}
+.startup-black.on{opacity:1;visibility:visible;pointer-events:auto}
+.startup-black.reveal{transition:opacity 1.45s ease,visibility 1.45s ease;opacity:0;visibility:hidden}
 
 </style>
 </head>
 <body>
-<div id="app">
+<div id="app" class="startup">
   <div id="tavern" class="scene" style="background-image:url('assets/berklith-tavern.jpg')"></div>
   <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')"></div>
   <div class="vignette"></div>
@@ -226,6 +235,7 @@ img {
       <div class="welcome-tap">TAP TO CONTINUE</div>
     </div>
   </div>
+  <div class="startup-black" id="startupBlack" aria-hidden="true"></div>
   <div class="hold-ring" id="holdRing" aria-hidden="true"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15.9"/><circle class="progress" id="holdProgress" cx="18" cy="18" r="15.9" pathLength="100"/></svg></div>
 
   <div class="fade" id="fade"></div><div class="toast" id="toast"></div>
@@ -244,7 +254,7 @@ img {
 (()=>{
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const overlay=$('#overlay'), preview=$('#preview'), fade=$('#fade'), toast=$('#toast');
-const welcome=$('#welcomeScreen'), holdRing=$('#holdRing'), holdProgress=$('#holdProgress'), app=$('#app');
+const welcome=$('#welcomeScreen'), startupBlack=$('#startupBlack'), holdRing=$('#holdRing'), holdProgress=$('#holdProgress'), app=$('#app');
 const scenes={tavern:$('#tavern'),room:$('#room')};
 const locations={
  tavern:{title:'MAIN TAVERN',sub:'BERKLITH TAVERN · EARLY EVENING',img:'assets/berklith-tavern.jpg'},
@@ -285,8 +295,20 @@ $('#cancelReset').addEventListener('click',()=>$('#confirm').classList.remove('o
 $('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');setWorldTime(WORLD_START);showScene('tavern');$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
 $('#motionBtn').addEventListener('click',e=>{motion=!motion;e.currentTarget.textContent='MENU MOTION · '+(motion?'ON':'REDUCED');document.documentElement.style.setProperty('--motion',motion?'1':'0');say(motion?'Full menu motion.':'Reduced menu motion.')});
 
-// Startup card is intentionally shown on each fresh app/page launch; it never advances world time.
-welcome.addEventListener('pointerup',()=>welcome.classList.add('dismissed'));
+// Startup presentation is separate from the live scene. Nothing playable is visible until the title sequence finishes.
+let startupLeaving=false;
+welcome.addEventListener('pointerup',()=>{
+ if(startupLeaving)return;startupLeaving=true;
+ startupBlack.classList.remove('reveal');startupBlack.classList.add('on');
+ // Fade the title artwork into black first.
+ setTimeout(()=>welcome.classList.add('dismissed'),80);
+ // Hold on black briefly, then reveal the already-loaded current scene.
+ setTimeout(()=>{
+   app.classList.remove('startup');app.classList.add('scene-reveal');
+   requestAnimationFrame(()=>requestAnimationFrame(()=>{startupBlack.classList.add('reveal');startupBlack.classList.remove('on')}));
+ },1250);
+ setTimeout(()=>{app.classList.remove('scene-reveal');startupBlack.classList.remove('reveal');},2900);
+});
 
 // Empty-scene hold gesture. Interactive elements can opt out now (and later hotspots/characters
 // should use .interactive or [data-interactive]) so their long-press remains free for future actions.
