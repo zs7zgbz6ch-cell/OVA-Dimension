@@ -44,8 +44,36 @@ function outputs(){xo.value=(+xEl.value).toFixed(1);yo.value=(+yEl.value).toFixe
 function render(){scene.querySelectorAll('.actor,.actor-label').forEach(e=>e.remove());state.spots.forEach(s=>{let a=document.createElement('img');a.src='assets/test-character-01.png';a.className='actor'+(s.id===state.selected?' selected':'');a.dataset.id=s.id;a.style.left=s.x+'%';a.style.top=s.y+'%';a.style.height=s.scale+'vh';scene.appendChild(a);let l=document.createElement('div');l.className='actor-label'+(s.id===state.selected?' selected':'');l.dataset.label=s.id;l.textContent=s.name;l.style.left=s.x+'%';l.style.top=Math.max(4,s.y-s.scale*.96)+'%';l.style.display=state.labels?'block':'none';scene.appendChild(l);a.addEventListener('pointerdown',startDrag)});let s=sel();nameInput.value=s.name;xEl.value=s.x;yEl.value=s.y;sEl.value=s.scale;outputs();status.textContent=state.spots.length+' SPOTS · '+s.name;document.querySelector('#labels').textContent='LABELS: '+(state.labels?'ON':'OFF')}
 function update(){let s=sel();s.x=+xEl.value;s.y=+yEl.value;s.scale=+sEl.value;save(true);render()}[xEl,yEl,sEl].forEach(e=>e.addEventListener('input',update));
 nameInput.addEventListener('change',()=>{let s=sel(),n=(nameInput.value||s.name).trim().toUpperCase().replace(/\s+/g,'_');if(state.spots.some(q=>q.id!==s.id&&q.name===n))n=uniqueName(n);s.name=n;save(true);render()});
-function startDrag(e){e.preventDefault();state.selected=e.currentTarget.dataset.id;drag={id:state.selected};render();let a=scene.querySelector('.actor[data-id="'+state.selected+'"]');a.setPointerCapture(e.pointerId);a.addEventListener('pointermove',moveDrag);a.addEventListener('pointerup',endDrag,{once:true});a.addEventListener('pointercancel',endDrag,{once:true})}
-function moveDrag(e){if(!drag)return;let r=scene.getBoundingClientRect(),s=sel();s.x=Math.max(-25,Math.min(125,(e.clientX-r.left)/r.width*100));s.y=Math.max(0,Math.min(150,(e.clientY-r.top)/r.height*100));e.currentTarget.style.left=s.x+'%';e.currentTarget.style.top=s.y+'%';let l=scene.querySelector('.actor-label[data-label="'+s.id+'"]');if(l){l.style.left=s.x+'%';l.style.top=Math.max(4,s.y-s.scale*.96)+'%'}xEl.value=s.x;yEl.value=s.y;outputs();status.textContent=state.spots.length+' SPOTS · '+s.name}
+function startDrag(e){
+ e.preventDefault();
+ state.selected=e.currentTarget.dataset.id;
+ const s=sel(),r=scene.getBoundingClientRect();
+ // Preserve the exact point where the actor was grabbed. Grabbing her head,
+ // waist, etc. no longer snaps her feet/anchor to the finger.
+ drag={
+   id:state.selected,
+   offsetX:e.clientX-(r.left+(s.x/100)*r.width),
+   offsetY:e.clientY-(r.top+(s.y/100)*r.height)
+ };
+ e.currentTarget.classList.add('selected');
+ const lab=scene.querySelector('.actor-label[data-label="'+s.id+'"]');if(lab)lab.classList.add('selected');
+ status.textContent=state.spots.length+' SPOTS · '+s.name;
+ e.currentTarget.setPointerCapture(e.pointerId);
+ e.currentTarget.addEventListener('pointermove',moveDrag);
+ e.currentTarget.addEventListener('pointerup',endDrag,{once:true});
+ e.currentTarget.addEventListener('pointercancel',endDrag,{once:true});
+}
+function moveDrag(e){
+ if(!drag)return;
+ let r=scene.getBoundingClientRect(),s=sel();
+ const anchorX=e.clientX-drag.offsetX,anchorY=e.clientY-drag.offsetY;
+ s.x=Math.max(-25,Math.min(125,(anchorX-r.left)/r.width*100));
+ s.y=Math.max(0,Math.min(150,(anchorY-r.top)/r.height*100));
+ e.currentTarget.style.left=s.x+'%';e.currentTarget.style.top=s.y+'%';
+ let l=scene.querySelector('.actor-label[data-label="'+s.id+'"]');
+ if(l){l.style.left=s.x+'%';l.style.top=Math.max(4,s.y-s.scale*.96)+'%'}
+ xEl.value=s.x;yEl.value=s.y;outputs();status.textContent=state.spots.length+' SPOTS · '+s.name;
+}
 function endDrag(){drag=null;save(true);render()}
 document.querySelector('#add').onclick=()=>{let next=1;while(state.spots.some(s=>s.name===('SPOT_'+String(next).padStart(2,'0'))))next++;let nm='SPOT_'+String(next).padStart(2,'0'),q={id:safeId(nm),name:nm,x:50,y:75,scale:45};state.spots.push(q);state.selected=q.id;save(true);render();toast('SPOT ADDED')};
 document.querySelector('#duplicate').onclick=()=>{let s=sel(),q={...s,id:safeId(s.name),name:uniqueName(s.name),x:Math.min(125,s.x+3),y:Math.min(150,s.y+2)};state.spots.push(q);state.selected=q.id;save(true);render();toast('DUPLICATED')};

@@ -1,4 +1,4 @@
-OVA-D LAB v0.2.2 — Scene Stage / Milestone 01C Pass 2
+OVA-D LAB v0.2.3 — Scene Stage / Milestone 01C Pass 2
 
 COMPLETE / SELF-CONTAINED LAB BUILD
 
@@ -24,3 +24,5 @@ Next:
 
 - v0.2.2: Generic SPOT_01 naming and offscreen placement (X -25..125, Y 0..150).
 - Existing saved layouts remain loadable; they are not automatically renamed.
+
+- v0.2.3: Dragging preserves the grab point instead of snapping the actor's feet to the finger. Grab head/torso and pull the feet below frame for foreground compositions.
