@@ -1,4 +1,4 @@
-OVA-D LAB v0.2.1 — Scene Stage / Milestone 01C Pass 2
+OVA-D LAB v0.2.2 — Scene Stage / Milestone 01C Pass 2
 
 COMPLETE / SELF-CONTAINED LAB BUILD
 
@@ -21,3 +21,6 @@ Next:
 01D — worldMinutes -> agenda -> witnessed movement / missed fade sync.
 
 - v0.2.1: Added persistent HIDE UI / SHOW UI stage-preview control.
+
+- v0.2.2: Generic SPOT_01 naming and offscreen placement (X -25..125, Y 0..150).
+- Existing saved layouts remain loadable; they are not automatically renamed.
