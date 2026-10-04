@@ -22,6 +22,7 @@ transition:opacity 1.45s ease,transform 1.45s cubic-bezier(.2,.8,.2,1);transform
 #app.startup .scene,#app.startup .vignette{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 #app.scene-reveal .scene:not(.hidden),#app.scene-reveal .vignette{visibility:visible!important;opacity:1!important}
 .scene.hidden{opacity:0;pointer-events:none;transform:scale(1.04)}
+#app.travel-switch .scene{transition:none!important}
 .vignette{position:absolute;inset:0;pointer-events:none;background:
 linear-gradient(to bottom,rgba(0,0,0,.15),transparent 30%,transparent 68%,rgba(0,0,0,.25)),
 radial-gradient(circle at center,transparent 50%,rgba(0,0,0,.28) 120%)}
@@ -90,7 +91,7 @@ font-size:11px;letter-spacing:.08em;opacity:0;pointer-events:none;transition:.3s
 .confirm.open{opacity:1;pointer-events:auto}.confirmbox{width:min(370px,86vw);padding:24px;background:#17100f;border:1px solid var(--line);text-align:center}
 .confirmbox h3{margin:0 0 8px;letter-spacing:.08em}.confirmbox p{font-size:12px;color:var(--muted);line-height:1.5}
 .confirmbox .actions{justify-content:center;margin-top:17px}
-.fade{position:absolute;inset:0;z-index:8800;background:#090606;opacity:0;pointer-events:none;transition:opacity .68s ease}.fade.on{opacity:1;pointer-events:auto}
+.fade{position:fixed;inset:0;z-index:9300;background:#090606;opacity:0;pointer-events:none;transition:opacity .68s ease}.fade.on{opacity:1;pointer-events:auto}
 @media(max-height:500px){
  .sheet{padding-top:max(18px,env(safe-area-inset-top));padding-bottom:14px}
  .title{font-size:23px}.nav{grid-template-columns:1fr 1fr;gap:7px}.nav button{min-height:43px;padding:8px 11px}
@@ -287,16 +288,21 @@ $$('.loc').forEach(b=>b.addEventListener('click',()=>{target=b.dataset.location;
 $('#previewBack').addEventListener('click',()=>preview.classList.remove('open'));
 $('#goBtn').addEventListener('click',()=>{
  const moved=target!==current;
- // Keep the travel preview/menu covering the old scene until black is fully opaque.
- // Swap scenes only while black, then dismiss the UI and reveal the destination.
+ // Travel is a hard cut hidden behind black — never a scene crossfade.
  fade.classList.add('on');
  setTimeout(()=>{
+   app.classList.add('travel-switch');
    showScene(target);
    if(moved)advanceTime(1);
+   // Commit the destination instantly while the black cover is fully opaque.
+   void app.offsetWidth;
    preview.classList.remove('open');
    closeMenu();
-   requestAnimationFrame(()=>requestAnimationFrame(()=>fade.classList.remove('on')));
- },700);
+   requestAnimationFrame(()=>{
+     app.classList.remove('travel-switch');
+     requestAnimationFrame(()=>fade.classList.remove('on'));
+   });
+ },720);
 });
 $$('[data-action]').forEach(b=>b.addEventListener('click',()=>{
  if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:false}));say('Prototype saved.')}
