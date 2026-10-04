@@ -1,4 +1,4 @@
-OVA-D LAB v0.2 — Scene Stage / Milestone 01C Pass 2
+OVA-D LAB v0.2.1 — Scene Stage / Milestone 01C Pass 2
 
 COMPLETE / SELF-CONTAINED LAB BUILD
 
@@ -19,3 +19,5 @@ The visible Barmaids represent scene spots, not cloned NPCs.
 Next:
 01C Pass 3 — routes, curves, timing, stair choreography and movement lock.
 01D — worldMinutes -> agenda -> witnessed movement / missed fade sync.
+
+- v0.2.1: Added persistent HIDE UI / SHOW UI stage-preview control.
