@@ -7,7 +7,10 @@ const CORE = [
   './assets/berklith-tavern.jpg',
   './assets/rionnes-room.jpg',
   './assets/intro-portrait.jpg',
-  './assets/intro-landscape.jpg'
+  './assets/intro-landscape.jpg',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
+  './manifest.webmanifest'
 ];
 
 self.addEventListener('install', event => {
