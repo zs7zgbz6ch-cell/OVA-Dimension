@@ -90,7 +90,7 @@ font-size:11px;letter-spacing:.08em;opacity:0;pointer-events:none;transition:.3s
 .confirm.open{opacity:1;pointer-events:auto}.confirmbox{width:min(370px,86vw);padding:24px;background:#17100f;border:1px solid var(--line);text-align:center}
 .confirmbox h3{margin:0 0 8px;letter-spacing:.08em}.confirmbox p{font-size:12px;color:var(--muted);line-height:1.5}
 .confirmbox .actions{justify-content:center;margin-top:17px}
-.fade{position:absolute;inset:0;background:#090606;opacity:0;pointer-events:none;transition:opacity .42s ease}.fade.on{opacity:1}
+.fade{position:absolute;inset:0;z-index:8800;background:#090606;opacity:0;pointer-events:none;transition:opacity .68s ease}.fade.on{opacity:1;pointer-events:auto}
 @media(max-height:500px){
  .sheet{padding-top:max(18px,env(safe-area-inset-top));padding-bottom:14px}
  .title{font-size:23px}.nav{grid-template-columns:1fr 1fr;gap:7px}.nav button{min-height:43px;padding:8px 11px}
@@ -285,8 +285,19 @@ $$('[data-page]').forEach(b=>b.addEventListener('click',()=>page(b.dataset.page)
 $$('.loc').forEach(b=>b.addEventListener('click',()=>{target=b.dataset.location;let d=locations[target];
  $('#previewImg').src=d.img;$('#previewTitle').textContent=d.title;$('#previewSub').textContent=d.sub;preview.classList.add('open')}));
 $('#previewBack').addEventListener('click',()=>preview.classList.remove('open'));
-$('#goBtn').addEventListener('click',()=>{const moved=target!==current;preview.classList.remove('open');closeMenu();fade.classList.add('on');
- setTimeout(()=>{showScene(target);if(moved)advanceTime(1);setTimeout(()=>fade.classList.remove('on'),160)},420)});
+$('#goBtn').addEventListener('click',()=>{
+ const moved=target!==current;
+ // Keep the travel preview/menu covering the old scene until black is fully opaque.
+ // Swap scenes only while black, then dismiss the UI and reveal the destination.
+ fade.classList.add('on');
+ setTimeout(()=>{
+   showScene(target);
+   if(moved)advanceTime(1);
+   preview.classList.remove('open');
+   closeMenu();
+   requestAnimationFrame(()=>requestAnimationFrame(()=>fade.classList.remove('on')));
+ },700);
+});
 $$('[data-action]').forEach(b=>b.addEventListener('click',()=>{
  if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:false}));say('Prototype saved.')}
  if(b.dataset.action==='load'){let s;try{s=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(s&&locations[s.location]){showScene(s.location);setWorldTime(Number.isFinite(s.worldMinute)?s.worldMinute:WORLD_START);closeMenu();say('Save loaded.')}else say('No save data yet.')}
@@ -314,12 +325,12 @@ welcome.addEventListener('pointerup',()=>{
 
 // Empty-scene hold gesture. Interactive elements can opt out now (and later hotspots/characters
 // should use .interactive or [data-interactive]) so their long-press remains free for future actions.
-let holdTimer=null, ringTimer=null, holdStart=0, holdX=0, holdY=0, holding=false;
-const HOLD_MS=1125, RING_DELAY=250, MOVE_LIMIT=18;
+let holdTimer=null, holdStart=0, holdX=0, holdY=0, holding=false;
+const HOLD_MS=840, RING_DELAY=0, MOVE_LIMIT=18;
 function holdBlocked(target){return !!target.closest('button,.overlay,.preview,.confirm,.welcome-screen,.interactive,[data-interactive]') || overlay.classList.contains('open') || preview.classList.contains('open') || $('#confirm').classList.contains('open') || !welcome.classList.contains('dismissed');}
-function clearHold(){holding=false;clearTimeout(holdTimer);clearTimeout(ringTimer);holdTimer=ringTimer=null;holdRing.classList.remove('visible','complete');holdProgress.style.strokeDashoffset='100';}
+function clearHold(){holding=false;clearTimeout(holdTimer);holdTimer=null;holdRing.classList.remove('visible','complete');holdProgress.style.strokeDashoffset='100';}
 function updateRing(){if(!holding)return;const elapsed=performance.now()-holdStart;const progress=Math.max(0,Math.min(1,(elapsed-RING_DELAY)/(HOLD_MS-RING_DELAY)));holdProgress.style.strokeDashoffset=String(100-progress*100);if(progress<1)requestAnimationFrame(updateRing)}
-app.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;if(holdBlocked(e.target))return;holding=true;holdStart=performance.now();holdX=e.clientX;holdY=e.clientY;holdRing.style.left=e.clientX+'px';holdRing.style.top=e.clientY+'px';ringTimer=setTimeout(()=>{if(!holding)return;holdRing.classList.add('visible');requestAnimationFrame(updateRing)},RING_DELAY);holdTimer=setTimeout(()=>{if(!holding)return;holdRing.classList.add('complete');holding=false;setTimeout(()=>{clearHold();openMenu()},150)},HOLD_MS)});
+app.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;if(holdBlocked(e.target))return;holding=true;holdStart=performance.now();holdX=e.clientX;holdY=e.clientY;holdRing.style.left=e.clientX+'px';holdRing.style.top=e.clientY+'px';holdRing.classList.add('visible');requestAnimationFrame(updateRing);holdTimer=setTimeout(()=>{if(!holding)return;holdRing.classList.add('complete');holding=false;setTimeout(()=>{clearHold();openMenu()},120)},HOLD_MS)});
 app.addEventListener('pointermove',e=>{if(holding&&Math.hypot(e.clientX-holdX,e.clientY-holdY)>MOVE_LIMIT)clearHold()});
 app.addEventListener('pointerup',clearHold);app.addEventListener('pointercancel',clearHold);app.addEventListener('pointerleave',clearHold);
 
