@@ -18,6 +18,7 @@
 #spotName{min-width:0;flex:1;height:31px;border:1px solid rgba(224,184,103,.42);border-radius:8px;background:rgba(36,25,14,.95);color:#f5e5bf;padding:0 9px;text-transform:uppercase;font-size:11px;letter-spacing:.07em}.btn{height:31px;border:1px solid rgba(224,184,103,.52);border-radius:8px;background:rgba(38,27,15,.96);color:#f2dfb1;padding:0 10px;font-size:9px;letter-spacing:.07em;white-space:nowrap}.btn:active{transform:scale(.97)}.btn.primary{border-color:#e0b867;background:rgba(93,64,29,.96)}.btn.danger{border-color:rgba(191,116,88,.65)}
 .control{display:grid;grid-template-columns:18px 1fr 43px 26px 26px;align-items:center;gap:5px;flex:1;min-width:0}.control label{font-size:9px;letter-spacing:.08em}.control output{font-size:9px;text-align:right;font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:#d6aa58}.nudge{height:27px;padding:0;border:1px solid rgba(224,184,103,.38);border-radius:7px;background:rgba(40,28,16,.94);color:#f2dfb1;font-size:14px}
 #uiToggle{position:fixed;z-index:90;right:max(8px,env(safe-area-inset-right));bottom:max(7px,env(safe-area-inset-bottom));height:29px;border:1px solid rgba(224,184,103,.52);border-radius:9px;background:rgba(13,9,5,.82);backdrop-filter:blur(10px);color:#f2dfb1;padding:0 9px;font:8px Georgia,serif;letter-spacing:.08em}body.ui-hidden #editor,body.ui-hidden .topbar{display:none}body:not(.ui-hidden) #uiToggle{bottom:calc(max(7px,env(safe-area-inset-bottom)) + 118px)}
+.actor.route-moving{pointer-events:none}body.route-playing #editor button:not(#stopRoute),body.route-playing #editor input{opacity:.55;pointer-events:none}
 #toast{position:fixed;z-index:60;left:50%;top:18%;transform:translate(-50%,-50%);opacity:0;transition:opacity .18s;padding:8px 12px;border:1px solid rgba(224,184,103,.55);background:rgba(13,9,5,.9);border-radius:10px;font-size:10px;letter-spacing:.08em;pointer-events:none}#toast.show{opacity:1}
 @media(max-width:760px){body:not(.ui-hidden) #uiToggle{bottom:calc(max(7px,env(safe-area-inset-bottom)) + 105px)}.badge,.status{font-size:7px;padding:5px 7px}#editor{padding:7px}.row{gap:5px;margin-bottom:5px}.btn{height:28px;padding:0 7px;font-size:8px}#spotName{height:28px;font-size:9px}.control{grid-template-columns:14px 1fr 36px 23px 23px;gap:3px}.control label,.control output{font-size:8px}.nudge{height:24px}}
 @media(orientation:portrait){#scene:after{content:"ROTATE FOR SCENE STAGE";position:absolute;inset:0;display:grid;place-items:center;background:#090704;color:#d8b46c;font-size:12px;letter-spacing:.18em;z-index:80}#editor,.topbar,#uiToggle{visibility:hidden}}
@@ -31,11 +32,21 @@
 <div class="control"><label>Y</label><input id="y" type="range" min="0" max="150" step=".1"><output id="yo"></output><button class="nudge" data-nudge="y,-.5">−</button><button class="nudge" data-nudge="y,.5">+</button></div>
 <div class="control"><label>S</label><input id="scale" type="range" min="20" max="100" step=".5"><output id="so"></output><button class="nudge" data-nudge="scale,-1">−</button><button class="nudge" data-nudge="scale,1">+</button></div>
 </div>
-<div class="row"><button class="btn primary" id="save">SAVE STATE</button><button class="btn" id="copy">COPY STATE</button><button class="btn" id="labels">LABELS: ON</button><button class="btn" id="reset">RESET DEFAULTS</button></div>
+<div class="row"><button class="btn primary" id="save">SAVE STATE</button><button class="btn" id="copy">COPY STATE</button><button class="btn" id="labels">LABELS: ON</button><button class="btn" id="reset">RESET DEFAULTS</button><button class="btn primary" id="routeBarStairs">▶ BAR → STAIRS</button><button class="btn" id="routeReverse">▶ STAIRS → BAR</button><button class="btn danger" id="stopRoute">■ STOP</button></div>
 </div><button id="uiToggle">HIDE UI</button><div id="toast"></div>
 <script>
 const KEY='ovad_scene_stage_v02',scene=document.querySelector('#scene'),status=document.querySelector('#status'),nameInput=document.querySelector('#spotName'),xEl=document.querySelector('#x'),yEl=document.querySelector('#y'),sEl=document.querySelector('#scale'),xo=document.querySelector('#xo'),yo=document.querySelector('#yo'),so=document.querySelector('#so'),toastEl=document.querySelector('#toast');
-const DEFAULTS=[{id:'spot_01',name:'SPOT_01',x:31,y:72,scale:38},{id:'spot_02',name:'SPOT_02',x:38,y:72.5,scale:38},{id:'spot_03',name:'SPOT_03',x:52,y:88,scale:50},{id:'spot_04',name:'SPOT_04',x:84,y:82,scale:45}];
+const DEFAULTS=[
+{id:'spot_01',name:'SPOT_01',x:26.44,y:66.55,scale:25},
+{id:'spot_02',name:'SPOT_02',x:35.4,y:67.74,scale:27},
+{id:'spot_03',name:'SPOT_03',x:45.52,y:80.7,scale:42},
+{id:'spot_04',name:'SPOT_04',x:94.47,y:95.82,scale:66},
+{id:'spot_05',name:'SPOT_05',x:31.1,y:72.87,scale:35},
+{id:'spot_06',name:'SPOT_06',x:54.33,y:68.5,scale:23},
+{id:'spot_07',name:'SPOT_07',x:23.86,y:103.14,scale:73},
+{id:'spot_08',name:'SPOT_08',x:48.38,y:117.5,scale:95},
+{id:'spot_09',name:'SPOT_09',x:76.3,y:70.34,scale:24.5}
+];
 let state={scene:'BERKLITH_TAVERN',spots:JSON.parse(JSON.stringify(DEFAULTS)),selected:'spot_03',labels:true},drag=null,toastTimer;
 function toast(t){toastEl.textContent=t;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1100)}
 function sel(){return state.spots.find(s=>s.id===state.selected)||state.spots[0]}function safeId(n){return n.toLowerCase().replace(/[^a-z0-9]+/g,'_')+'_'+Date.now()}function uniqueName(b){let n=b.toUpperCase(),i=2;while(state.spots.some(s=>s.name===n))n=b.toUpperCase()+'_'+i++;return n}
@@ -84,5 +95,31 @@ document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{let [k,d]=b.
 document.querySelector('#copy').onclick=async()=>{let ex={version:'OVA-D_SCENE_STAGE_0.2',scene:state.scene,spots:{}};state.spots.forEach(s=>ex.spots[s.name]={x:+s.x.toFixed(2),y:+s.y.toFixed(2),scale:+s.scale.toFixed(2)});let t=JSON.stringify(ex,null,2);try{await navigator.clipboard.writeText(t);toast('STATE COPIED')}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('STATE COPIED')}};
 const uiToggle=document.querySelector('#uiToggle');
 uiToggle.onclick=()=>{document.body.classList.toggle('ui-hidden');uiToggle.textContent=document.body.classList.contains('ui-hidden')?'SHOW UI':'HIDE UI'};
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let routeToken=0;
+function routeActor(id){return scene.querySelector('.actor[data-id="'+id+'"]')}
+function pose(a,p,d=0,e='cubic-bezier(.22,.61,.36,1)'){
+ a.style.transition=d?`left ${d}ms ${e},top ${d}ms ${e},width ${d}ms ${e},opacity ${d}ms ease`:'none';
+ a.style.left=p.x+'%';a.style.top=p.y+'%';a.style.width=p.scale+'%';if(p.opacity!==undefined)a.style.opacity=p.opacity;
+}
+async function leg(a,p,d,t,e){if(t!==routeToken)return false;pose(a,p,d,e);await sleep(d);return t===routeToken}
+function stopRouteNow(){routeToken++;document.body.classList.remove('route-playing');render()}
+async function playRoute(reverse=false){
+ if(document.body.classList.contains('route-playing'))return;
+ const token=++routeToken,names=reverse?['SPOT_04','SPOT_03','SPOT_05','SPOT_01']:['SPOT_01','SPOT_05','SPOT_03','SPOT_04'];
+ const pts=names.map(n=>state.spots.find(q=>q.name===n));
+ if(pts.some(x=>!x)){toast('Need SPOT_01/03/04/05');return}
+ document.body.classList.add('route-playing');state.selected=pts[0].id;render();
+ const a=routeActor(pts[0].id);a.classList.add('route-moving');a.style.zIndex=40;pose(a,{...pts[0],opacity:1});await sleep(450);
+ for(let i=1;i<pts.length;i++)if(!await leg(a,{...pts[i],opacity:1},i===pts.length-1?2400:2100,token,'cubic-bezier(.45,.05,.3,1)'))return;
+ if(!reverse){await sleep(550);let q=pts[3];if(!await leg(a,{x:q.x+3.5,y:q.y-25,scale:q.scale*.82,opacity:.08},2200,token,'cubic-bezier(.4,0,.6,1)'))return}
+ await sleep(300);
+ if(token===routeToken){document.body.classList.remove('route-playing');a.classList.remove('route-moving');toast(reverse?'Route complete · BAR':'Route complete · UPSTAIRS')}
+}
+document.querySelector('#routeBarStairs').onclick=()=>playRoute(false);
+document.querySelector('#routeReverse').onclick=()=>playRoute(true);
+document.querySelector('#stopRoute').onclick=stopRouteNow;
+
 load();render();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
 </script></body></html>

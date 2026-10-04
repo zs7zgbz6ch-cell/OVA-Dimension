@@ -1,4 +1,4 @@
-OVA-D LAB v0.2.3 — Scene Stage / Milestone 01C Pass 2
+OVA-D LAB v0.3 — Scene Stage / Milestone 01C Pass 2
 
 COMPLETE / SELF-CONTAINED LAB BUILD
 
@@ -26,3 +26,7 @@ Next:
 - Existing saved layouts remain loadable; they are not automatically renamed.
 
 - v0.2.3: Dragging preserves the grab point instead of snapping the actor's feet to the finger. Grab head/torso and pull the feet below frame for foreground compositions.
+
+- v0.3 Route Stage: uses the first iPhone-authored 9-spot tavern map.
+- BAR → STAIRS and reverse choreography previews.
+- Slow travel, brief stair settle, ascent shrink/fade, and interaction lock while moving.
