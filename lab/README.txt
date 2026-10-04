@@ -1,4 +1,4 @@
-OVA-D LAB v0.3 — Scene Stage / Milestone 01C Pass 2
+OVA-D LAB v0.3.1 — Distance Route / Milestone 01C Pass 2
 
 COMPLETE / SELF-CONTAINED LAB BUILD
 
@@ -30,3 +30,15 @@ Next:
 - v0.3 Route Stage: uses the first iPhone-authored 9-spot tavern map.
 - BAR → STAIRS and reverse choreography previews.
 - Slow travel, brief stair settle, ascent shrink/fade, and interaction lock while moving.
+
+
+- v0.3.1: Fixed route actor aspect-ratio distortion. Route movement now animates HEIGHT (the same scale unit used by scene spots), never width.
+- Spot scale remains authoritative perspective data and interpolates smoothly A -> B.
+- Route travel time is now derived from authored fictional world distance, not screen-pixel distance.
+- First proof uses 1.15 m/s walking speed and per-segment metre values.
+- COPY STATE now includes BAR_TO_STAIRS route distance data.
+
+Core rule:
+Screen x/y = where the actor appears.
+Spot scale = how large the actor appears at that depth.
+Route distance = how long travel should take in the fictional world.

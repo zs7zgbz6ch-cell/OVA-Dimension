@@ -24,7 +24,7 @@
 @media(orientation:portrait){#scene:after{content:"ROTATE FOR SCENE STAGE";position:absolute;inset:0;display:grid;place-items:center;background:#090704;color:#d8b46c;font-size:12px;letter-spacing:.18em;z-index:80}#editor,.topbar,#uiToggle{visibility:hidden}}
 </style></head><body>
 <div id="scene"><div class="vignette"></div></div>
-<div class="topbar"><div class="badge">OVA-D LAB · 01C PASS 2 · SCENE STAGE</div><div class="status" id="status"></div></div>
+<div class="topbar"><div class="badge">OVA-D LAB · 01C PASS 2 · DISTANCE ROUTE</div><div class="status" id="status"></div></div>
 <div id="editor">
 <div class="row"><input id="spotName"><button class="btn primary" id="add">+ SPOT</button><button class="btn" id="duplicate">DUPLICATE</button><button class="btn danger" id="remove">DELETE</button></div>
 <div class="row">
@@ -92,7 +92,7 @@ document.querySelector('#remove').onclick=()=>{if(state.spots.length<=1)return t
 document.querySelector('#save').onclick=()=>save();document.querySelector('#labels').onclick=()=>{state.labels=!state.labels;save(true);render()};
 document.querySelector('#reset').onclick=()=>{if(confirm('Reset Scene Stage to the default four spots?')){state={scene:'BERKLITH_TAVERN',spots:JSON.parse(JSON.stringify(DEFAULTS)),selected:'spot_03',labels:true};save(true);render();toast('DEFAULTS RESTORED')}};
 document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{let [k,d]=b.dataset.nudge.split(','),s=sel();s[k]=+(s[k]+(+d)).toFixed(2);save(true);render()});
-document.querySelector('#copy').onclick=async()=>{let ex={version:'OVA-D_SCENE_STAGE_0.2',scene:state.scene,spots:{}};state.spots.forEach(s=>ex.spots[s.name]={x:+s.x.toFixed(2),y:+s.y.toFixed(2),scale:+s.scale.toFixed(2)});let t=JSON.stringify(ex,null,2);try{await navigator.clipboard.writeText(t);toast('STATE COPIED')}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('STATE COPIED')}};
+document.querySelector('#copy').onclick=async()=>{let ex={version:'OVA-D_SCENE_STAGE_0.3.1',scene:state.scene,spots:{},routes:{BAR_TO_STAIRS:{walkMps:WALK_MPS,segments:BAR_STAIRS_ROUTE}}};state.spots.forEach(s=>ex.spots[s.name]={x:+s.x.toFixed(2),y:+s.y.toFixed(2),scale:+s.scale.toFixed(2)});let t=JSON.stringify(ex,null,2);try{await navigator.clipboard.writeText(t);toast('STATE COPIED')}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('STATE COPIED')}};
 const uiToggle=document.querySelector('#uiToggle');
 uiToggle.onclick=()=>{document.body.classList.toggle('ui-hidden');uiToggle.textContent=document.body.classList.contains('ui-hidden')?'SHOW UI':'HIDE UI'};
 
@@ -100,22 +100,41 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let routeToken=0;
 function routeActor(id){return scene.querySelector('.actor[data-id="'+id+'"]')}
 function pose(a,p,d=0,e='cubic-bezier(.22,.61,.36,1)'){
- a.style.transition=d?`left ${d}ms ${e},top ${d}ms ${e},width ${d}ms ${e},opacity ${d}ms ease`:'none';
- a.style.left=p.x+'%';a.style.top=p.y+'%';a.style.width=p.scale+'%';if(p.opacity!==undefined)a.style.opacity=p.opacity;
+ a.style.transition=d?`left ${d}ms ${e},top ${d}ms ${e},height ${d}ms ${e},opacity ${d}ms ease`:'none';
+ a.style.left=p.x+'%';a.style.top=p.y+'%';a.style.height=p.scale+'vh';a.style.width='auto';if(p.opacity!==undefined)a.style.opacity=p.opacity;
 }
 async function leg(a,p,d,t,e){if(t!==routeToken)return false;pose(a,p,d,e);await sleep(d);return t===routeToken}
 function stopRouteNow(){routeToken++;document.body.classList.remove('route-playing');render()}
+// Route timing is authored in WORLD distance, never inferred from screen pixels.
+// Each segment keeps the destination spot's x/y/scale, so perspective size changes
+// smoothly while travel time comes from fictional metres / character walk speed.
+const WALK_MPS=1.15;
+const BAR_STAIRS_ROUTE=[
+ {from:'SPOT_01',to:'SPOT_05',distanceM:2.2},
+ {from:'SPOT_05',to:'SPOT_03',distanceM:3.4},
+ {from:'SPOT_03',to:'SPOT_04',distanceM:5.8}
+];
+const travelMs=m=>Math.max(650,Math.round((m/WALK_MPS)*1000));
 async function playRoute(reverse=false){
  if(document.body.classList.contains('route-playing'))return;
- const token=++routeToken,names=reverse?['SPOT_04','SPOT_03','SPOT_05','SPOT_01']:['SPOT_01','SPOT_05','SPOT_03','SPOT_04'];
- const pts=names.map(n=>state.spots.find(q=>q.name===n));
- if(pts.some(x=>!x)){toast('Need SPOT_01/03/04/05');return}
- document.body.classList.add('route-playing');state.selected=pts[0].id;render();
- const a=routeActor(pts[0].id);a.classList.add('route-moving');a.style.zIndex=40;pose(a,{...pts[0],opacity:1});await sleep(450);
- for(let i=1;i<pts.length;i++)if(!await leg(a,{...pts[i],opacity:1},i===pts.length-1?2400:2100,token,'cubic-bezier(.45,.05,.3,1)'))return;
- if(!reverse){await sleep(550);let q=pts[3];if(!await leg(a,{x:q.x+3.5,y:q.y-25,scale:q.scale*.82,opacity:.08},2200,token,'cubic-bezier(.4,0,.6,1)'))return}
+ const token=++routeToken;
+ const segs=reverse?[...BAR_STAIRS_ROUTE].reverse().map(s=>({from:s.to,to:s.from,distanceM:s.distanceM})):[...BAR_STAIRS_ROUTE];
+ const start=state.spots.find(q=>q.name===segs[0].from);
+ if(!start||segs.some(s=>!state.spots.find(q=>q.name===s.to))){toast('Need SPOT_01/03/04/05');return}
+ document.body.classList.add('route-playing');state.selected=start.id;render();
+ const a=routeActor(start.id);a.classList.add('route-moving');a.style.zIndex=40;pose(a,{...start,opacity:1});await sleep(450);
+ for(const seg of segs){
+   const p=state.spots.find(q=>q.name===seg.to),duration=travelMs(seg.distanceM);
+   status.textContent=`${seg.from} → ${seg.to} · ${seg.distanceM.toFixed(1)}m · ${(duration/1000).toFixed(1)}s`;
+   if(!await leg(a,{...p,opacity:1},duration,token,'cubic-bezier(.45,.05,.3,1)'))return;
+ }
+ if(!reverse){
+   await sleep(550);let q=state.spots.find(q=>q.name==='SPOT_04');
+   status.textContent='STAIRS ASCENT · AUTHORED BEAT';
+   if(!await leg(a,{x:q.x+3.5,y:q.y-25,scale:q.scale*.82,opacity:.08},2200,token,'cubic-bezier(.4,0,.6,1)'))return
+ }
  await sleep(300);
- if(token===routeToken){document.body.classList.remove('route-playing');a.classList.remove('route-moving');toast(reverse?'Route complete · BAR':'Route complete · UPSTAIRS')}
+ if(token===routeToken){document.body.classList.remove('route-playing');a.classList.remove('route-moving');render();toast(reverse?'Route complete · BAR':'Route complete · UPSTAIRS')}
 }
 document.querySelector('#routeBarStairs').onclick=()=>playRoute(false);
 document.querySelector('#routeReverse').onclick=()=>playRoute(true);
