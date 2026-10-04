@@ -1,1 +1,24 @@
-{"id":"./ova-d-lab-v01","name":"OVA-D LAB","short_name":"OVA-D LAB","description":"OVA-D internal character and scene development laboratory.","start_url":"./index.html?lab=v01","scope":"./","display":"standalone","orientation":"landscape","background_color":"#090704","theme_color":"#090704","icons":[{"src":"assets/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"assets/icon-512.png","sizes":"512x512","type":"image/png"}]}
+{
+  "id": "./ova-d-lab-scene-stage-v02",
+  "name": "OVA-D LAB",
+  "short_name": "OVA-D LAB",
+  "description": "OVA-D internal Scene Stage for blocking and spot placement.",
+  "start_url": "./index.html?stage=v02",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#090704",
+  "theme_color": "#090704",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-<!doctype html><html><head>
+<!doctype html>
+<html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -6,41 +7,51 @@
 <meta name="apple-mobile-web-app-title" content="OVA-D LAB">
 <meta name="theme-color" content="#090704">
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/icon-192.png">
-<title>OVA-D LAB · 01C</title>
+<title>OVA-D LAB · Scene Stage</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090704;color:#f2dfb1;font-family:Georgia,serif;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}body{position:fixed;inset:0}
-#scene{position:fixed;inset:-2px;background:url('assets/berklith-tavern.jpg') center/cover no-repeat;overflow:hidden}.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,transparent 54%,rgba(0,0,0,.34) 100%)}
-#person{position:absolute;width:auto;transform:translate(-50%,-100%);transform-origin:50% 100%;filter:drop-shadow(0 10px 8px rgba(0,0,0,.25));pointer-events:none;opacity:1;will-change:left,top,height,opacity}
-#person.idle{animation:idleLife 4.8s ease-in-out infinite}@keyframes idleLife{0%,100%{translate:0 0;rotate:0deg}45%{translate:0 -0.22vh;rotate:-0.18deg}72%{translate:0 -0.05vh;rotate:0.12deg}}
-.tag{position:fixed;z-index:10;top:max(8px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));padding:7px 10px;border:1px solid rgba(224,184,103,.4);background:rgba(13,9,5,.66);backdrop-filter:blur(10px);border-radius:10px;font-size:10px;letter-spacing:.12em}
-#readout{position:fixed;z-index:10;top:max(8px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));padding:7px 10px;border:1px solid rgba(224,184,103,.28);background:rgba(13,9,5,.58);backdrop-filter:blur(10px);border-radius:10px;font-size:9px;letter-spacing:.08em;text-align:right}
-.panel{position:fixed;z-index:12;left:50%;transform:translateX(-50%);bottom:max(9px,env(safe-area-inset-bottom));display:flex;gap:7px;padding:8px;background:rgba(13,9,5,.8);backdrop-filter:blur(12px);border:1px solid rgba(224,184,103,.48);border-radius:14px}.panel button{min-width:82px;border:1px solid rgba(224,184,103,.55);background:rgba(38,27,15,.92);color:#f2dfb1;border-radius:9px;padding:9px 11px;font:11px Georgia,serif;letter-spacing:.08em}.panel button:active{transform:scale(.97)}.panel button.active{background:rgba(101,70,31,.92);border-color:#e0b867}#sequence{border-color:rgba(242,223,177,.78)}
-@media(max-width:700px){.tag{font-size:8px}#readout{font-size:8px}.panel{width:calc(100% - 20px)}.panel button{flex:1;min-width:0;padding:9px 3px;font-size:10px}}
-@media(orientation:portrait){#scene:after{content:"ROTATE FOR CHARACTER STAGE";position:absolute;inset:0;display:grid;place-items:center;background:#090704;color:#d8b46c;font-size:12px;letter-spacing:.18em;z-index:20}.panel,.tag,#readout{visibility:hidden}}
+#scene{position:fixed;inset:-2px;background:url('assets/berklith-tavern.jpg') center/cover no-repeat;overflow:hidden}.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,transparent 57%,rgba(0,0,0,.28) 100%)}
+.actor{position:absolute;width:auto;transform:translate(-50%,-100%);transform-origin:50% 100%;filter:drop-shadow(0 9px 7px rgba(0,0,0,.24));touch-action:none}.actor.selected{filter:drop-shadow(0 0 4px rgba(255,220,132,.95)) drop-shadow(0 10px 7px rgba(0,0,0,.28))}
+.actor-label{position:absolute;z-index:7;transform:translate(-50%,-50%);padding:3px 6px;border-radius:7px;border:1px solid rgba(224,184,103,.65);background:rgba(13,9,5,.76);font-size:8px;letter-spacing:.07em;white-space:nowrap;pointer-events:none}.actor-label.selected{background:rgba(105,71,29,.92);border-color:#f0cb7d}
+.topbar{position:fixed;z-index:20;top:max(7px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));display:flex;justify-content:space-between;gap:8px;pointer-events:none}.badge,.status{padding:6px 9px;border:1px solid rgba(224,184,103,.38);background:rgba(13,9,5,.67);backdrop-filter:blur(10px);border-radius:9px;font-size:9px;letter-spacing:.09em;pointer-events:auto}.status{text-align:right}
+#editor{position:fixed;z-index:30;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:max(7px,env(safe-area-inset-bottom));padding:8px;border:1px solid rgba(224,184,103,.5);background:rgba(13,9,5,.86);backdrop-filter:blur(14px);border-radius:14px}.row{display:flex;align-items:center;gap:7px;margin-bottom:7px}.row:last-child{margin-bottom:0}
+#spotName{min-width:0;flex:1;height:31px;border:1px solid rgba(224,184,103,.42);border-radius:8px;background:rgba(36,25,14,.95);color:#f5e5bf;padding:0 9px;text-transform:uppercase;font-size:11px;letter-spacing:.07em}.btn{height:31px;border:1px solid rgba(224,184,103,.52);border-radius:8px;background:rgba(38,27,15,.96);color:#f2dfb1;padding:0 10px;font-size:9px;letter-spacing:.07em;white-space:nowrap}.btn:active{transform:scale(.97)}.btn.primary{border-color:#e0b867;background:rgba(93,64,29,.96)}.btn.danger{border-color:rgba(191,116,88,.65)}
+.control{display:grid;grid-template-columns:18px 1fr 43px 26px 26px;align-items:center;gap:5px;flex:1;min-width:0}.control label{font-size:9px;letter-spacing:.08em}.control output{font-size:9px;text-align:right;font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:#d6aa58}.nudge{height:27px;padding:0;border:1px solid rgba(224,184,103,.38);border-radius:7px;background:rgba(40,28,16,.94);color:#f2dfb1;font-size:14px}
+#toast{position:fixed;z-index:60;left:50%;top:18%;transform:translate(-50%,-50%);opacity:0;transition:opacity .18s;padding:8px 12px;border:1px solid rgba(224,184,103,.55);background:rgba(13,9,5,.9);border-radius:10px;font-size:10px;letter-spacing:.08em;pointer-events:none}#toast.show{opacity:1}
+@media(max-width:760px){.badge,.status{font-size:7px;padding:5px 7px}#editor{padding:7px}.row{gap:5px;margin-bottom:5px}.btn{height:28px;padding:0 7px;font-size:8px}#spotName{height:28px;font-size:9px}.control{grid-template-columns:14px 1fr 36px 23px 23px;gap:3px}.control label,.control output{font-size:8px}.nudge{height:24px}}
+@media(orientation:portrait){#scene:after{content:"ROTATE FOR SCENE STAGE";position:absolute;inset:0;display:grid;place-items:center;background:#090704;color:#d8b46c;font-size:12px;letter-spacing:.18em;z-index:80}#editor,.topbar{visibility:hidden}}
 </style></head><body>
-<div id="scene"><img id="person" src="assets/test-character-01.png" alt=""><div class="vignette"></div></div>
-<div class="tag">OVA-D LAB · 01C · DIRECTED MOVEMENT</div><div id="readout">BAR</div>
-<div class="panel"><button data-anchor="bar">BAR</button><button data-anchor="room">ROOM</button><button data-anchor="close">CLOSE</button><button data-anchor="stairs">STAIRS</button><button id="sequence">SEQUENCE</button></div>
+<div id="scene"><div class="vignette"></div></div>
+<div class="topbar"><div class="badge">OVA-D LAB · 01C PASS 2 · SCENE STAGE</div><div class="status" id="status"></div></div>
+<div id="editor">
+<div class="row"><input id="spotName"><button class="btn primary" id="add">+ SPOT</button><button class="btn" id="duplicate">DUPLICATE</button><button class="btn danger" id="remove">DELETE</button></div>
+<div class="row">
+<div class="control"><label>X</label><input id="x" type="range" min="0" max="100" step=".1"><output id="xo"></output><button class="nudge" data-nudge="x,-.5">−</button><button class="nudge" data-nudge="x,.5">+</button></div>
+<div class="control"><label>Y</label><input id="y" type="range" min="10" max="112" step=".1"><output id="yo"></output><button class="nudge" data-nudge="y,-.5">−</button><button class="nudge" data-nudge="y,.5">+</button></div>
+<div class="control"><label>S</label><input id="scale" type="range" min="20" max="100" step=".5"><output id="so"></output><button class="nudge" data-nudge="scale,-1">−</button><button class="nudge" data-nudge="scale,1">+</button></div>
+</div>
+<div class="row"><button class="btn primary" id="save">SAVE STATE</button><button class="btn" id="copy">COPY STATE</button><button class="btn" id="labels">LABELS: ON</button><button class="btn" id="reset">RESET DEFAULTS</button></div>
+</div><div id="toast"></div>
 <script>
-const person=document.querySelector('#person'),readout=document.querySelector('#readout'),buttons=[...document.querySelectorAll('[data-anchor]')];
-const anchors={bar:{x:38,y:91,h:38,o:1},room:{x:50,y:98,h:53,o:1},close:{x:59,y:108,h:82,o:1},stairs:{x:101,y:101,h:61,o:0}};
-const transitions={
-'bar>room':{move:1450,scale:1550,fade:450,ease:'cubic-bezier(.22,.75,.22,1)'},'room>bar':{move:1500,scale:1650,fade:450,ease:'cubic-bezier(.22,.75,.22,1)'},
-'room>close':{move:1850,scale:2050,fade:450,ease:'cubic-bezier(.18,.72,.20,1)'},'close>room':{move:1700,scale:1850,fade:450,ease:'cubic-bezier(.22,.72,.24,1)'},
-'bar>close':{move:2050,scale:2250,fade:450,ease:'cubic-bezier(.18,.72,.20,1)'},'close>bar':{move:1950,scale:2100,fade:450,ease:'cubic-bezier(.22,.72,.24,1)'},
-'room>stairs':{move:2100,scale:1950,fade:850,ease:'cubic-bezier(.30,.65,.30,1)'},'bar>stairs':{move:2350,scale:2150,fade:850,ease:'cubic-bezier(.30,.65,.30,1)'},
-'close>stairs':{move:2400,scale:2200,fade:900,ease:'cubic-bezier(.30,.65,.30,1)'},'stairs>room':{move:1900,scale:1850,fade:700,ease:'cubic-bezier(.20,.70,.24,1)'},'stairs>bar':{move:2200,scale:2050,fade:700,ease:'cubic-bezier(.20,.70,.24,1)'}};
-let current='bar',busy=false,timer=null;
-const spec=(a,b)=>transitions[`${a}>${b}`]||{move:1700,scale:1800,fade:600,ease:'cubic-bezier(.22,.75,.22,1)'};
-function active(n){buttons.forEach(b=>b.classList.toggle('active',b.dataset.anchor===n))}
-function instant(n){let p=anchors[n];person.style.transition='none';person.style.left=p.x+'%';person.style.top=p.y+'%';person.style.height=p.h+'vh';person.style.opacity=p.o;current=n;active(n);readout.textContent=n.toUpperCase();requestAnimationFrame(()=>person.classList.add('idle'))}
-function go(n){if(busy||n===current)return Promise.resolve();busy=true;clearTimeout(timer);person.classList.remove('idle');let from=current,p=anchors[n],t=spec(from,n);
-if(from==='stairs'){let s=anchors.stairs;person.style.transition='none';person.style.left=s.x+'%';person.style.top=s.y+'%';person.style.height=s.h+'vh';person.style.opacity=0;void person.offsetWidth}
-person.style.transition=`left ${t.move}ms ${t.ease},top ${t.move}ms ${t.ease},height ${t.scale}ms ${t.ease},opacity ${t.fade}ms ease`;
-requestAnimationFrame(()=>{person.style.left=p.x+'%';person.style.top=p.y+'%';person.style.height=p.h+'vh';person.style.opacity=p.o});
-current=n;active(n);readout.textContent=`${from.toUpperCase()} → ${n.toUpperCase()}`;let total=Math.max(t.move,t.scale,t.fade);
-return new Promise(resolve=>{timer=setTimeout(()=>{busy=false;readout.textContent=n.toUpperCase();if(n!=='stairs')person.classList.add('idle');resolve()},total+80)})}
-buttons.forEach(b=>b.addEventListener('click',()=>go(b.dataset.anchor)));
-document.querySelector('#sequence').addEventListener('click',async()=>{if(busy)return;if(current==='stairs')await go('bar');if(current!=='bar')await go('bar');await new Promise(r=>setTimeout(r,450));await go('room');await new Promise(r=>setTimeout(r,550));await go('close');await new Promise(r=>setTimeout(r,650));await go('room');await new Promise(r=>setTimeout(r,500));await go('stairs')});
-instant('bar');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
+const KEY='ovad_scene_stage_v02',scene=document.querySelector('#scene'),status=document.querySelector('#status'),nameInput=document.querySelector('#spotName'),xEl=document.querySelector('#x'),yEl=document.querySelector('#y'),sEl=document.querySelector('#scale'),xo=document.querySelector('#xo'),yo=document.querySelector('#yo'),so=document.querySelector('#so'),toastEl=document.querySelector('#toast');
+const DEFAULTS=[{id:'bar_rionne',name:'BAR_RIONNE',x:31,y:72,scale:38},{id:'bar_barmaid',name:'BAR_BARMAID',x:38,y:72.5,scale:38},{id:'center',name:'CENTER',x:52,y:88,scale:50},{id:'stairs_base',name:'STAIRS_BASE',x:84,y:82,scale:45}];
+let state={scene:'BERKLITH_TAVERN',spots:JSON.parse(JSON.stringify(DEFAULTS)),selected:'center',labels:true},drag=null,toastTimer;
+function toast(t){toastEl.textContent=t;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1100)}
+function sel(){return state.spots.find(s=>s.id===state.selected)||state.spots[0]}function safeId(n){return n.toLowerCase().replace(/[^a-z0-9]+/g,'_')+'_'+Date.now()}function uniqueName(b){let n=b.toUpperCase(),i=2;while(state.spots.some(s=>s.name===n))n=b.toUpperCase()+'_'+i++;return n}
+function save(silent=false){localStorage.setItem(KEY,JSON.stringify(state));if(!silent)toast('STATE SAVED')}function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.spots?.length)state=v}catch(e){}if(!state.spots.some(s=>s.id===state.selected))state.selected=state.spots[0].id}
+function outputs(){xo.value=(+xEl.value).toFixed(1);yo.value=(+yEl.value).toFixed(1);so.value=(+sEl.value).toFixed(1)}
+function render(){scene.querySelectorAll('.actor,.actor-label').forEach(e=>e.remove());state.spots.forEach(s=>{let a=document.createElement('img');a.src='assets/test-character-01.png';a.className='actor'+(s.id===state.selected?' selected':'');a.dataset.id=s.id;a.style.left=s.x+'%';a.style.top=s.y+'%';a.style.height=s.scale+'vh';scene.appendChild(a);let l=document.createElement('div');l.className='actor-label'+(s.id===state.selected?' selected':'');l.dataset.label=s.id;l.textContent=s.name;l.style.left=s.x+'%';l.style.top=Math.max(4,s.y-s.scale*.96)+'%';l.style.display=state.labels?'block':'none';scene.appendChild(l);a.addEventListener('pointerdown',startDrag)});let s=sel();nameInput.value=s.name;xEl.value=s.x;yEl.value=s.y;sEl.value=s.scale;outputs();status.textContent=state.spots.length+' SPOTS · '+s.name;document.querySelector('#labels').textContent='LABELS: '+(state.labels?'ON':'OFF')}
+function update(){let s=sel();s.x=+xEl.value;s.y=+yEl.value;s.scale=+sEl.value;save(true);render()}[xEl,yEl,sEl].forEach(e=>e.addEventListener('input',update));
+nameInput.addEventListener('change',()=>{let s=sel(),n=(nameInput.value||s.name).trim().toUpperCase().replace(/\s+/g,'_');if(state.spots.some(q=>q.id!==s.id&&q.name===n))n=uniqueName(n);s.name=n;save(true);render()});
+function startDrag(e){e.preventDefault();state.selected=e.currentTarget.dataset.id;drag={id:state.selected};render();let a=scene.querySelector('.actor[data-id="'+state.selected+'"]');a.setPointerCapture(e.pointerId);a.addEventListener('pointermove',moveDrag);a.addEventListener('pointerup',endDrag,{once:true});a.addEventListener('pointercancel',endDrag,{once:true})}
+function moveDrag(e){if(!drag)return;let r=scene.getBoundingClientRect(),s=sel();s.x=Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100));s.y=Math.max(10,Math.min(112,(e.clientY-r.top)/r.height*100));e.currentTarget.style.left=s.x+'%';e.currentTarget.style.top=s.y+'%';let l=scene.querySelector('.actor-label[data-label="'+s.id+'"]');if(l){l.style.left=s.x+'%';l.style.top=Math.max(4,s.y-s.scale*.96)+'%'}xEl.value=s.x;yEl.value=s.y;outputs();status.textContent=state.spots.length+' SPOTS · '+s.name}
+function endDrag(){drag=null;save(true);render()}
+document.querySelector('#add').onclick=()=>{let q={id:safeId('new_spot'),name:uniqueName('NEW_SPOT'),x:50,y:75,scale:45};state.spots.push(q);state.selected=q.id;save(true);render();toast('SPOT ADDED')};
+document.querySelector('#duplicate').onclick=()=>{let s=sel(),q={...s,id:safeId(s.name),name:uniqueName(s.name),x:Math.min(100,s.x+3),y:Math.min(112,s.y+2)};state.spots.push(q);state.selected=q.id;save(true);render();toast('DUPLICATED')};
+document.querySelector('#remove').onclick=()=>{if(state.spots.length<=1)return toast('KEEP ONE SPOT');let i=state.spots.findIndex(s=>s.id===state.selected);state.spots.splice(i,1);state.selected=state.spots[Math.max(0,i-1)].id;save(true);render();toast('SPOT DELETED')};
+document.querySelector('#save').onclick=()=>save();document.querySelector('#labels').onclick=()=>{state.labels=!state.labels;save(true);render()};
+document.querySelector('#reset').onclick=()=>{if(confirm('Reset Scene Stage to the default four spots?')){state={scene:'BERKLITH_TAVERN',spots:JSON.parse(JSON.stringify(DEFAULTS)),selected:'center',labels:true};save(true);render();toast('DEFAULTS RESTORED')}};
+document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{let [k,d]=b.dataset.nudge.split(','),s=sel();s[k]=+(s[k]+(+d)).toFixed(2);save(true);render()});
+document.querySelector('#copy').onclick=async()=>{let ex={version:'OVA-D_SCENE_STAGE_0.2',scene:state.scene,spots:{}};state.spots.forEach(s=>ex.spots[s.name]={x:+s.x.toFixed(2),y:+s.y.toFixed(2),scale:+s.scale.toFixed(2)});let t=JSON.stringify(ex,null,2);try{await navigator.clipboard.writeText(t);toast('STATE COPIED')}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('STATE COPIED')}};
+load();render();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
 </script></body></html>

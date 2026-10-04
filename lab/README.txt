@@ -1,20 +1,21 @@
-OVA-D LAB v0.1 — Milestone 01C
+OVA-D LAB v0.2 — Scene Stage / Milestone 01C Pass 2
 
 COMPLETE / SELF-CONTAINED LAB BUILD
 
-Purpose:
-Test whether one static transparent character can feel intentionally directed
-through Berklith Tavern using authored anchors and per-transition timing.
+Purpose: visually block Berklith Tavern scene spots on the actual iPhone stage.
 
-Anchors: BAR / ROOM / CLOSE / STAIRS
-SEQUENCE: BAR -> ROOM -> CLOSE -> ROOM -> STAIRS
+Features:
+- Multiple simultaneous Test Barmaid spot actors
+- Tap a character to select; drag to position
+- X / Y / Scale sliders and fine +/- nudges
+- Rename, add, duplicate and delete spots
+- Toggle labels
+- SAVE STATE persists the complete layout locally
+- COPY STATE exports JSON for sharing back into development
+- RESET DEFAULTS restores BAR_RIONNE, BAR_BARMAID, CENTER and STAIRS_BASE
 
-This LAB does not modify the stable OVA-D production app.
+The visible Barmaids represent scene spots, not cloned NPCs.
 
-Recommended GitHub layout:
-OVA-Dimension/
-  [production files]
-  lab/
-    [contents of this package]
-
-Open /lab/ through GitHub Pages in Safari, then Add to Home Screen.
+Next:
+01C Pass 3 — routes, curves, timing, stair choreography and movement lock.
+01D — worldMinutes -> agenda -> witnessed movement / missed fade sync.
