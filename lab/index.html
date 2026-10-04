@@ -1,0 +1,46 @@
+<!doctype html><html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OVA-D LAB">
+<meta name="theme-color" content="#090704">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/icon-192.png">
+<title>OVA-D LAB · 01C</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090704;color:#f2dfb1;font-family:Georgia,serif;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}body{position:fixed;inset:0}
+#scene{position:fixed;inset:-2px;background:url('assets/berklith-tavern.jpg') center/cover no-repeat;overflow:hidden}.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,transparent 54%,rgba(0,0,0,.34) 100%)}
+#person{position:absolute;width:auto;transform:translate(-50%,-100%);transform-origin:50% 100%;filter:drop-shadow(0 10px 8px rgba(0,0,0,.25));pointer-events:none;opacity:1;will-change:left,top,height,opacity}
+#person.idle{animation:idleLife 4.8s ease-in-out infinite}@keyframes idleLife{0%,100%{translate:0 0;rotate:0deg}45%{translate:0 -0.22vh;rotate:-0.18deg}72%{translate:0 -0.05vh;rotate:0.12deg}}
+.tag{position:fixed;z-index:10;top:max(8px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));padding:7px 10px;border:1px solid rgba(224,184,103,.4);background:rgba(13,9,5,.66);backdrop-filter:blur(10px);border-radius:10px;font-size:10px;letter-spacing:.12em}
+#readout{position:fixed;z-index:10;top:max(8px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));padding:7px 10px;border:1px solid rgba(224,184,103,.28);background:rgba(13,9,5,.58);backdrop-filter:blur(10px);border-radius:10px;font-size:9px;letter-spacing:.08em;text-align:right}
+.panel{position:fixed;z-index:12;left:50%;transform:translateX(-50%);bottom:max(9px,env(safe-area-inset-bottom));display:flex;gap:7px;padding:8px;background:rgba(13,9,5,.8);backdrop-filter:blur(12px);border:1px solid rgba(224,184,103,.48);border-radius:14px}.panel button{min-width:82px;border:1px solid rgba(224,184,103,.55);background:rgba(38,27,15,.92);color:#f2dfb1;border-radius:9px;padding:9px 11px;font:11px Georgia,serif;letter-spacing:.08em}.panel button:active{transform:scale(.97)}.panel button.active{background:rgba(101,70,31,.92);border-color:#e0b867}#sequence{border-color:rgba(242,223,177,.78)}
+@media(max-width:700px){.tag{font-size:8px}#readout{font-size:8px}.panel{width:calc(100% - 20px)}.panel button{flex:1;min-width:0;padding:9px 3px;font-size:10px}}
+@media(orientation:portrait){#scene:after{content:"ROTATE FOR CHARACTER STAGE";position:absolute;inset:0;display:grid;place-items:center;background:#090704;color:#d8b46c;font-size:12px;letter-spacing:.18em;z-index:20}.panel,.tag,#readout{visibility:hidden}}
+</style></head><body>
+<div id="scene"><img id="person" src="assets/test-character-01.png" alt=""><div class="vignette"></div></div>
+<div class="tag">OVA-D LAB · 01C · DIRECTED MOVEMENT</div><div id="readout">BAR</div>
+<div class="panel"><button data-anchor="bar">BAR</button><button data-anchor="room">ROOM</button><button data-anchor="close">CLOSE</button><button data-anchor="stairs">STAIRS</button><button id="sequence">SEQUENCE</button></div>
+<script>
+const person=document.querySelector('#person'),readout=document.querySelector('#readout'),buttons=[...document.querySelectorAll('[data-anchor]')];
+const anchors={bar:{x:38,y:91,h:38,o:1},room:{x:50,y:98,h:53,o:1},close:{x:59,y:108,h:82,o:1},stairs:{x:101,y:101,h:61,o:0}};
+const transitions={
+'bar>room':{move:1450,scale:1550,fade:450,ease:'cubic-bezier(.22,.75,.22,1)'},'room>bar':{move:1500,scale:1650,fade:450,ease:'cubic-bezier(.22,.75,.22,1)'},
+'room>close':{move:1850,scale:2050,fade:450,ease:'cubic-bezier(.18,.72,.20,1)'},'close>room':{move:1700,scale:1850,fade:450,ease:'cubic-bezier(.22,.72,.24,1)'},
+'bar>close':{move:2050,scale:2250,fade:450,ease:'cubic-bezier(.18,.72,.20,1)'},'close>bar':{move:1950,scale:2100,fade:450,ease:'cubic-bezier(.22,.72,.24,1)'},
+'room>stairs':{move:2100,scale:1950,fade:850,ease:'cubic-bezier(.30,.65,.30,1)'},'bar>stairs':{move:2350,scale:2150,fade:850,ease:'cubic-bezier(.30,.65,.30,1)'},
+'close>stairs':{move:2400,scale:2200,fade:900,ease:'cubic-bezier(.30,.65,.30,1)'},'stairs>room':{move:1900,scale:1850,fade:700,ease:'cubic-bezier(.20,.70,.24,1)'},'stairs>bar':{move:2200,scale:2050,fade:700,ease:'cubic-bezier(.20,.70,.24,1)'}};
+let current='bar',busy=false,timer=null;
+const spec=(a,b)=>transitions[`${a}>${b}`]||{move:1700,scale:1800,fade:600,ease:'cubic-bezier(.22,.75,.22,1)'};
+function active(n){buttons.forEach(b=>b.classList.toggle('active',b.dataset.anchor===n))}
+function instant(n){let p=anchors[n];person.style.transition='none';person.style.left=p.x+'%';person.style.top=p.y+'%';person.style.height=p.h+'vh';person.style.opacity=p.o;current=n;active(n);readout.textContent=n.toUpperCase();requestAnimationFrame(()=>person.classList.add('idle'))}
+function go(n){if(busy||n===current)return Promise.resolve();busy=true;clearTimeout(timer);person.classList.remove('idle');let from=current,p=anchors[n],t=spec(from,n);
+if(from==='stairs'){let s=anchors.stairs;person.style.transition='none';person.style.left=s.x+'%';person.style.top=s.y+'%';person.style.height=s.h+'vh';person.style.opacity=0;void person.offsetWidth}
+person.style.transition=`left ${t.move}ms ${t.ease},top ${t.move}ms ${t.ease},height ${t.scale}ms ${t.ease},opacity ${t.fade}ms ease`;
+requestAnimationFrame(()=>{person.style.left=p.x+'%';person.style.top=p.y+'%';person.style.height=p.h+'vh';person.style.opacity=p.o});
+current=n;active(n);readout.textContent=`${from.toUpperCase()} → ${n.toUpperCase()}`;let total=Math.max(t.move,t.scale,t.fade);
+return new Promise(resolve=>{timer=setTimeout(()=>{busy=false;readout.textContent=n.toUpperCase();if(n!=='stairs')person.classList.add('idle');resolve()},total+80)})}
+buttons.forEach(b=>b.addEventListener('click',()=>go(b.dataset.anchor)));
+document.querySelector('#sequence').addEventListener('click',async()=>{if(busy)return;if(current==='stairs')await go('bar');if(current!=='bar')await go('bar');await new Promise(r=>setTimeout(r,450));await go('room');await new Promise(r=>setTimeout(r,550));await go('close');await new Promise(r=>setTimeout(r,650));await go('room');await new Promise(r=>setTimeout(r,500));await go('stairs')});
+instant('bar');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
+</script></body></html>
