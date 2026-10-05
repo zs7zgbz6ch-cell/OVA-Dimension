@@ -149,12 +149,33 @@ img {
 .startup-black.on{opacity:1;visibility:visible;pointer-events:auto}
 .startup-black.reveal{transition:opacity 1.45s ease,visibility 1.45s ease;opacity:0;visibility:hidden}
 
+
+/* OVA-D 01D — action-driven time + agenda test */
+.scene-hotspot{position:absolute;z-index:120;display:grid;place-items:center;width:54px;height:54px;border:1px solid rgba(240,203,126,.38);border-radius:50%;background:rgba(25,14,11,.30);box-shadow:0 0 0 5px rgba(16,9,8,.12),0 5px 20px rgba(0,0,0,.28);color:#f3d596;font-size:9px;letter-spacing:.12em;text-align:center;text-shadow:0 1px 3px #000;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);transition:opacity .22s ease,transform .16s ease,border-color .2s ease}
+.scene-hotspot:active{transform:scale(.94);border-color:rgba(255,222,151,.8)}
+.scene-hotspot.busy{opacity:.42;pointer-events:none}
+#tavern .hotspot-one{left:12%;top:47%} #tavern .hotspot-five{left:66%;top:34%}
+#room .hotspot-one{left:76%;top:31%} #room .hotspot-five{left:18%;top:45%}
+.action-card{position:absolute;z-index:8800;left:50%;top:18%;transform:translate(-50%,10px);min-width:min(430px,76vw);padding:13px 18px;border:1px solid rgba(224,187,113,.48);border-radius:4px;background:rgba(18,11,10,.91);box-shadow:0 12px 42px rgba(0,0,0,.45);text-align:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,transform .28s ease,visibility .28s ease}
+.action-card.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.action-kicker{font-size:9px;letter-spacing:.28em;color:var(--gold);margin-bottom:5px}.action-copy{font-size:13px;letter-spacing:.05em;color:#f3e5ce;line-height:1.4}
+.agenda-card{position:absolute;z-index:8850;left:50%;top:23%;transform:translate(-50%,10px);width:min(520px,82vw);padding:16px 20px;border-top:1px solid rgba(224,187,113,.6);border-bottom:1px solid rgba(224,187,113,.6);background:linear-gradient(90deg,rgba(10,7,7,.12),rgba(20,12,10,.91) 18%,rgba(20,12,10,.91) 82%,rgba(10,7,7,.12));text-align:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .38s ease,transform .38s ease,visibility .38s ease}
+.agenda-card.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.agenda-title{font-size:10px;letter-spacing:.3em;color:var(--gold);margin-bottom:7px}.agenda-copy{font-size:14px;font-style:italic;color:#f4e4ca;line-height:1.5}
+@media(max-height:500px){.scene-hotspot{width:46px;height:46px;font-size:8px}.action-card{top:12%}.agenda-card{top:16%}}
+
 </style>
 </head>
 <body>
 <div id="app" class="startup">
-  <div id="tavern" class="scene" style="background-image:url('assets/berklith-tavern.jpg')"></div>
-  <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')"></div>
+  <div id="tavern" class="scene" style="background-image:url('assets/berklith-tavern.jpg')">
+    <button class="scene-hotspot hotspot-one interactive" type="button" data-action-cost="1" data-action-text="You check the fire. The coals shift softly.">+1 MIN</button>
+    <button class="scene-hotspot hotspot-five interactive" type="button" data-action-cost="5" data-action-text="You linger by the window and watch the street.">+5 MIN</button>
+  </div>
+  <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')">
+    <button class="scene-hotspot hotspot-one interactive" type="button" data-action-cost="1" data-action-text="You glance out across the evening rooftops.">+1 MIN</button>
+    <button class="scene-hotspot hotspot-five interactive" type="button" data-action-cost="5" data-action-text="You leaf through a few pages and lose track of time.">+5 MIN</button>
+  </div>
   <div class="vignette"></div>
 
   <div class="overlay" id="overlay">
@@ -241,6 +262,8 @@ img {
   <div class="startup-black" id="startupBlack" aria-hidden="true"></div>
   <div class="hold-ring" id="holdRing" aria-hidden="true"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15.9"/><circle class="progress" id="holdProgress" cx="18" cy="18" r="15.9" pathLength="100"/></svg></div>
 
+  <div class="action-card" id="actionCard"><div class="action-kicker" id="actionKicker">INTERACTION</div><div class="action-copy" id="actionCopy"></div></div>
+  <div class="agenda-card" id="agendaCard"><div class="agenda-title">17:35 · WORLD AGENDA</div><div class="agenda-copy" id="agendaCopy"></div></div>
   <div class="fade" id="fade"></div><div class="toast" id="toast"></div>
 </div>
 
@@ -258,6 +281,7 @@ img {
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const overlay=$('#overlay'), preview=$('#preview'), fade=$('#fade'), toast=$('#toast');
 const welcome=$('#welcomeScreen'), startupBlack=$('#startupBlack'), holdRing=$('#holdRing'), holdProgress=$('#holdProgress'), app=$('#app');
+const actionCard=$('#actionCard'), actionCopy=$('#actionCopy'), actionKicker=$('#actionKicker'), agendaCard=$('#agendaCard'), agendaCopy=$('#agendaCopy');
 const scenes={tavern:$('#tavern'),room:$('#room')};
 const locations={
  tavern:{title:'MAIN TAVERN',sub:'BERKLITH TAVERN · EARLY EVENING',img:'assets/berklith-tavern.jpg'},
@@ -275,6 +299,40 @@ function formatWorldTime(){
 function updateWorldTimeReadout(){const el=$('#worldTimeReadout');if(el)el.textContent='WORLD TIME · '+formatWorldTime()}
 function setWorldTime(minute){worldMinute=minute;localStorage.setItem('ovad_world_time',String(worldMinute));updateWorldTimeReadout()}
 function advanceTime(minutes=1){setWorldTime(worldMinute+Math.max(0,Math.floor(minutes)))}
+
+// 01D interaction lifecycle. Time advances only after the authored interaction resolves.
+let interactionState='idle', actionHideTimer=null, agendaHideTimer=null;
+const agendaState={bath1735:localStorage.getItem('ovad_agenda_bath1735')==='1'};
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function crossedMinute(oldMinute,newMinute,targetMinute){return oldMinute<targetMinute && newMinute>=targetMinute}
+function setInteractionState(next){interactionState=next;$$('.scene-hotspot').forEach(el=>el.classList.toggle('busy',next!=='idle'))}
+function showAction(text,cost){clearTimeout(actionHideTimer);actionKicker.textContent=`INTERACTION · +${cost} MIN`;actionCopy.textContent=text;actionCard.classList.add('show')}
+function hideAction(){actionCard.classList.remove('show')}
+function showAgendaPresentation(){
+ clearTimeout(agendaHideTimer);
+ agendaCopy.textContent=current==='tavern'?'From upstairs, hurried footsteps cross the landing. Someone has remembered the time.':'Footsteps pass beyond the room, then continue toward the bathhouse.';
+ agendaCard.classList.add('show');
+ agendaHideTimer=setTimeout(()=>agendaCard.classList.remove('show'),2600);
+}
+async function evaluateAgendas(oldMinute,newMinute){
+ const trigger=17*60+35;
+ if(!agendaState.bath1735 && crossedMinute(oldMinute,newMinute,trigger)){
+   agendaState.bath1735=true;localStorage.setItem('ovad_agenda_bath1735','1');
+   // Player has control again conceptually; leave the intentional quiet beat before the world responds.
+   interactionState='post-action';await sleep(1000);interactionState='presentation';showAgendaPresentation();await sleep(500);
+ }
+}
+async function runSceneInteraction(el){
+ if(interactionState!=='idle')return;
+ const cost=Math.max(0,Number.parseInt(el.dataset.actionCost||'1',10)||1), oldMinute=worldMinute;
+ setInteractionState('interaction');showAction(el.dataset.actionText||'You take a moment.',cost);
+ await sleep(850);hideAction();
+ interactionState='resolve';advanceTime(cost);
+ await evaluateAgendas(oldMinute,worldMinute);
+ setInteractionState('idle');$$('.scene-hotspot').forEach(h=>h.classList.remove('busy'));
+}
+$$('.scene-hotspot').forEach(el=>el.addEventListener('click',()=>runSceneInteraction(el)));
+
 function showScene(id){Object.entries(scenes).forEach(([k,v])=>v.classList.toggle('hidden',k!==id));current=id;localStorage.setItem('ovad_current',id)}
 function page(id){$$('.page').forEach(p=>p.classList.toggle('active',p.id===id))}
 function openMenu(){page('mainPage');updateWorldTimeReadout();overlay.classList.add('open')}
@@ -305,13 +363,13 @@ $('#goBtn').addEventListener('click',()=>{
  },720);
 });
 $$('[data-action]').forEach(b=>b.addEventListener('click',()=>{
- if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:false}));say('Prototype saved.')}
- if(b.dataset.action==='load'){let s;try{s=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(s&&locations[s.location]){showScene(s.location);setWorldTime(Number.isFinite(s.worldMinute)?s.worldMinute:WORLD_START);closeMenu();say('Save loaded.')}else say('No save data yet.')}
+ if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:false,agendaBath1735:agendaState.bath1735}));say('Prototype saved.')}
+ if(b.dataset.action==='load'){let s;try{s=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(s&&locations[s.location]){showScene(s.location);setWorldTime(Number.isFinite(s.worldMinute)?s.worldMinute:WORLD_START);agendaState.bath1735=!!s.agendaBath1735;localStorage.setItem('ovad_agenda_bath1735',agendaState.bath1735?'1':'0');closeMenu();say('Save loaded.')}else say('No save data yet.')}
  if(b.dataset.action==='extra')say('Archive section coming later.')
 }));
 $('#resetBtn').addEventListener('click',()=>$('#confirm').classList.add('open'));
 $('#cancelReset').addEventListener('click',()=>$('#confirm').classList.remove('open'));
-$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');setWorldTime(WORLD_START);showScene('tavern');$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
+$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');localStorage.removeItem('ovad_agenda_bath1735');agendaState.bath1735=false;setWorldTime(WORLD_START);showScene('tavern');$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
 $('#motionBtn').addEventListener('click',e=>{motion=!motion;e.currentTarget.textContent='MENU MOTION · '+(motion?'ON':'REDUCED');document.documentElement.style.setProperty('--motion',motion?'1':'0');say(motion?'Full menu motion.':'Reduced menu motion.')});
 
 // Startup presentation is separate from the live scene. Nothing playable is visible until the title sequence finishes.
@@ -333,7 +391,7 @@ welcome.addEventListener('pointerup',()=>{
 // should use .interactive or [data-interactive]) so their long-press remains free for future actions.
 let holdTimer=null, holdStart=0, holdX=0, holdY=0, holding=false;
 const HOLD_MS=840, RING_DELAY=0, MOVE_LIMIT=18;
-function holdBlocked(target){return !!target.closest('button,.overlay,.preview,.confirm,.welcome-screen,.interactive,[data-interactive]') || overlay.classList.contains('open') || preview.classList.contains('open') || $('#confirm').classList.contains('open') || !welcome.classList.contains('dismissed');}
+function holdBlocked(target){return interactionState!=='idle' || !!target.closest('button,.overlay,.preview,.confirm,.welcome-screen,.interactive,[data-interactive]') || overlay.classList.contains('open') || preview.classList.contains('open') || $('#confirm').classList.contains('open') || !welcome.classList.contains('dismissed');}
 function clearHold(){holding=false;clearTimeout(holdTimer);holdTimer=null;holdRing.classList.remove('visible','complete');holdProgress.style.strokeDashoffset='100';}
 function updateRing(){if(!holding)return;const elapsed=performance.now()-holdStart;const progress=Math.max(0,Math.min(1,(elapsed-RING_DELAY)/(HOLD_MS-RING_DELAY)));holdProgress.style.strokeDashoffset=String(100-progress*100);if(progress<1)requestAnimationFrame(updateRing)}
 app.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;if(holdBlocked(e.target))return;holding=true;holdStart=performance.now();holdX=e.clientX;holdY=e.clientY;holdRing.style.left=e.clientX+'px';holdRing.style.top=e.clientY+'px';holdRing.classList.add('visible');requestAnimationFrame(updateRing);holdTimer=setTimeout(()=>{if(!holding)return;holdRing.classList.add('complete');holding=false;setTimeout(()=>{clearHold();openMenu()},120)},HOLD_MS)});
