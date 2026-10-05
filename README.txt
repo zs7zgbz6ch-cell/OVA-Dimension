@@ -1,24 +1,13 @@
-OVA-D CURRENT — 01D Agenda Integration Test
+OVA-D 01D — Witnessed Character Agenda Test
 
-BASED DIRECTLY ON STABLE MASTER v0.9
-
-Preserved:
-• locked iOS/startup presentation behavior
-• immediate hold ring, 840 ms activation
-• travel-black hard scene swap
-• PWA manifest/icons and existing environments
-
-01D test additions:
-• two in-scene time interactions in each scene (+1 and +5 minutes)
-• reusable interaction lifecycle / anti-spam lock
-• action time advances only after the interaction resolves
-• agenda crossing test uses (oldWorldMinute, newWorldMinute], not exact equality
-• one-shot 17:35 agenda trigger
-• ~1 second quiet post-action beat before agenda presentation
-• agenda state persists and participates in prototype save/load/reset
-• service-worker cache bumped for iPhone testing
+Based on stable v0.9 + passed 01D agenda timing test.
 
 TEST:
-Start at 17:20. Use +5 until 17:30, then +1 as desired. Crossing 17:35 with either action should fire the agenda exactly once after the interaction and quiet beat.
+- Test Barmaid is visibly behind the tavern bar before 17:35.
+- Use +1 / +5 minute interactions to cross 17:35.
+- After the interaction resolves, there is a ~1 second quiet beat.
+- She reacts, becomes presentation-locked, fades from behind the bar, reappears in front, crosses the room, then leaves upstairs.
+- Crossing 17:35 while in Rionne's Room updates her logical state off-screen; returning to the tavern should show her already gone.
+- Reset Prototype restores 17:20 and the barmaid.
 
-This is a controlled 01D integration build. Promote only after iPhone testing.
+This is still a controlled 01D test. It does not replace the stable v0.9 source of truth until explicitly promoted.

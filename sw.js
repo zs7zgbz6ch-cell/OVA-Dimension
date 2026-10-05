@@ -1,4 +1,4 @@
-const CACHE = 'ovad-01d-agenda-0010';
+const CACHE = 'ovad-01d-witnessed-0011';
 
 const CORE = [
   './',
@@ -10,6 +10,7 @@ const CORE = [
   './assets/intro-landscape.jpg',
   './assets/icon-192.png',
   './assets/icon-512.png',
+  './assets/test-character-01.png',
   './manifest.webmanifest'
 ];
 

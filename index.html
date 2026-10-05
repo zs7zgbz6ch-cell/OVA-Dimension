@@ -164,6 +164,15 @@ img {
 .agenda-title{font-size:10px;letter-spacing:.3em;color:var(--gold);margin-bottom:7px}.agenda-copy{font-size:14px;font-style:italic;color:#f4e4ca;line-height:1.5}
 @media(max-height:500px){.scene-hotspot{width:46px;height:46px;font-size:8px}.action-card{top:12%}.agenda-card{top:16%}}
 
+/* 01D Pass 2 — first witnessed character agenda */
+#testBarmaid{position:absolute;z-index:82;width:auto;height:27vh;left:35.4%;top:67.74%;transform:translate(-50%,-100%);transform-origin:50% 100%;filter:drop-shadow(0 9px 8px rgba(0,0,0,.28));pointer-events:none;opacity:1;will-change:left,top,height,opacity,transform;transition:opacity .45s ease}
+#testBarmaid.gone{opacity:0}
+.character-bubble{position:absolute;z-index:8860;left:35.4%;top:33%;transform:translate(-50%,8px);max-width:220px;padding:9px 13px;border:1px solid rgba(224,187,113,.55);border-radius:15px;background:rgba(22,13,11,.92);box-shadow:0 10px 30px rgba(0,0,0,.38);color:#f5e6cc;font-size:12px;font-style:italic;text-align:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,transform .25s ease,visibility .25s ease}
+.character-bubble.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.character-bubble:after{content:"";position:absolute;left:50%;bottom:-7px;width:12px;height:12px;background:rgba(22,13,11,.92);border-right:1px solid rgba(224,187,113,.55);border-bottom:1px solid rgba(224,187,113,.55);transform:translateX(-50%) rotate(45deg)}
+.dev-agenda-note{position:absolute;z-index:121;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));padding:7px 10px;border:1px solid rgba(224,187,113,.28);border-radius:9px;background:rgba(13,9,5,.58);color:#d8bd86;font-size:8px;letter-spacing:.11em;pointer-events:none}
+@media(max-height:500px){#testBarmaid{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
+
 </style>
 </head>
 <body>
@@ -171,6 +180,9 @@ img {
   <div id="tavern" class="scene" style="background-image:url('assets/berklith-tavern.jpg')">
     <button class="scene-hotspot hotspot-one interactive" type="button" data-action-cost="1" data-action-text="You check the fire. The coals shift softly.">+1 MIN</button>
     <button class="scene-hotspot hotspot-five interactive" type="button" data-action-cost="5" data-action-text="You linger by the window and watch the street.">+5 MIN</button>
+    <img id="testBarmaid" src="assets/test-character-01.png" alt="" aria-hidden="true">
+    <div class="character-bubble" id="barmaidBubble">Ah—time already?</div>
+    <div class="dev-agenda-note">TEST BARMAID · LEAVES 17:35</div>
   </div>
   <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')">
     <button class="scene-hotspot hotspot-one interactive" type="button" data-action-cost="1" data-action-text="You glance out across the evening rooftops.">+1 MIN</button>
@@ -282,6 +294,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const overlay=$('#overlay'), preview=$('#preview'), fade=$('#fade'), toast=$('#toast');
 const welcome=$('#welcomeScreen'), startupBlack=$('#startupBlack'), holdRing=$('#holdRing'), holdProgress=$('#holdProgress'), app=$('#app');
 const actionCard=$('#actionCard'), actionCopy=$('#actionCopy'), actionKicker=$('#actionKicker'), agendaCard=$('#agendaCard'), agendaCopy=$('#agendaCopy');
+const testBarmaid=$('#testBarmaid'), barmaidBubble=$('#barmaidBubble');
 const scenes={tavern:$('#tavern'),room:$('#room')};
 const locations={
  tavern:{title:'MAIN TAVERN',sub:'BERKLITH TAVERN · EARLY EVENING',img:'assets/berklith-tavern.jpg'},
@@ -302,25 +315,43 @@ function advanceTime(minutes=1){setWorldTime(worldMinute+Math.max(0,Math.floor(m
 
 // 01D interaction lifecycle. Time advances only after the authored interaction resolves.
 let interactionState='idle', actionHideTimer=null, agendaHideTimer=null;
-const agendaState={bath1735:localStorage.getItem('ovad_agenda_bath1735')==='1'};
+const agendaState={barmaid1735:localStorage.getItem('ovad_agenda_barmaid1735')==='1'};
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function crossedMinute(oldMinute,newMinute,targetMinute){return oldMinute<targetMinute && newMinute>=targetMinute}
 function setInteractionState(next){interactionState=next;$$('.scene-hotspot').forEach(el=>el.classList.toggle('busy',next!=='idle'))}
 function showAction(text,cost){clearTimeout(actionHideTimer);actionKicker.textContent=`INTERACTION · +${cost} MIN`;actionCopy.textContent=text;actionCard.classList.add('show')}
 function hideAction(){actionCard.classList.remove('show')}
-function showAgendaPresentation(){
- clearTimeout(agendaHideTimer);
- agendaCopy.textContent=current==='tavern'?'From upstairs, hurried footsteps cross the landing. Someone has remembered the time.':'Footsteps pass beyond the room, then continue toward the bathhouse.';
- agendaCard.classList.add('show');
- agendaHideTimer=setTimeout(()=>agendaCard.classList.remove('show'),2600);
+function setBarmaidPose(x,y,h,opacity=1,transition='none'){
+ testBarmaid.style.transition=transition;testBarmaid.style.left=x+'%';testBarmaid.style.top=y+'%';testBarmaid.style.height=h+'vh';testBarmaid.style.opacity=opacity;
+}
+async function witnessedBarmaidDeparture(){
+ // Presentation only: the logical agenda already decided that she leaves at 17:35.
+ interactionState='presentation';
+ barmaidBubble.classList.add('show');await sleep(1150);barmaidBubble.classList.remove('show');await sleep(260);
+ // Behind bar -> front of bar is an authored visibility cut, not literal sliding through furniture.
+ setBarmaidPose(35.4,67.74,27,0,'opacity 420ms ease');await sleep(470);
+ setBarmaidPose(31.1,72.87,35,0,'none');void testBarmaid.offsetWidth;
+ setBarmaidPose(31.1,72.87,35,1,'opacity 460ms ease');await sleep(560);
+ // Front-bar -> room center. Position and apparent size interpolate together.
+ setBarmaidPose(45.52,80.7,42,1,'left 2200ms cubic-bezier(.22,.72,.24,1), top 2200ms cubic-bezier(.22,.72,.24,1), height 2200ms cubic-bezier(.22,.72,.24,1)');await sleep(2250);
+ // Cross toward the stair base; screen distance is not used as world distance.
+ setBarmaidPose(76.3,70.34,24.5,1,'left 3100ms cubic-bezier(.22,.72,.24,1), top 3100ms cubic-bezier(.22,.72,.24,1), height 3100ms cubic-bezier(.22,.72,.24,1)');await sleep(3150);
+ // Climb out of the authored shot and disappear upstairs.
+ setBarmaidPose(91.5,42,18,0,'left 2100ms cubic-bezier(.28,.62,.32,1), top 2100ms cubic-bezier(.28,.62,.32,1), height 2100ms cubic-bezier(.28,.62,.32,1), opacity 1450ms ease 500ms');await sleep(2200);
 }
 async function evaluateAgendas(oldMinute,newMinute){
  const trigger=17*60+35;
- if(!agendaState.bath1735 && crossedMinute(oldMinute,newMinute,trigger)){
-   agendaState.bath1735=true;localStorage.setItem('ovad_agenda_bath1735','1');
-   // Player has control again conceptually; leave the intentional quiet beat before the world responds.
-   interactionState='post-action';await sleep(1000);interactionState='presentation';showAgendaPresentation();await sleep(500);
+ if(!agendaState.barmaid1735 && crossedMinute(oldMinute,newMinute,trigger)){
+   agendaState.barmaid1735=true;localStorage.setItem('ovad_agenda_barmaid1735','1');
+   interactionState='post-action';await sleep(1000);
+   if(current==='tavern') await witnessedBarmaidDeparture();
+   else { interactionState='presentation'; setBarmaidPose(35.4,67.74,27,0,'none'); await sleep(350); }
  }
+}
+function syncBarmaidPresentation(){
+ if(!testBarmaid)return;
+ if(agendaState.barmaid1735 || worldMinute>=17*60+35) setBarmaidPose(35.4,67.74,27,0,'none');
+ else setBarmaidPose(35.4,67.74,27,1,'none');
 }
 async function runSceneInteraction(el){
  if(interactionState!=='idle')return;
@@ -332,8 +363,9 @@ async function runSceneInteraction(el){
  setInteractionState('idle');$$('.scene-hotspot').forEach(h=>h.classList.remove('busy'));
 }
 $$('.scene-hotspot').forEach(el=>el.addEventListener('click',()=>runSceneInteraction(el)));
+syncBarmaidPresentation();
 
-function showScene(id){Object.entries(scenes).forEach(([k,v])=>v.classList.toggle('hidden',k!==id));current=id;localStorage.setItem('ovad_current',id)}
+function showScene(id){Object.entries(scenes).forEach(([k,v])=>v.classList.toggle('hidden',k!==id));current=id;localStorage.setItem('ovad_current',id);syncBarmaidPresentation()}
 function page(id){$$('.page').forEach(p=>p.classList.toggle('active',p.id===id))}
 function openMenu(){page('mainPage');updateWorldTimeReadout();overlay.classList.add('open')}
 function closeMenu(){overlay.classList.remove('open')}
@@ -363,13 +395,13 @@ $('#goBtn').addEventListener('click',()=>{
  },720);
 });
 $$('[data-action]').forEach(b=>b.addEventListener('click',()=>{
- if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:false,agendaBath1735:agendaState.bath1735}));say('Prototype saved.')}
- if(b.dataset.action==='load'){let s;try{s=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(s&&locations[s.location]){showScene(s.location);setWorldTime(Number.isFinite(s.worldMinute)?s.worldMinute:WORLD_START);agendaState.bath1735=!!s.agendaBath1735;localStorage.setItem('ovad_agenda_bath1735',agendaState.bath1735?'1':'0');closeMenu();say('Save loaded.')}else say('No save data yet.')}
+ if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:false,agendaBarmaid1735:agendaState.barmaid1735}));say('Prototype saved.')}
+ if(b.dataset.action==='load'){let s;try{s=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(s&&locations[s.location]){showScene(s.location);setWorldTime(Number.isFinite(s.worldMinute)?s.worldMinute:WORLD_START);agendaState.barmaid1735=!!s.agendaBarmaid1735;localStorage.setItem('ovad_agenda_barmaid1735',agendaState.barmaid1735?'1':'0');syncBarmaidPresentation();closeMenu();say('Save loaded.')}else say('No save data yet.')}
  if(b.dataset.action==='extra')say('Archive section coming later.')
 }));
 $('#resetBtn').addEventListener('click',()=>$('#confirm').classList.add('open'));
 $('#cancelReset').addEventListener('click',()=>$('#confirm').classList.remove('open'));
-$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');localStorage.removeItem('ovad_agenda_bath1735');agendaState.bath1735=false;setWorldTime(WORLD_START);showScene('tavern');$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
+$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');localStorage.removeItem('ovad_agenda_bath1735');localStorage.removeItem('ovad_agenda_barmaid1735');agendaState.barmaid1735=false;setWorldTime(WORLD_START);showScene('tavern');syncBarmaidPresentation();$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
 $('#motionBtn').addEventListener('click',e=>{motion=!motion;e.currentTarget.textContent='MENU MOTION · '+(motion?'ON':'REDUCED');document.documentElement.style.setProperty('--motion',motion?'1':'0');say(motion?'Full menu motion.':'Reduced menu motion.')});
 
 // Startup presentation is separate from the live scene. Nothing playable is visible until the title sequence finishes.
