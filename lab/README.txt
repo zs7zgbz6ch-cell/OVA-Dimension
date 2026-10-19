@@ -7,3 +7,8 @@ COPY STATE exports OVA-D_SCENE_STAGE_0.4 semantic data.
 Existing v0.3 local state is migrated into the new v0.4 save key.
 
 The existing BAR ↔ STAIRS choreography remains as a LEGACY preview for regression testing. Its stair fade is not generic route-end behavior.
+
+v0.4.1 UI SAFETY
+- HIDE UI moved into the action row directly beside STOP.
+- When hidden, SHOW UI floats safely at bottom-right.
+- No scene data, semantic, route, or movement behavior changed.

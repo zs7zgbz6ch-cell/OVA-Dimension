@@ -22,9 +22,13 @@
 #toast{position:fixed;z-index:60;left:50%;top:18%;transform:translate(-50%,-50%);opacity:0;transition:opacity .18s;padding:8px 12px;border:1px solid rgba(224,184,103,.55);background:rgba(13,9,5,.9);border-radius:10px;font-size:10px;letter-spacing:.08em;pointer-events:none}#toast.show{opacity:1}
 @media(max-width:760px){body:not(.ui-hidden) #uiToggle{bottom:calc(max(7px,env(safe-area-inset-bottom)) + 105px)}.badge,.status{font-size:7px;padding:5px 7px}#editor{padding:7px}.row{gap:5px;margin-bottom:5px}.btn{height:28px;padding:0 7px;font-size:8px}#spotName{height:28px;font-size:9px}.control{grid-template-columns:14px 1fr 36px 23px 23px;gap:3px}.control label,.control output{font-size:8px}.nudge{height:24px}}
 @media(orientation:portrait){#scene:after{content:"ROTATE FOR SCENE STAGE";position:absolute;inset:0;display:grid;place-items:center;background:#090704;color:#d8b46c;font-size:12px;letter-spacing:.18em;z-index:80}#editor,.topbar,#uiToggle{visibility:hidden}}
+
+/* v0.4.1 UI safety: HIDE UI lives safely beside STOP. */
+#uiToggle{position:static;height:31px;border:1px solid rgba(224,184,103,.52);border-radius:8px;background:rgba(38,27,15,.96);color:#f2dfb1;padding:0 10px;font:9px Georgia,serif;letter-spacing:.07em;white-space:nowrap}
+body.ui-hidden #uiToggle{display:block;position:fixed;z-index:90;right:max(8px,env(safe-area-inset-right));bottom:max(7px,env(safe-area-inset-bottom));height:29px;background:rgba(13,9,5,.82);backdrop-filter:blur(10px);font:8px Georgia,serif}
 </style></head><body>
 <div id="scene"><div class="vignette"></div></div>
-<div class="topbar"><div class="badge">OVA-D LAB · 01C · SEMANTIC STAGE</div><div class="status" id="status"></div></div>
+<div class="topbar"><div class="badge">OVA-D LAB · 01C · SEMANTIC STAGE · v0.4.1</div><div class="status" id="status"></div></div>
 <div id="editor">
 <div class="row"><input id="spotName"><button class="btn primary" id="add">+ SPOT</button><button class="btn" id="duplicate">DUPLICATE</button><button class="btn danger" id="remove">DELETE</button></div>
 <div class="row"><select id="spotType" class="btn"><option value="unset">TYPE: UNSET</option><option value="idle">TYPE: IDLE</option><option value="waypoint">TYPE: WAYPOINT</option><option value="entrance">TYPE: ENTRANCE</option><option value="exit">TYPE: EXIT</option><option value="activity">TYPE: ACTIVITY</option></select><input id="transition" class="btn" style="flex:1;min-width:0;text-align:left" placeholder="TRANSITION: NONE"><input id="destination" class="btn" style="flex:1;min-width:0;text-align:left" placeholder="DESTINATION: NONE"></div>
@@ -33,8 +37,8 @@
 <div class="control"><label>Y</label><input id="y" type="range" min="0" max="150" step=".1"><output id="yo"></output><button class="nudge" data-nudge="y,-.5">−</button><button class="nudge" data-nudge="y,.5">+</button></div>
 <div class="control"><label>S</label><input id="scale" type="range" min="20" max="100" step=".5"><output id="so"></output><button class="nudge" data-nudge="scale,-1">−</button><button class="nudge" data-nudge="scale,1">+</button></div>
 </div>
-<div class="row"><button class="btn primary" id="save">SAVE STATE</button><button class="btn" id="copy">COPY STATE</button><button class="btn" id="labels">LABELS: ON</button><button class="btn" id="reset">RESET LAB</button><button class="btn primary" id="routeBarStairs">▶ LEGACY BAR → STAIRS</button><button class="btn" id="routeReverse">▶ LEGACY STAIRS → BAR</button><button class="btn danger" id="stopRoute">■ STOP</button></div>
-</div><button id="uiToggle">HIDE UI</button><div id="toast"></div>
+<div class="row"><button class="btn primary" id="save">SAVE STATE</button><button class="btn" id="copy">COPY STATE</button><button class="btn" id="labels">LABELS: ON</button><button class="btn" id="reset">RESET LAB</button><button class="btn primary" id="routeBarStairs">▶ LEGACY BAR → STAIRS</button><button class="btn" id="routeReverse">▶ LEGACY STAIRS → BAR</button><button class="btn danger" id="stopRoute">■ STOP</button><button class="btn" id="uiToggle">HIDE UI</button></div>
+</div><div id="toast"></div>
 <script>
 const KEY='ovad_scene_stage_semantic_v04',LEGACY_KEY='ovad_scene_stage_v02',scene=document.querySelector('#scene'),status=document.querySelector('#status'),nameInput=document.querySelector('#spotName'),xEl=document.querySelector('#x'),yEl=document.querySelector('#y'),sEl=document.querySelector('#scale'),xo=document.querySelector('#xo'),yo=document.querySelector('#yo'),so=document.querySelector('#so'),toastEl=document.querySelector('#toast');
 const typeEl=document.querySelector('#spotType'),transitionEl=document.querySelector('#transition'),destinationEl=document.querySelector('#destination');
@@ -96,7 +100,11 @@ document.querySelector('#reset').onclick=()=>{if(confirm('Reset Lab? This clears
 document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{let [k,d]=b.dataset.nudge.split(','),s=sel();s[k]=+(s[k]+(+d)).toFixed(2);save(true);render()});
 document.querySelector('#copy').onclick=async()=>{let ex={version:'OVA-D_SCENE_STAGE_0.4',scene:state.scene,spots:{}};state.spots.forEach(s=>ex.spots[s.id]={name:s.name,type:s.type||'unset',transition:s.transition||'none',destination:s.destination||'none',x:+s.x.toFixed(2),y:+s.y.toFixed(2),scale:+s.scale.toFixed(2)});let t=JSON.stringify(ex,null,2);try{await navigator.clipboard.writeText(t);toast('STATE COPIED')}catch(e){let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('STATE COPIED')}};
 const uiToggle=document.querySelector('#uiToggle');
-uiToggle.onclick=()=>{document.body.classList.toggle('ui-hidden');uiToggle.textContent=document.body.classList.contains('ui-hidden')?'SHOW UI':'HIDE UI'};
+uiToggle.onclick=()=>{
+ const hiding=!document.body.classList.contains('ui-hidden');
+ if(hiding){document.body.appendChild(uiToggle);document.body.classList.add('ui-hidden');uiToggle.textContent='SHOW UI'}
+ else{document.body.classList.remove('ui-hidden');document.querySelector('#stopRoute').after(uiToggle);uiToggle.textContent='HIDE UI'}
+};
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let routeToken=0;
