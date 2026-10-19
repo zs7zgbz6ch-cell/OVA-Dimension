@@ -1,13 +1,19 @@
-OVA-D 01D — Witnessed Character Agenda Test
+OVA-D 01D — Cross-Scene Character Synchronization Test
 
-Based on stable v0.9 + passed 01D agenda timing test.
+Based on the proven witnessed-character agenda build.
 
-TEST:
-- Test Barmaid is visibly behind the tavern bar before 17:35.
-- Use +1 / +5 minute interactions to cross 17:35.
-- After the interaction resolves, there is a ~1 second quiet beat.
-- She reacts, becomes presentation-locked, fades from behind the bar, reappears in front, crosses the room, then leaves upstairs.
-- Crossing 17:35 while in Rionne's Room updates her logical state off-screen; returning to the tavern should show her already gone.
-- Reset Prototype restores 17:20 and the barmaid.
+TEST GOAL
+At 17:35 Test Barmaid logically transfers from BERKLITH_TAVERN to RIONNES_ROOM.
 
-This is still a controlled 01D test. It does not replace the stable v0.9 source of truth until explicitly promoted.
+AUTHORED GEOGRAPHY
+Tavern SPOT_02 behind-bar idle -> SPOT_04 bar depth transfer -> SPOT_05 centre waypoint -> SPOT_03 stairs transfer.
+Room SPOT_01 door is the cross-scene transfer endpoint; SPOT_02 window idle is her destination activity spot.
+
+THREE CASES
+1. WITNESSED: use normal +1 interactions to cross 17:35 while in Tavern. After the interaction and quiet beat, she reacts and performs the full departure. Visit Rionne's Room afterward: she is at the window idle spot.
+2. MISSED / OCCUPIED: arrange time so OCCUPIED +5 crosses 17:35 in Tavern. Time advances while the interaction card still has your attention. On return, no bubble and no journey replay: the stale Tavern Barmaid gently fades. She exists in Rionne's Room.
+3. OFF-SCREEN: go to Rionne's Room before 17:35 and cross the trigger there. No Tavern departure performance plays. Because the destination change happens while the player is occupied in the room, she fades in at the room idle spot when the interaction settles.
+
+RESET PROTOTYPE restores 17:20 and Barmaid to Tavern SPOT_02.
+
+This is a controlled test build, not a production-content pass.
