@@ -27,15 +27,15 @@
 body.ui-hidden #uiToggle{display:block;position:fixed;z-index:90;right:max(8px,env(safe-area-inset-right));bottom:max(7px,env(safe-area-inset-bottom));height:29px;background:rgba(13,9,5,.82);backdrop-filter:blur(10px);font:8px Georgia,serif}
 </style></head><body>
 <div id="scene"><div class="vignette"></div></div>
-<div class="topbar"><div class="badge">OVA-D LAB · SCENE LIBRARY · v0.5</div><div class="status" id="status"></div></div>
+<div class="topbar"><div class="badge">OVA-D LAB · SCENE LIBRARY · v0.5.2</div><div class="status" id="status"></div></div>
 <div id="editor">
 <div class="row"><select id="sceneSelect" class="btn primary" style="flex:1;min-width:150px"></select><button class="btn" id="newScene">+ SCENE</button><button class="btn" id="copyScene">COPY SCENE</button><button class="btn" id="exportProject">EXPORT PROJECT</button><button class="btn" id="importProject">IMPORT</button></div>
 <div class="row"><input id="spotName"><button class="btn primary" id="add">+ SPOT</button><button class="btn" id="duplicate">DUPLICATE</button><button class="btn danger" id="remove">DELETE</button></div>
-<div class="row"><select id="spotType" class="btn"><option value="unset">TYPE: UNSET</option><option value="idle">TYPE: IDLE</option><option value="waypoint">TYPE: WAYPOINT</option><option value="entrance">TYPE: ENTRANCE</option><option value="exit">TYPE: EXIT</option><option value="activity">TYPE: ACTIVITY</option></select><input id="transition" class="btn" style="flex:1;min-width:0;text-align:left" placeholder="TRANSITION: NONE"><input id="destination" class="btn" style="flex:1;min-width:0;text-align:left" placeholder="DESTINATION: NONE"></div>
+<div class="row"><select id="spotType" class="btn"><option value="unset">TYPE: UNSET</option><option value="idle">TYPE: IDLE</option><option value="waypoint">TYPE: WAYPOINT</option><option value="transfer">TYPE: TRANSFER</option><option value="activity">TYPE: ACTIVITY</option></select><input id="transition" class="btn" style="flex:1;min-width:0;text-align:left" placeholder="TRANSITION: NONE"><input id="destination" class="btn" style="flex:1;min-width:0;text-align:left" placeholder="DESTINATION: NONE"></div>
 <div class="row">
 <div class="control"><label>X</label><input id="x" type="range" min="-25" max="125" step=".1"><output id="xo"></output><button class="nudge" data-nudge="x,-.5">−</button><button class="nudge" data-nudge="x,.5">+</button></div>
 <div class="control"><label>Y</label><input id="y" type="range" min="0" max="150" step=".1"><output id="yo"></output><button class="nudge" data-nudge="y,-.5">−</button><button class="nudge" data-nudge="y,.5">+</button></div>
-<div class="control"><label>S</label><input id="scale" type="range" min="20" max="100" step=".5"><output id="so"></output><button class="nudge" data-nudge="scale,-1">−</button><button class="nudge" data-nudge="scale,1">+</button></div>
+<div class="control"><label>S</label><input id="scale" type="range" min="20" max="150" step=".5"><output id="so"></output><button class="nudge" data-nudge="scale,-1">−</button><button class="nudge" data-nudge="scale,1">+</button></div>
 </div>
 <div class="row"><button class="btn primary" id="save">SAVE PROJECT</button><button class="btn" id="copy">COPY SPOTS</button><button class="btn" id="labels">LABELS: ON</button><button class="btn" id="reset">RESET SCENE</button><button class="btn" id="uiToggle">HIDE UI</button></div>
 </div><div id="toast"></div>

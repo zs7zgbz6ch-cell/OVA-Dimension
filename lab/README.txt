@@ -14,3 +14,9 @@ Multi-scene authoring workspace.
 - Legacy Tavern route buttons are retired.
 
 Scene Stage owns geography. World connections, routes, and agendas remain separate systems.
+
+
+v0.5.2
+- ENTRANCE / EXIT replaced by TRANSFER.
+- Existing entrance/exit spots migrate to TRANSFER.
+- Maximum character scale increased from 100 to 150.
