@@ -25,3 +25,11 @@ v0.5.2
 v0.5.3
 - Removed obsolete TRANSITION and DESTINATION spot controls/data from Scene Stage.
 - Scene spots now author only semantic name/type and X/Y/scale geography.
+
+v0.6 — Compact Authoring UI
+- Compact two-row positioning bar.
+- X/Y/Scale and nudges stay immediately accessible.
+- Scene selector stays one-tap accessible.
+- ⋯ panel holds spot/scene/project management.
+- HIDE/SHOW UI stays lower-right.
+- No data-model or runtime/game changes.
