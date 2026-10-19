@@ -20,3 +20,8 @@ v0.5.2
 - ENTRANCE / EXIT replaced by TRANSFER.
 - Existing entrance/exit spots migrate to TRANSFER.
 - Maximum character scale increased from 100 to 150.
+
+
+v0.5.3
+- Removed obsolete TRANSITION and DESTINATION spot controls/data from Scene Stage.
+- Scene spots now author only semantic name/type and X/Y/scale geography.
