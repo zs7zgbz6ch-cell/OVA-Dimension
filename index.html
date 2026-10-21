@@ -175,7 +175,7 @@ img {
 @media(max-height:500px){#tavernRionne{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
 
 
-/* 01D Pass 4A.2 — missed-change synchronization punctuation. */
+/* 01D Pass 4A.3 — missed-change synchronization punctuation. */
 .sync-streaks{position:absolute;z-index:83;pointer-events:none;width:74px;height:76px;transform:translate(-50%,-50%);opacity:0}
 .sync-streaks i{position:absolute;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(248,225,184,.78),transparent);filter:drop-shadow(0 0 2px rgba(255,224,163,.35));transform-origin:right center}
 .sync-streaks i:nth-child(1){top:18%;width:64%;transform:translateX(5px)}.sync-streaks i:nth-child(2){top:34%;width:92%;transform:translateX(12px)}.sync-streaks i:nth-child(3){top:51%;width:72%;transform:translateX(2px)}.sync-streaks i:nth-child(4){top:68%;width:100%;transform:translateX(15px)}.sync-streaks i:nth-child(5){top:82%;width:58%;transform:translateX(7px)}
@@ -190,7 +190,7 @@ img {
     <img id="tavernRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
     <button class="scene-hotspot interactive" id="rionneTalk" style="left:31%;top:48%;width:62px;height:42px" type="button" data-rionne-talk="true">RIONNE +1</button>
     <div class="character-bubble" id="rionneBubble">Ah—I forgot something upstairs.</div>
-    <div class="dev-agenda-note">01D PASS 4A.2 · WITNESS + SYNC · DIMENSION GEAR</div>
+    <div class="dev-agenda-note">01D PASS 4A.3 · WITNESS + SYNC · DIMENSION GEAR</div>
   </div>
   <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')">
     <img id="roomRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
@@ -333,7 +333,7 @@ function setInteractionState(next){interactionState=next;$$('.scene-hotspot').fo
 function showAction(text,cost){clearTimeout(actionHideTimer);actionKicker.textContent=`INTERACTION · +${cost} MIN`;actionCopy.textContent=text;actionCard.classList.add('show')}
 function hideAction(){actionCard.classList.remove('show')}
 function setRionnePose(el,x,y,h,opacity=1,transition='none',src=null,flip=false){
- if(src && !el.src.endsWith(src)){el.style.opacity=Math.max(.58,opacity*.7);el.src=src}
+ if(src && !el.src.endsWith(src))el.src=src;
  el.style.transition=transition;el.style.left=x+'%';el.style.top=y+'%';el.style.height=h+'vh';el.style.width='auto';el.style.opacity=opacity;
  el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;
 }
@@ -375,30 +375,56 @@ function routeDuration(points,pace=38){
  let d=0;for(let i=1;i<points.length;i++)d+=distance2D(points[i-1],points[i]);
  return Math.max(2200,Math.round((d/pace)*1000));
 }
-async function walkThrough(el,points,pace=38){
- // Pose is derived from the CURRENT route leg, not the route's overall start/end.
- // Consecutive legs with the same presentation remain one continuous animation.
- let i=0;
- while(i<points.length-1){
-   const pose=travelPose(points[i],points[i+1]);
-   let j=i+1;
-   while(j<points.length-1){
-     const next=travelPose(points[j],points[j+1]);
-     if(next.src!==pose.src || next.flip!==pose.flip)break;
-     j++;
-   }
-   const group=points.slice(i,j+1), duration=routeDuration(group,pace);
-   const a=group[0], b=group[group.length-1];
-   place(el,a,1,'none',pose.src,pose.flip);
-   await new Promise(requestAnimationFrame);
-   const seg=[];let total=0;for(let k=1;k<group.length;k++){const d=distance2D(group[k-1],group[k]);seg.push(d);total+=d}
-   let run=0;
-   const frames=group.map((p,k)=>{let offset=0;if(k){run+=seg[k-1];offset=total?run/total:1}return {left:p.x+'%',top:p.y+'%',height:p.h+'vh',offset}});
-   const anim=el.animate(frames,{duration,easing:'linear',fill:'forwards'});
-   try{await anim.finished}catch(e){}
-   anim.cancel();place(el,b,1,'none',pose.src,pose.flip);
-   i=j;
+async function crossfadePose(el,src,flip=false,ms=150){
+ if(!src || el.src.endsWith(src)){
+   el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;return;
  }
+ // Keep the outgoing drawing frozen in exactly the same geometry while the incoming
+ // drawing is already decoded. Only opacity changes during the pose hand-off.
+ const ghost=el.cloneNode(false);
+ ghost.removeAttribute('id');ghost.setAttribute('aria-hidden','true');
+ ghost.style.transition='none';ghost.style.pointerEvents='none';ghost.style.opacity=getComputedStyle(el).opacity;
+ el.parentNode.insertBefore(ghost,el);
+ el.style.transition='none';el.src=src;el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;el.style.opacity='0';
+ await new Promise(requestAnimationFrame);
+ ghost.style.transition=`opacity ${ms}ms ease`;el.style.transition=`opacity ${ms}ms ease`;
+ ghost.style.opacity='0';el.style.opacity='1';
+ await sleep(ms+24);ghost.remove();el.style.transition='none';
+}
+function lerp(a,b,t){return a+(b-a)*t}
+function smoothstep(t){return t*t*(3-2*t)}
+async function walkThrough(el,points,pace=38){
+ // 4A.3: one requestAnimationFrame locomotion clock. Waypoints are geometry, not
+ // separate CSS transitions, so there is no brake/restart at each point.
+ const seg=[];let total=0;
+ for(let i=1;i<points.length;i++){const d=distance2D(points[i-1],points[i]);seg.push(d);total+=d}
+ const duration=routeDuration(points,pace);
+ let currentLeg=0;
+ const firstPose=travelPose(points[0],points[1]);
+ await crossfadePose(el,firstPose.src,firstPose.flip,145);
+ const started=performance.now();
+ await new Promise(resolve=>{
+   function frame(now){
+     const raw=Math.min(1,(now-started)/duration);
+     // Gentle acceleration/deceleration only at the route's real start/end.
+     const progress=smoothstep(raw), target=progress*total;
+     let run=0, leg=0;
+     while(leg<seg.length-1 && run+seg[leg]<target){run+=seg[leg];leg++}
+     const local=seg[leg]?Math.max(0,Math.min(1,(target-run)/seg[leg])):1;
+     if(leg!==currentLeg){
+       currentLeg=leg;
+       const pose=travelPose(points[leg],points[leg+1]);
+       // Curves may change facing/depth. The swap is independent from locomotion;
+       // do not await it or interrupt the route clock.
+       crossfadePose(el,pose.src,pose.flip,145);
+     }
+     const a=points[leg],b=points[leg+1];
+     el.style.left=lerp(a.x,b.x,local)+'%';el.style.top=lerp(a.y,b.y,local)+'%';el.style.height=lerp(a.h,b.h,local)+'vh';
+     if(raw<1)requestAnimationFrame(frame);else resolve();
+   }
+   requestAnimationFrame(frame);
+ });
+ const last=points[points.length-1];place(el,last,1,'none',null,el.style.transform.includes('scaleX(-1)'));
 }
 async function fadeAt(el,p,from,to,ms,src,flip=false){
  place(el,p,from,'none',src,flip);void el.offsetWidth;
@@ -414,7 +440,7 @@ async function witnessedRionneDeparture(){
  // One relaxed walk. SPOT_05 is geometry only: pass through it without stopping.
  await walkThrough(tavernRionne,[SPOT.tavern.barTransfer,SPOT.tavern.waypoint,SPOT.tavern.stairs],24);
  // Arrive, stop, orient for the stairs, pause, then cross the transfer in full-back view.
- place(tavernRionne,SPOT.tavern.stairs,1,'opacity 150ms ease',RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+ place(tavernRionne,SPOT.tavern.stairs,1,'none',null,false);await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
  place(tavernRionne,SPOT.tavern.stairsFar,0,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 1500ms ease 700ms',RIONNE_POSE.fullBack,false);
  await sleep(1250);commitRionneRoom();await sleep(1250);
 }
@@ -424,14 +450,14 @@ async function witnessedRoomArrival(){
  await fadeAt(roomRionne,SPOT.room.door,0,1,420,RIONNE_POSE.fullBack,false);
  await sleep(TRANSFER_PAUSE);
  await walkThrough(roomRionne,[SPOT.room.door,SPOT.room.window],22);
- place(roomRionne,SPOT.room.window,1,'opacity 150ms ease',RIONNE_POSE.front,false);
+ place(roomRionne,SPOT.room.window,1,'none',null,false);await crossfadePose(roomRionne,RIONNE_POSE.front,false);
  rionneWorld.spot='spot_02_1792445282697';saveRionneWorld();
 }
 async function witnessedRoomDeparture(){
  interactionState='presentation';
  // Leave the activity spot, walk to the door, stop, orient full-front, pause, then transfer out.
  await walkThrough(roomRionne,[SPOT.room.window,SPOT.room.door],22);
- place(roomRionne,SPOT.room.door,1,'opacity 150ms ease',RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
+ place(roomRionne,SPOT.room.door,1,'none',null,false);await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
  await fadeAt(roomRionne,SPOT.room.door,1,0,650,RIONNE_POSE.front,false);commitRionneTavern();
 }
 async function witnessedTavernArrival(){
@@ -443,7 +469,7 @@ async function witnessedTavernArrival(){
  // Continuous return walk: left + farther automatically selects unmirrored 3/4-back art.
  await walkThrough(tavernRionne,[SPOT.tavern.stairs,SPOT.tavern.waypoint,SPOT.tavern.barTransfer],24);
  // At bar transfer: stop, orient full-back toward the bar, pause, then cross behind it.
- place(tavernRionne,SPOT.tavern.barTransfer,1,'opacity 150ms ease',RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+ place(tavernRionne,SPOT.tavern.barTransfer,1,'none',null,false);await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
  await fadeAt(tavernRionne,SPOT.tavern.barTransfer,1,0,420,RIONNE_POSE.fullBack,false);
  await fadeAt(tavernRionne,SPOT.tavern.barIdle,0,1,430,RIONNE_POSE.front,false);
  rionneWorld.spot='spot_02_1792447350835';saveRionneWorld();
