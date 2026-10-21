@@ -367,6 +367,90 @@ const SPOT={
  room:{door:{x:90.2606837607,y:111.0619047619,h:111},window:{x:47.5863247863,y:74,h:61.5}}
 };
 const TRANSFER_PAUSE=1000;
+// 01D Pass 4A.7 — NAVIGATION GRAPH.
+// Agenda code names a destination. The graph owns how spots connect; presentation owns how visible edges are performed.
+const NAV_NODE={
+ 'tavern.barIdle':{scene:'tavern',spot:SPOT.tavern.barIdle,type:'idle'},
+ 'tavern.barTransfer':{scene:'tavern',spot:SPOT.tavern.barTransfer,type:'transfer'},
+ 'tavern.waypoint':{scene:'tavern',spot:SPOT.tavern.waypoint,type:'waypoint'},
+ 'tavern.stairs':{scene:'tavern',spot:SPOT.tavern.stairs,type:'transfer'},
+ 'room.door':{scene:'room',spot:SPOT.room.door,type:'transfer'},
+ 'room.window':{scene:'room',spot:SPOT.room.window,type:'idle'}
+};
+const NAV_EDGE=[
+ ['tavern.barIdle','tavern.barTransfer','barTransfer'],
+ ['tavern.barTransfer','tavern.barIdle','barTransfer'],
+ ['tavern.barTransfer','tavern.waypoint','walk'],
+ ['tavern.waypoint','tavern.barTransfer','walk'],
+ ['tavern.waypoint','tavern.stairs','walk'],
+ ['tavern.stairs','tavern.waypoint','walk'],
+ ['tavern.stairs','room.door','stairsTransfer'],
+ ['room.door','tavern.stairs','stairsTransfer'],
+ ['room.door','room.window','walk'],
+ ['room.window','room.door','walk']
+];
+function navPath(start,goal){
+ if(start===goal)return [start];
+ const q=[start],prev=new Map([[start,null]]);
+ while(q.length){
+   const at=q.shift();
+   for(const [a,b] of NAV_EDGE){
+     if(a!==at||prev.has(b))continue;
+     prev.set(b,at);if(b===goal){q.length=0;break}q.push(b);
+   }
+ }
+ if(!prev.has(goal))throw new Error(`No navigation route: ${start} -> ${goal}`);
+ const out=[];for(let at=goal;at!==null;at=prev.get(at))out.push(at);return out.reverse();
+}
+function navEdgeKind(a,b){const e=NAV_EDGE.find(([x,y])=>x===a&&y===b);return e?e[2]:null}
+function navScenePoints(path,scene){
+ return path.filter(id=>NAV_NODE[id].scene===scene).map(id=>NAV_NODE[id].spot);
+}
+function rionneNode(){return rionneWorld.location==='room'?'room.window':'tavern.barIdle'}
+function commitRionneDestination(id){
+ if(id==='room.window'){rionneWorld={location:'room',spot:'spot_02_1792445282697'}}
+ else if(id==='tavern.barIdle'){rionneWorld={location:'tavern',spot:'spot_02_1792447350835'}}
+ else {const n=NAV_NODE[id];rionneWorld={location:n.scene,spot:id}}
+ saveRionneWorld();
+}
+async function navigateRionneTo(destination){
+ const start=rionneNode(),path=navPath(start,destination);
+ interactionState='presentation';
+ // The route is resolved globally. Only the currently visible scene performs its portion.
+ if(current==='tavern'){
+   const pts=navScenePoints(path,'tavern');
+   if(start==='tavern.barIdle'&&destination==='room.window'){
+     rionneBubble.textContent='Ah—I forgot something upstairs.';rionneBubble.classList.add('show');await sleep(1250);rionneBubble.classList.remove('show');await sleep(260);
+     await fadeAt(tavernRionne,NAV_NODE['tavern.barIdle'].spot,1,0,420,RIONNE_POSE.front,false);
+     await fadeAt(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,0,1,420,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
+     // barTransfer is already reached by its transfer; walk the graph-resolved remainder to the stairs.
+     await walkThrough(tavernRionne,pts.slice(1),24);
+     place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+     place(tavernRionne,SPOT.tavern.stairsFar,0,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 1500ms ease 700ms',RIONNE_POSE.fullBack,false);await sleep(2500);
+   }else if(start==='room.window'&&destination==='tavern.barIdle'){
+     // The incoming stairs connection is part of the resolved path; begin at its visible Tavern endpoint.
+     await setPoseStable(tavernRionne,RIONNE_POSE.front,false);
+     place(tavernRionne,SPOT.tavern.stairsFar,0,'none');
+     place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 800ms ease');await sleep(2450);
+     place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'none');await sleep(TRANSFER_PAUSE);
+     await walkThrough(tavernRionne,pts.slice(0,-1),24);
+     place(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+     await fadeAt(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,1,0,420,RIONNE_POSE.fullBack,false);
+     await fadeAt(tavernRionne,NAV_NODE['tavern.barIdle'].spot,0,1,430,RIONNE_POSE.front,false);
+   }
+ }else if(current==='room'){
+   const pts=navScenePoints(path,'room');
+   if(start==='tavern.barIdle'&&destination==='room.window'){
+     await fadeAt(roomRionne,NAV_NODE['room.door'].spot,0,1,420,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+     await walkThrough(roomRionne,pts,22);place(roomRionne,NAV_NODE['room.window'].spot,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);
+   }else if(start==='room.window'&&destination==='tavern.barIdle'){
+     await walkThrough(roomRionne,pts,22);place(roomRionne,NAV_NODE['room.door'].spot,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
+     await fadeAt(roomRionne,NAV_NODE['room.door'].spot,1,0,650,RIONNE_POSE.front,false);
+   }
+ }
+ commitRionneDestination(destination);
+}
+
 function travelPose(a,b){
  const toward=b.h>a.h+.15;
  const right=b.x>a.x+.05;
@@ -448,50 +532,6 @@ async function fadeAt(el,p,from,to,ms,src,flip=false){
  anim.cancel();
  place(el,p,to,'none',null,flip);
 }
-async function witnessedRionneDeparture(){
- interactionState='presentation';
- rionneBubble.textContent='Ah—I forgot something upstairs.';rionneBubble.classList.add('show');await sleep(1250);rionneBubble.classList.remove('show');await sleep(260);
- // Behind bar -> front-side transfer. Appear stationary/front, then take a beat before walking.
- await fadeAt(tavernRionne,SPOT.tavern.barIdle,1,0,420,RIONNE_POSE.front,false);
- await fadeAt(tavernRionne,SPOT.tavern.barTransfer,0,1,420,RIONNE_POSE.front,false);
- await sleep(TRANSFER_PAUSE);
- // One relaxed walk. SPOT_05 is geometry only: pass through it without stopping.
- await walkThrough(tavernRionne,[SPOT.tavern.barTransfer,SPOT.tavern.waypoint,SPOT.tavern.stairs],24);
- // Arrive, stop, orient for the stairs, pause, then cross the transfer in full-back view.
- place(tavernRionne,SPOT.tavern.stairs,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
- place(tavernRionne,SPOT.tavern.stairsFar,0,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 1500ms ease 700ms',RIONNE_POSE.fullBack,false);
- await sleep(1250);commitRionneRoom();await sleep(1250);
-}
-async function witnessedRoomArrival(){
- interactionState='presentation';commitRionneRoom();
- // Enter through the room door already oriented away from camera, pause, then walk on.
- await fadeAt(roomRionne,SPOT.room.door,0,1,420,RIONNE_POSE.fullBack,false);
- await sleep(TRANSFER_PAUSE);
- await walkThrough(roomRionne,[SPOT.room.door,SPOT.room.window],22);
- place(roomRionne,SPOT.room.window,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);
- rionneWorld.spot='spot_02_1792445282697';saveRionneWorld();
-}
-async function witnessedRoomDeparture(){
- interactionState='presentation';
- // Leave the activity spot, walk to the door, stop, orient full-front, pause, then transfer out.
- await walkThrough(roomRionne,[SPOT.room.window,SPOT.room.door],22);
- place(roomRionne,SPOT.room.door,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
- await fadeAt(roomRionne,SPOT.room.door,1,0,650,RIONNE_POSE.front,false);commitRionneTavern();
-}
-async function witnessedTavernArrival(){
- interactionState='presentation';commitRionneTavern();
- // Descend toward camera in full-front view, arrive at stairs transfer, stop and pause.
- place(tavernRionne,SPOT.tavern.stairsFar,0,'none',RIONNE_POSE.front,false);void tavernRionne.offsetWidth;
- place(tavernRionne,SPOT.tavern.stairs,1,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 800ms ease',RIONNE_POSE.front,false);await sleep(2450);
- place(tavernRionne,SPOT.tavern.stairs,1,'none',RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
- // Continuous return walk: left + farther automatically selects unmirrored 3/4-back art.
- await walkThrough(tavernRionne,[SPOT.tavern.stairs,SPOT.tavern.waypoint,SPOT.tavern.barTransfer],24);
- // At bar transfer: stop, orient full-back toward the bar, pause, then cross behind it.
- place(tavernRionne,SPOT.tavern.barTransfer,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
- await fadeAt(tavernRionne,SPOT.tavern.barTransfer,1,0,420,RIONNE_POSE.fullBack,false);
- await fadeAt(tavernRionne,SPOT.tavern.barIdle,0,1,430,RIONNE_POSE.front,false);
- rionneWorld.spot='spot_02_1792447350835';saveRionneWorld();
-}
 function agendaOccurrencesBetween(oldMinute,newMinute){
  const events=[];
  if(newMinute<=oldMinute)return events;
@@ -525,25 +565,19 @@ async function performMissedOccurrence(event){
  interactionState='sync';
  if(event.kind==='rionne-up'){
    // Reality changes first. Only the currently visible stale presentation is corrected.
-   commitRionneRoom();
+   commitRionneDestination('room.window');
    if(current==='tavern' && Number.parseFloat(getComputedStyle(tavernRionne).opacity)>.05)await syncOut(tavernRionne,SPOT.tavern.barIdle);
    else if(current==='room' && Number.parseFloat(getComputedStyle(roomRionne).opacity)<.95)await syncIn(roomRionne,SPOT.room.window);
  }else{
-   commitRionneTavern();
+   commitRionneDestination('tavern.barIdle');
    if(current==='room' && Number.parseFloat(getComputedStyle(roomRionne).opacity)>.05)await syncOut(roomRionne,SPOT.room.window);
    else if(current==='tavern' && Number.parseFloat(getComputedStyle(tavernRionne).opacity)<.95)await syncIn(tavernRionne,SPOT.tavern.barIdle);
  }
 }
 async function performWitnessedOccurrence(event){
- if(event.kind==='rionne-up'){
-   if(current==='tavern'){interactionState='post-action';await sleep(1000);await witnessedRionneDeparture()}
-   else if(current==='room'){interactionState='post-action';await sleep(1000);await witnessedRoomArrival()}
-   else commitRionneRoom();
- }else{
-   if(current==='room'){interactionState='post-action';await sleep(1000);await witnessedRoomDeparture()}
-   else if(current==='tavern'){interactionState='post-action';await sleep(1000);await witnessedTavernArrival()}
-   else commitRionneTavern();
- }
+ interactionState='post-action';await sleep(1000);
+ // Dimension Gear expresses intent only. Navigation resolves every intermediate spot/transfer.
+ await navigateRionneTo(event.kind==='rionne-up'?'room.window':'tavern.barIdle');
 }
 async function evaluateAgendas(oldMinute,newMinute){
  const occurrences=agendaOccurrencesBetween(oldMinute,newMinute);

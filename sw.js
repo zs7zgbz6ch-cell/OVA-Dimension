@@ -1,4 +1,4 @@
-const CACHE = 'ovad-01d-directional-assets-0014';
+const CACHE = 'ovad-01d-navigation-graph-0015';
 
 const CORE = [
   './',

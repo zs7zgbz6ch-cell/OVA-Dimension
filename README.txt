@@ -47,3 +47,13 @@ PASS 4A.2 — WITNESS + SYNC
 - Only an occurrence landed on exactly is eligible for witnessed choreography.
 - If control returns after the occurrence, world state is already advanced and the visible stale character uses a brief anime streak/squash sync-out or sync-in instead of replaying history.
 - Route facing is now derived per current route leg; Rionne pose assets are preloaded to avoid the Spot 04 wrong-facing flash.
+
+
+PASS 4A.7 — DESTINATION NAVIGATION GRAPH
+- Agenda events now request a destination instead of hard-coding every intermediate spot.
+- Tavern/Room spots are navigation nodes with typed connections.
+- A graph search resolves the logical route between Rionne's current node and destination.
+- Waypoints remain pass-through geometry; transfers remain authored boundary choreography.
+- Only the route portion in the player's current scene is animated; off-screen travel is simulated.
+- The old duplicated witnessed departure/arrival route functions were removed.
+- Existing rAF locomotion, directional PNG assets, Dimension Gear timing, and sync effects remain intact.
