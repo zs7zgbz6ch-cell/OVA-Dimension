@@ -175,7 +175,7 @@ img {
 @media(max-height:500px){#tavernRionne{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
 
 
-/* 01D Pass 4A.4 — missed-change synchronization punctuation. */
+/* 01D Pass 4A.5 — missed-change synchronization punctuation. */
 .sync-streaks{position:absolute;z-index:83;pointer-events:none;width:74px;height:76px;transform:translate(-50%,-50%);opacity:0}
 .sync-streaks i{position:absolute;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(248,225,184,.78),transparent);filter:drop-shadow(0 0 2px rgba(255,224,163,.35));transform-origin:right center}
 .sync-streaks i:nth-child(1){top:18%;width:64%;transform:translateX(5px)}.sync-streaks i:nth-child(2){top:34%;width:92%;transform:translateX(12px)}.sync-streaks i:nth-child(3){top:51%;width:72%;transform:translateX(2px)}.sync-streaks i:nth-child(4){top:68%;width:100%;transform:translateX(15px)}.sync-streaks i:nth-child(5){top:82%;width:58%;transform:translateX(7px)}
@@ -332,10 +332,12 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function setInteractionState(next){interactionState=next;$$('.scene-hotspot').forEach(el=>el.classList.toggle('busy',next!=='idle'))}
 function showAction(text,cost){clearTimeout(actionHideTimer);actionKicker.textContent=`INTERACTION · +${cost} MIN`;actionCopy.textContent=text;actionCard.classList.add('show')}
 function hideAction(){actionCard.classList.remove('show')}
-function setRionnePose(el,x,y,h,opacity=1,transition='none',src=null,flip=false){
- if(src && !el.src.endsWith(src))el.src=src;
+function setRionnePose(el,x,y,h,opacity=1,transition='none',src=null,flip=null){
+ // Geometry/opacity updates must never silently change facing.
+ // Facing belongs to the pose handoff only.
  el.style.transition=transition;el.style.left=x+'%';el.style.top=y+'%';el.style.height=h+'vh';el.style.width='auto';el.style.opacity=opacity;
- el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;
+ if(flip!==null)el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;
+ if(src && !el.src.endsWith(src))el.src=src;
 }
 function setTavernRionne(x,y,h,opacity=1,transition='none',src=null,flip=false){setRionnePose(tavernRionne,x,y,h,opacity,transition,src,flip)}
 function setRoomRionne(x,y,h,opacity=1,transition='none',src=null,flip=false){setRionnePose(roomRionne,x,y,h,opacity,transition,src,flip)}
@@ -369,7 +371,7 @@ function travelPose(a,b){
  const flip=b.x>a.x+.05; // source art faces left; mirror only for rightward travel
  return {src,flip};
 }
-function place(el,p,opacity=1,transition='none',src=null,flip=false){setRionnePose(el,p.x,p.y,p.h,opacity,transition,src,flip)}
+function place(el,p,opacity=1,transition='none',src=null,flip=null){setRionnePose(el,p.x,p.y,p.h,opacity,transition,src,flip)}
 function distance2D(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
 function routeDuration(points,pace=38){
  let d=0;for(let i=1;i<points.length;i++)d+=distance2D(points[i-1],points[i]);
@@ -387,10 +389,12 @@ async function setPoseStable(el,src,flip=false){
    // Decode before exposing the new drawing. No ghost clone, opacity race, or overlapping transition.
    const probe=new Image();probe.src=src;
    try{if(probe.decode)await probe.decode()}catch(e){}
-   el.src=src;
  }
  el.style.transition='none';
+ // Commit facing before exposing the new directional drawing. On iOS, changing
+ // src first can briefly paint the asset in its native (left-facing) orientation.
  el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;
+ if(src && !el.src.endsWith(src))el.src=src;
  st.src=src||st.src;st.flip=!!flip;
  // Commit the pose before locomotion/transfer starts.
  await new Promise(requestAnimationFrame);
@@ -450,7 +454,7 @@ async function witnessedRionneDeparture(){
  // One relaxed walk. SPOT_05 is geometry only: pass through it without stopping.
  await walkThrough(tavernRionne,[SPOT.tavern.barTransfer,SPOT.tavern.waypoint,SPOT.tavern.stairs],24);
  // Arrive, stop, orient for the stairs, pause, then cross the transfer in full-back view.
- place(tavernRionne,SPOT.tavern.stairs,1,'none',null,false);await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+ place(tavernRionne,SPOT.tavern.stairs,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
  place(tavernRionne,SPOT.tavern.stairsFar,0,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 1500ms ease 700ms',RIONNE_POSE.fullBack,false);
  await sleep(1250);commitRionneRoom();await sleep(1250);
 }
@@ -460,14 +464,14 @@ async function witnessedRoomArrival(){
  await fadeAt(roomRionne,SPOT.room.door,0,1,420,RIONNE_POSE.fullBack,false);
  await sleep(TRANSFER_PAUSE);
  await walkThrough(roomRionne,[SPOT.room.door,SPOT.room.window],22);
- place(roomRionne,SPOT.room.window,1,'none',null,false);await crossfadePose(roomRionne,RIONNE_POSE.front,false);
+ place(roomRionne,SPOT.room.window,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);
  rionneWorld.spot='spot_02_1792445282697';saveRionneWorld();
 }
 async function witnessedRoomDeparture(){
  interactionState='presentation';
  // Leave the activity spot, walk to the door, stop, orient full-front, pause, then transfer out.
  await walkThrough(roomRionne,[SPOT.room.window,SPOT.room.door],22);
- place(roomRionne,SPOT.room.door,1,'none',null,false);await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
+ place(roomRionne,SPOT.room.door,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
  await fadeAt(roomRionne,SPOT.room.door,1,0,650,RIONNE_POSE.front,false);commitRionneTavern();
 }
 async function witnessedTavernArrival(){
@@ -479,7 +483,7 @@ async function witnessedTavernArrival(){
  // Continuous return walk: left + farther automatically selects unmirrored 3/4-back art.
  await walkThrough(tavernRionne,[SPOT.tavern.stairs,SPOT.tavern.waypoint,SPOT.tavern.barTransfer],24);
  // At bar transfer: stop, orient full-back toward the bar, pause, then cross behind it.
- place(tavernRionne,SPOT.tavern.barTransfer,1,'none',null,false);await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+ place(tavernRionne,SPOT.tavern.barTransfer,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
  await fadeAt(tavernRionne,SPOT.tavern.barTransfer,1,0,420,RIONNE_POSE.fullBack,false);
  await fadeAt(tavernRionne,SPOT.tavern.barIdle,0,1,430,RIONNE_POSE.front,false);
  rionneWorld.spot='spot_02_1792447350835';saveRionneWorld();
