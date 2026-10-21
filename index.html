@@ -182,6 +182,23 @@ img {
 @media(max-height:500px){#tavernRionne{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
 
 
+/* 4B.1B — major-character interaction cut-in. */
+#tavernRionne,#roomRionne{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#tavernRionne.rionne-interactive,#roomRionne.rionne-interactive{pointer-events:auto;cursor:pointer}
+#tavernRionne.rionne-boop,#roomRionne.rionne-boop{filter:drop-shadow(0 7px 7px rgba(0,0,0,.3)) brightness(1.06)}
+.rionne-panel{position:absolute;z-index:9300;inset:0;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
+.rionne-panel.open{opacity:1;visibility:visible;pointer-events:auto}
+.rionne-panel-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,3,4,.36),rgba(4,3,4,.08) 42%,rgba(4,3,4,.08) 58%,rgba(4,3,4,.36));backdrop-filter:blur(.8px);-webkit-backdrop-filter:blur(.8px)}
+.rionne-cut{position:absolute;top:50%;width:min(46vw,610px);height:min(76vh,560px);transform:translateY(-48%) scale(.97);opacity:0;display:grid;grid-template-columns:minmax(150px,43%) 1fr;overflow:hidden;border:1px solid rgba(231,194,123,.72);border-radius:18px;background:linear-gradient(145deg,rgba(44,25,22,.97),rgba(15,10,12,.98));box-shadow:0 24px 70px rgba(0,0,0,.62),inset 0 0 0 1px rgba(255,238,197,.08);transition:transform .26s cubic-bezier(.2,.85,.2,1),opacity .22s ease}
+.rionne-panel.open .rionne-cut{transform:translateY(-50%) scale(1);opacity:1}
+.rionne-panel.side-left .rionne-cut{left:max(3.5vw,env(safe-area-inset-left))}.rionne-panel.side-right .rionne-cut{right:max(3.5vw,env(safe-area-inset-right));grid-template-columns:1fr minmax(150px,43%)}
+.rionne-portrait{position:relative;min-width:0;background:#160e0d}.rionne-portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 38%;display:block}.rionne-panel.side-right .rionne-portrait{order:2}.rionne-panel.side-right .rionne-portrait img{transform:scaleX(-1)}
+.rionne-portrait:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 34px rgba(0,0,0,.35);pointer-events:none}
+.rionne-ui{min-width:0;padding:clamp(14px,2.2vw,28px);display:flex;flex-direction:column;justify-content:center;position:relative}.rionne-name{font-size:clamp(18px,2.6vw,32px);letter-spacing:.16em;color:#f4dfb4}.rionne-role{margin-top:3px;font-size:clamp(7px,1vw,10px);letter-spacing:.25em;color:#b99865}.rionne-rule{height:1px;margin:12px 0 14px;background:linear-gradient(90deg,rgba(224,187,113,.72),transparent)}
+.rionne-options{display:grid;gap:5px}.rionne-option{appearance:none;border:0;border-bottom:1px solid rgba(222,188,125,.2);background:transparent;color:#f4e8d4;text-align:left;padding:8px 5px;font:inherit;font-size:clamp(11px,1.55vw,16px);letter-spacing:.13em;cursor:pointer}.rionne-option:active{transform:translateX(3px);color:#ffd993}.rionne-option small{display:block;margin-top:2px;color:#9f886b;font-size:.62em;letter-spacing:.08em}
+.rionne-dialogue{display:none;color:#f5e8d3;font-size:clamp(12px,1.55vw,16px);line-height:1.55;font-style:italic;cursor:pointer;min-height:130px}.rionne-dialogue.show{display:flex;flex-direction:column;justify-content:center}.rionne-dialogue .hint{margin-top:14px;color:#a98e67;font-size:.62em;letter-spacing:.16em;font-style:normal}.rionne-close{position:absolute;right:10px;top:8px;border:0;background:transparent;color:#cdb78e;font-size:22px;padding:5px 9px;cursor:pointer}
+@media(max-height:500px){.rionne-cut{height:82vh;width:min(49vw,610px);border-radius:13px}.rionne-ui{padding:13px 15px}.rionne-rule{margin:7px 0 8px}.rionne-option{padding:5px 3px}.rionne-dialogue{min-height:100px}}
+
 /* 01D Pass 4A.6 — missed-change synchronization punctuation. */
 .sync-streaks{position:absolute;z-index:83;pointer-events:none;width:74px;height:76px;transform:translate(-50%,-50%);opacity:0}
 .sync-streaks i{position:absolute;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(248,225,184,.78),transparent);filter:drop-shadow(0 0 2px rgba(255,224,163,.35));transform-origin:right center}
@@ -194,17 +211,35 @@ img {
   <div id="tavern" class="scene" style="background-image:url('assets/berklith-tavern.jpg')">
     <button class="scene-hotspot hotspot-one interactive" type="button" data-action-cost="1" data-action-text="You check the fire. The coals shift softly.">+1 MIN</button>
     <button class="scene-hotspot hotspot-five interactive" type="button" data-action-cost="5" data-occupied="true" data-action-text="You get absorbed watching the street for a while.">OCCUPIED +5</button>
-    <img id="tavernRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
+    <img id="tavernRionne" src="assets/rionne-front.png" alt="Rionne" draggable="false" data-character="rionne">
     <img id="tavernBarmaid" class="interactive" src="assets/barmaid-beer.png" alt="Barmaid holding beer" draggable="false" data-character="barmaid" data-character-state="activity">
     <div class="npc-bubble" id="barmaidBubble" aria-live="polite"></div>
     <div class="character-bubble" id="rionneBubble">Ah—I forgot something upstairs.</div>
-    <div class="dev-agenda-note">4B.1A · NPC INTERACTION · DIMENSION GEAR</div>
+    <div class="dev-agenda-note">4B.1B · RIONNE INTERACTION · DIMENSION GEAR</div>
   </div>
   <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')">
-    <img id="roomRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
+    <img id="roomRionne" src="assets/rionne-front.png" alt="Rionne" draggable="false" data-character="rionne">
     <button class="scene-hotspot hotspot-one interactive" type="button" data-action-cost="1" data-action-text="You glance out across the evening rooftops.">+1 MIN</button>
     <button class="scene-hotspot hotspot-five interactive" type="button" data-action-cost="5" data-occupied="true" data-action-text="You get absorbed in a few pages and lose track of time.">OCCUPIED +5</button>
     <div class="dev-agenda-note">RIONNE ROOM · DOOR TRANSFER → WINDOW IDLE</div>
+  </div>
+  <div class="rionne-panel" id="rionnePanel" aria-hidden="true">
+    <div class="rionne-panel-shade" id="rionnePanelShade"></div>
+    <section class="rionne-cut" aria-label="Rionne interaction">
+      <div class="rionne-portrait"><img src="assets/rionne-interaction-bar.jpg" alt="Rionne behind the bar"></div>
+      <div class="rionne-ui">
+        <button class="rionne-close" id="rionneClose" type="button" aria-label="Leave">×</button>
+        <div class="rionne-name">RIONNE</div><div class="rionne-role">BERKLITH TAVERN · PROPRIETOR</div><div class="rionne-rule"></div>
+        <div class="rionne-options" id="rionneOptions">
+          <button class="rionne-option" type="button" data-rionne-action="observe">OBSERVE<small>Take a quiet look.</small></button>
+          <button class="rionne-option" type="button" data-rionne-action="talk">TALK<small>Get her attention.</small></button>
+          <button class="rionne-option" type="button" data-rionne-action="give">GIVE<small>Offer something.</small></button>
+          <button class="rionne-option" type="button" data-rionne-action="status">STATUS<small>How things stand.</small></button>
+          <button class="rionne-option" type="button" data-rionne-action="leave">LEAVE<small>Let her get back to work.</small></button>
+        </div>
+        <div class="rionne-dialogue" id="rionneDialogue"><div id="rionneDialogueText"></div><div class="hint">TAP TO CONTINUE</div></div>
+      </div>
+    </section>
   </div>
   <div class="vignette"></div>
 
@@ -314,6 +349,7 @@ const welcome=$('#welcomeScreen'), startupBlack=$('#startupBlack'), holdRing=$('
 const actionCard=$('#actionCard'), actionCopy=$('#actionCopy'), actionKicker=$('#actionKicker'), agendaCard=$('#agendaCard'), agendaCopy=$('#agendaCopy');
 const tavernRionne=$('#tavernRionne'), roomRionne=$('#roomRionne'), rionneBubble=$('#rionneBubble');
 const tavernBarmaid=$('#tavernBarmaid'), barmaidBubble=$('#barmaidBubble');
+const rionnePanel=$('#rionnePanel'),rionneOptions=$('#rionneOptions'),rionneDialogue=$('#rionneDialogue'),rionneDialogueText=$('#rionneDialogueText');
 const scenes={tavern:$('#tavern'),room:$('#room')};
 const locations={
  tavern:{title:'MAIN TAVERN',sub:'BERKLITH TAVERN · EARLY EVENING',img:'assets/berklith-tavern.jpg'},
@@ -338,7 +374,7 @@ let interactionState='idle', actionHideTimer=null, agendaHideTimer=null;
 let rionneWorld={location:localStorage.getItem('ovad_rionne_location')||'tavern',spot:localStorage.getItem('ovad_rionne_spot')||'spot_02_1792447350835'};
 function saveRionneWorld(){localStorage.setItem('ovad_rionne_location',rionneWorld.location);localStorage.setItem('ovad_rionne_spot',rionneWorld.spot)}
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-function setInteractionState(next){interactionState=next;$$('.scene-hotspot').forEach(el=>el.classList.toggle('busy',next!=='idle'));if(tavernBarmaid)tavernBarmaid.classList.toggle('busy',next!=='idle')}
+function setInteractionState(next){interactionState=next;$$('.scene-hotspot').forEach(el=>el.classList.toggle('busy',next!=='idle'));if(tavernBarmaid)tavernBarmaid.classList.toggle('busy',next!=='idle');refreshRionneInteraction()}
 function showAction(text,cost){clearTimeout(actionHideTimer);actionKicker.textContent=`INTERACTION · +${cost} MIN`;actionCopy.textContent=text;actionCard.classList.add('show')}
 function hideAction(){actionCard.classList.remove('show')}
 function setRionnePose(el,x,y,h,opacity=1,transition='none',src=null,flip=null){
@@ -614,6 +650,32 @@ function syncRionnePresentation(){
    setRoomRionne(47.5863247863,74,61.5,0,'none','assets/rionne-front.png');
  }
 }
+function rionneIsInteractable(){
+ if(interactionState!=='idle')return false;
+ if(current==='tavern')return rionneWorld.location==='tavern'&&rionneWorld.spot==='spot_02_1792447350835'&&Number.parseFloat(getComputedStyle(tavernRionne).opacity)>.5;
+ if(current==='room')return rionneWorld.location==='room'&&rionneWorld.spot==='spot_01_1792445282697'&&Number.parseFloat(getComputedStyle(roomRionne).opacity)>.5;
+ return false;
+}
+function refreshRionneInteraction(){
+ const tavernOK=rionneIsInteractable()&&current==='tavern',roomOK=rionneIsInteractable()&&current==='room';
+ tavernRionne.classList.toggle('rionne-interactive',tavernOK);roomRionne.classList.toggle('rionne-interactive',roomOK);
+}
+function rionneAlphaHit(el,e){
+ try{const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;if(x<0||x>1||y<0||y>1)return false;const c=rionneAlphaHit.canvas||(rionneAlphaHit.canvas=document.createElement('canvas'));c.width=el.naturalWidth;c.height=el.naturalHeight;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.clearRect(0,0,c.width,c.height);ctx.drawImage(el,0,0);return ctx.getImageData(Math.min(c.width-1,Math.max(0,Math.floor(x*c.width))),Math.min(c.height-1,Math.max(0,Math.floor(y*c.height))),1,1).data[3]>28}catch(_){return true}
+}
+let rionneDialogueQueue=[];
+function showRionneDialogue(lines){rionneDialogueQueue=[...lines];rionneOptions.style.display='none';rionneDialogue.classList.add('show');advanceRionneDialogue()}
+function advanceRionneDialogue(){if(!rionneDialogueQueue.length){rionneDialogue.classList.remove('show');rionneOptions.style.display='grid';return}rionneDialogueText.textContent=rionneDialogueQueue.shift()}
+async function openRionneInteraction(el,e){
+ if(!rionneIsInteractable()||!rionneAlphaHit(el,e))return;
+ setInteractionState('interaction');el.classList.add('rionne-boop');el.style.transform+=' scale(.975,1.015)';await sleep(95);el.classList.remove('rionne-boop');el.style.transform=el.style.transform.replace(' scale(.975,1.015)','');
+ const r=el.getBoundingClientRect(),mid=r.left+r.width/2;rionnePanel.classList.toggle('side-left',mid>innerWidth/2);rionnePanel.classList.toggle('side-right',mid<=innerWidth/2);rionnePanel.classList.add('open');rionnePanel.setAttribute('aria-hidden','false');
+}
+function closeRionneInteraction(){rionnePanel.classList.remove('open');rionnePanel.setAttribute('aria-hidden','true');rionneDialogue.classList.remove('show');rionneOptions.style.display='grid';rionneDialogueQueue=[];setInteractionState('idle')}
+[tavernRionne,roomRionne].forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openRionneInteraction(el,e)}));
+$('#rionneClose').addEventListener('click',e=>{e.stopPropagation();closeRionneInteraction()});$('#rionnePanelShade').addEventListener('click',e=>{e.stopPropagation();closeRionneInteraction()});rionneDialogue.addEventListener('click',e=>{e.stopPropagation();advanceRionneDialogue()});
+rionneOptions.addEventListener('click',e=>{const b=e.target.closest('[data-rionne-action]');if(!b)return;e.stopPropagation();const a=b.dataset.rionneAction;if(a==='leave')return closeRionneInteraction();if(a==='talk')return showRionneDialogue([current==='tavern'?'Mm? Need something, or are you just keeping me company?':'You found me. Give me a moment—I’m still looking for something.','Well? I’m listening.']);if(a==='observe')return showRionneDialogue([current==='tavern'?'Rionne works without hurrying—watching the room even while her hands stay busy.':'She seems more relaxed up here, though she is clearly searching for something.']);if(a==='give')return showRionneDialogue(['You don’t have anything to offer her yet.']);if(a==='status')return showRionneDialogue(['Rionne knows you. Whether that is reassuring to her is another question.'])});
+
 const BARMAID_LINES=[
  'Hehe! Busy tonight, as always!',
  'Careful—I’m carrying enough ale for a small army.',
@@ -642,9 +704,9 @@ async function runSceneInteraction(el){
  setInteractionState('idle');$$('.scene-hotspot').forEach(h=>h.classList.remove('busy'));
 }
 $$('.scene-hotspot').forEach(el=>el.addEventListener('click',()=>runSceneInteraction(el)));
-syncRionnePresentation();
+syncRionnePresentation();refreshRionneInteraction();
 
-function showScene(id){Object.entries(scenes).forEach(([k,v])=>v.classList.toggle('hidden',k!==id));current=id;localStorage.setItem('ovad_current',id);syncRionnePresentation()}
+function showScene(id){Object.entries(scenes).forEach(([k,v])=>v.classList.toggle('hidden',k!==id));current=id;localStorage.setItem('ovad_current',id);syncRionnePresentation();refreshRionneInteraction()}
 function page(id){$$('.page').forEach(p=>p.classList.toggle('active',p.id===id))}
 function openMenu(){page('mainPage');updateWorldTimeReadout();overlay.classList.add('open')}
 function closeMenu(){overlay.classList.remove('open')}
