@@ -174,6 +174,12 @@ img {
 .dev-agenda-note{position:absolute;z-index:121;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));padding:7px 10px;border:1px solid rgba(224,187,113,.28);border-radius:9px;background:rgba(13,9,5,.58);color:#d8bd86;font-size:8px;letter-spacing:.11em;pointer-events:none}
 @media(max-height:500px){#tavernRionne{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
 
+
+/* 01D Pass 4A.2 — missed-change synchronization punctuation. */
+.sync-streaks{position:absolute;z-index:83;pointer-events:none;width:74px;height:76px;transform:translate(-50%,-50%);opacity:0}
+.sync-streaks i{position:absolute;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(248,225,184,.78),transparent);filter:drop-shadow(0 0 2px rgba(255,224,163,.35));transform-origin:right center}
+.sync-streaks i:nth-child(1){top:18%;width:64%;transform:translateX(5px)}.sync-streaks i:nth-child(2){top:34%;width:92%;transform:translateX(12px)}.sync-streaks i:nth-child(3){top:51%;width:72%;transform:translateX(2px)}.sync-streaks i:nth-child(4){top:68%;width:100%;transform:translateX(15px)}.sync-streaks i:nth-child(5){top:82%;width:58%;transform:translateX(7px)}
+
 </style>
 </head>
 <body>
@@ -184,7 +190,7 @@ img {
     <img id="tavernRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
     <button class="scene-hotspot interactive" id="rionneTalk" style="left:31%;top:48%;width:62px;height:42px" type="button" data-rionne-talk="true">RIONNE +1</button>
     <div class="character-bubble" id="rionneBubble">Ah—I forgot something upstairs.</div>
-    <div class="dev-agenda-note">01D PASS 4A.1 · MOVEMENT GRAMMAR · DIMENSION GEAR</div>
+    <div class="dev-agenda-note">01D PASS 4A.2 · WITNESS + SYNC · DIMENSION GEAR</div>
   </div>
   <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')">
     <img id="roomRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
@@ -344,6 +350,8 @@ const RIONNE_POSE={
  walkFront:'assets/rionne-walk-front-3q.png',
  walkBack:'assets/rionne-walk-back-3q.png'
 };
+// Keep directional swaps resident before the first route begins; avoids a one-frame native-facing flash on iOS.
+Object.values(RIONNE_POSE).forEach(src=>{const img=new Image();img.decoding='async';img.src=src});
 const SPOT={
  tavern:{
   barIdle:{x:36.0945868946,y:68.2391705069,h:27},
@@ -368,18 +376,29 @@ function routeDuration(points,pace=38){
  return Math.max(2200,Math.round((d/pace)*1000));
 }
 async function walkThrough(el,points,pace=38){
- const a=points[0], b=points[points.length-1], pose=travelPose(a,b), duration=routeDuration(points,pace);
- // One animation, so intermediate waypoints bend the route without creating stop/start beats.
- place(el,a,1,'none',pose.src,pose.flip);void el.offsetWidth;
- const seg=[];let total=0;for(let i=1;i<points.length;i++){const d=distance2D(points[i-1],points[i]);seg.push(d);total+=d}
- let run=0;
- const frames=points.map((p,i)=>{
-  let offset=0;if(i){run+=seg[i-1];offset=total?run/total:1}
-  return {left:p.x+'%',top:p.y+'%',height:p.h+'vh',offset};
- });
- const anim=el.animate(frames,{duration,easing:'ease-in-out',fill:'forwards'});
- try{await anim.finished}catch(e){}
- anim.cancel();place(el,b,1,'none',pose.src,pose.flip);
+ // Pose is derived from the CURRENT route leg, not the route's overall start/end.
+ // Consecutive legs with the same presentation remain one continuous animation.
+ let i=0;
+ while(i<points.length-1){
+   const pose=travelPose(points[i],points[i+1]);
+   let j=i+1;
+   while(j<points.length-1){
+     const next=travelPose(points[j],points[j+1]);
+     if(next.src!==pose.src || next.flip!==pose.flip)break;
+     j++;
+   }
+   const group=points.slice(i,j+1), duration=routeDuration(group,pace);
+   const a=group[0], b=group[group.length-1];
+   place(el,a,1,'none',pose.src,pose.flip);
+   await new Promise(requestAnimationFrame);
+   const seg=[];let total=0;for(let k=1;k<group.length;k++){const d=distance2D(group[k-1],group[k]);seg.push(d);total+=d}
+   let run=0;
+   const frames=group.map((p,k)=>{let offset=0;if(k){run+=seg[k-1];offset=total?run/total:1}return {left:p.x+'%',top:p.y+'%',height:p.h+'vh',offset}});
+   const anim=el.animate(frames,{duration,easing:'linear',fill:'forwards'});
+   try{await anim.finished}catch(e){}
+   anim.cancel();place(el,b,1,'none',pose.src,pose.flip);
+   i=j;
+ }
 }
 async function fadeAt(el,p,from,to,ms,src,flip=false){
  place(el,p,from,'none',src,flip);void el.offsetWidth;
@@ -440,21 +459,56 @@ function agendaOccurrencesBetween(oldMinute,newMinute){
  }
  return events.sort((a,b)=>a.at-b.at);
 }
-async function performAgendaOccurrence(event){
+function syncEffectHost(){return current==='room'?scenes.room:scenes.tavern}
+function syncStreaksAt(p){
+ const fx=document.createElement('div');fx.className='sync-streaks';fx.style.left=p.x+'%';fx.style.top=(p.y-p.h*.48)+'%';
+ fx.innerHTML='<i></i><i></i><i></i><i></i><i></i>';syncEffectHost().appendChild(fx);return fx;
+}
+async function syncOut(el,p){
+ // Presentation shorthand only: the character already left in world state.
+ const fx=syncStreaksAt(p), flip=(el.style.transform||'').includes('scaleX(-1)')?-1:1;
+ fx.animate([{opacity:0,transform:'translate(-50%,-50%) scaleX(.72)'},{opacity:.9,offset:.28},{opacity:0,transform:'translate(-50%,-50%) scaleX(1.15)'}],{duration:390,easing:'ease-out',fill:'forwards'});
+ const a=el.animate([{opacity:1,transform:`translate(-50%,-100%) scaleX(${flip})`},{opacity:.9,transform:`translate(-50%,-100%) scaleX(${1.04*flip})`,offset:.24},{opacity:0,transform:`translate(-50%,-100%) scaleX(${.72*flip})`}],{duration:360,easing:'ease-in',fill:'forwards'});
+ try{await a.finished}catch(e){};a.cancel();place(el,p,0,'none',RIONNE_POSE.front,false);await sleep(90);fx.remove();
+}
+async function syncIn(el,p){
+ const fx=syncStreaksAt(p);place(el,p,0,'none',RIONNE_POSE.front,false);
+ fx.animate([{opacity:0,transform:'translate(-50%,-50%) scaleX(1.12)'},{opacity:.85,offset:.25},{opacity:0,transform:'translate(-50%,-50%) scaleX(.78)'}],{duration:390,easing:'ease-out',fill:'forwards'});
+ const a=el.animate([{opacity:0,transform:'translate(-50%,-100%) scaleX(.72)'},{opacity:.9,transform:'translate(-50%,-100%) scaleX(1.04)',offset:.72},{opacity:1,transform:'translate(-50%,-100%) scaleX(1)'}],{duration:390,easing:'ease-out',fill:'forwards'});
+ try{await a.finished}catch(e){};a.cancel();place(el,p,1,'none',RIONNE_POSE.front,false);await sleep(80);fx.remove();
+}
+async function performMissedOccurrence(event){
+ interactionState='sync';
+ if(event.kind==='rionne-up'){
+   // Reality changes first. Only the currently visible stale presentation is corrected.
+   commitRionneRoom();
+   if(current==='tavern' && Number.parseFloat(getComputedStyle(tavernRionne).opacity)>.05)await syncOut(tavernRionne,SPOT.tavern.barIdle);
+   else if(current==='room' && Number.parseFloat(getComputedStyle(roomRionne).opacity)<.95)await syncIn(roomRionne,SPOT.room.window);
+ }else{
+   commitRionneTavern();
+   if(current==='room' && Number.parseFloat(getComputedStyle(roomRionne).opacity)>.05)await syncOut(roomRionne,SPOT.room.window);
+   else if(current==='tavern' && Number.parseFloat(getComputedStyle(tavernRionne).opacity)<.95)await syncIn(tavernRionne,SPOT.tavern.barIdle);
+ }
+}
+async function performWitnessedOccurrence(event){
  if(event.kind==='rionne-up'){
    if(current==='tavern'){interactionState='post-action';await sleep(1000);await witnessedRionneDeparture()}
    else if(current==='room'){interactionState='post-action';await sleep(1000);await witnessedRoomArrival()}
    else commitRionneRoom();
- }else if(event.kind==='rionne-down'){
+ }else{
    if(current==='room'){interactionState='post-action';await sleep(1000);await witnessedRoomDeparture()}
    else if(current==='tavern'){interactionState='post-action';await sleep(1000);await witnessedTavernArrival()}
    else commitRionneTavern();
  }
 }
 async function evaluateAgendas(oldMinute,newMinute){
- // Reconcile every world occurrence crossed by the elapsed interval, in chronological order.
  const occurrences=agendaOccurrencesBetween(oldMinute,newMinute);
- for(const occurrence of occurrences)await performAgendaOccurrence(occurrence);
+ for(const occurrence of occurrences){
+   // Landing exactly on the occurrence can be witnessed after the current beat resolves.
+   // If control returns AFTER it, history is already history: synchronize, never replay it.
+   if(occurrence.at===newMinute)await performWitnessedOccurrence(occurrence);
+   else await performMissedOccurrence(occurrence);
+ }
 }
 function rionneShouldBeUpstairs(minute=worldMinute){
  const tod=((minute%1440)+1440)%1440;

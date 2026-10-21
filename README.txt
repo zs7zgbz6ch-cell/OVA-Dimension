@@ -41,3 +41,9 @@ This is a controlled test build, not a production-content pass.
 - Room arrival: fade in at door full-back, pause, then walk to window.
 - Room exit: walk to door, stop full-front, pause, then fade through transfer.
 - Added rionne-back.png for authored full-back transfer choreography.
+
+PASS 4A.2 — WITNESS + SYNC
+- Agenda occurrences still reconcile every crossed world-time boundary.
+- Only an occurrence landed on exactly is eligible for witnessed choreography.
+- If control returns after the occurrence, world state is already advanced and the visible stale character uses a brief anime streak/squash sync-out or sync-in instead of replaying history.
+- Route facing is now derived per current route leg; Rionne pose assets are preloaded to avoid the Spot 04 wrong-facing flash.
