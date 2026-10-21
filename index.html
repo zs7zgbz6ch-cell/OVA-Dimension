@@ -175,7 +175,7 @@ img {
 @media(max-height:500px){#tavernRionne{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
 
 
-/* 01D Pass 4A.4 — missed-change synchronization punctuation. */
+/* 01D Pass 4A.3 — missed-change synchronization punctuation. */
 .sync-streaks{position:absolute;z-index:83;pointer-events:none;width:74px;height:76px;transform:translate(-50%,-50%);opacity:0}
 .sync-streaks i{position:absolute;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(248,225,184,.78),transparent);filter:drop-shadow(0 0 2px rgba(255,224,163,.35));transform-origin:right center}
 .sync-streaks i:nth-child(1){top:18%;width:64%;transform:translateX(5px)}.sync-streaks i:nth-child(2){top:34%;width:92%;transform:translateX(12px)}.sync-streaks i:nth-child(3){top:51%;width:72%;transform:translateX(2px)}.sync-streaks i:nth-child(4){top:68%;width:100%;transform:translateX(15px)}.sync-streaks i:nth-child(5){top:82%;width:58%;transform:translateX(7px)}
@@ -375,70 +375,60 @@ function routeDuration(points,pace=38){
  let d=0;for(let i=1;i<points.length;i++)d+=distance2D(points[i-1],points[i]);
  return Math.max(2200,Math.round((d/pace)*1000));
 }
-const RIONNE_PRESENTATION=new WeakMap();
-function presentationState(el){
- let st=RIONNE_PRESENTATION.get(el);
- if(!st){st={src:null,flip:false,moving:false};RIONNE_PRESENTATION.set(el,st)}
- return st;
-}
-async function setPoseStable(el,src,flip=false){
- const st=presentationState(el);
- if(src && !el.src.endsWith(src)){
-   // Decode before exposing the new drawing. No ghost clone, opacity race, or overlapping transition.
-   const probe=new Image();probe.src=src;
-   try{if(probe.decode)await probe.decode()}catch(e){}
-   el.src=src;
- }
- el.style.transition='none';
- el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;
- st.src=src||st.src;st.flip=!!flip;
- // Commit the pose before locomotion/transfer starts.
- await new Promise(requestAnimationFrame);
-}
 async function crossfadePose(el,src,flip=false,ms=150){
- // Compatibility name for existing choreography: 4A.4 intentionally uses an atomic pose handoff.
- // The old clone-based crossfade could race locomotion and briefly expose the wrong facing.
- await setPoseStable(el,src,flip);
+ if(!src || el.src.endsWith(src)){
+   el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;return;
+ }
+ // Keep the outgoing drawing frozen in exactly the same geometry while the incoming
+ // drawing is already decoded. Only opacity changes during the pose hand-off.
+ const ghost=el.cloneNode(false);
+ ghost.removeAttribute('id');ghost.setAttribute('aria-hidden','true');
+ ghost.style.transition='none';ghost.style.pointerEvents='none';ghost.style.opacity=getComputedStyle(el).opacity;
+ el.parentNode.insertBefore(ghost,el);
+ el.style.transition='none';el.src=src;el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;el.style.opacity='0';
+ await new Promise(requestAnimationFrame);
+ ghost.style.transition=`opacity ${ms}ms ease`;el.style.transition=`opacity ${ms}ms ease`;
+ ghost.style.opacity='0';el.style.opacity='1';
+ await sleep(ms+24);ghost.remove();el.style.transition='none';
 }
 function lerp(a,b,t){return a+(b-a)*t}
 function smoothstep(t){return t*t*(3-2*t)}
 async function walkThrough(el,points,pace=38){
- // 4A.4: locomotion owns only X/Y/scale. Pose/facing is committed BEFORE movement begins.
+ // 4A.3: one requestAnimationFrame locomotion clock. Waypoints are geometry, not
+ // separate CSS transitions, so there is no brake/restart at each point.
  const seg=[];let total=0;
  for(let i=1;i<points.length;i++){const d=distance2D(points[i-1],points[i]);seg.push(d);total+=d}
  const duration=routeDuration(points,pace);
- const st=presentationState(el);st.moving=true;
+ let currentLeg=0;
  const firstPose=travelPose(points[0],points[1]);
- await setPoseStable(el,firstPose.src,firstPose.flip);
+ await crossfadePose(el,firstPose.src,firstPose.flip,145);
  const started=performance.now();
  await new Promise(resolve=>{
    function frame(now){
      const raw=Math.min(1,(now-started)/duration);
+     // Gentle acceleration/deceleration only at the route's real start/end.
      const progress=smoothstep(raw), target=progress*total;
-     let run=0,leg=0;
+     let run=0, leg=0;
      while(leg<seg.length-1 && run+seg[leg]<target){run+=seg[leg];leg++}
      const local=seg[leg]?Math.max(0,Math.min(1,(target-run)/seg[leg])):1;
-     // Current authored routes keep the same directional/depth family through their pass-through waypoint.
-     // If a future route truly changes family mid-walk, that will be an explicit route beat rather than an async race.
+     if(leg!==currentLeg){
+       currentLeg=leg;
+       const pose=travelPose(points[leg],points[leg+1]);
+       // Curves may change facing/depth. The swap is independent from locomotion;
+       // do not await it or interrupt the route clock.
+       crossfadePose(el,pose.src,pose.flip,145);
+     }
      const a=points[leg],b=points[leg+1];
-     el.style.left=lerp(a.x,b.x,local)+'%';
-     el.style.top=lerp(a.y,b.y,local)+'%';
-     el.style.height=lerp(a.h,b.h,local)+'vh';
+     el.style.left=lerp(a.x,b.x,local)+'%';el.style.top=lerp(a.y,b.y,local)+'%';el.style.height=lerp(a.h,b.h,local)+'vh';
      if(raw<1)requestAnimationFrame(frame);else resolve();
    }
    requestAnimationFrame(frame);
  });
- const last=points[points.length-1];
- el.style.left=last.x+'%';el.style.top=last.y+'%';el.style.height=last.h+'vh';
- st.moving=false;
+ const last=points[points.length-1];place(el,last,1,'none',null,el.style.transform.includes('scaleX(-1)'));
 }
 async function fadeAt(el,p,from,to,ms,src,flip=false){
- await setPoseStable(el,src,flip);
- place(el,p,from,'none',null,flip);
- const anim=el.animate([{opacity:from},{opacity:to}],{duration:ms,easing:'ease',fill:'forwards'});
- try{await anim.finished}catch(e){}
- anim.cancel();
- place(el,p,to,'none',null,flip);
+ place(el,p,from,'none',src,flip);void el.offsetWidth;
+ place(el,p,to,`opacity ${ms}ms ease`,src,flip);await sleep(ms+40);
 }
 async function witnessedRionneDeparture(){
  interactionState='presentation';
