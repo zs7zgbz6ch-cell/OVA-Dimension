@@ -1,4 +1,4 @@
-const CACHE = 'ovad-01d-navigation-graph-0015';
+const CACHE = 'ovad-4b1a-npc-interaction';
 
 const CORE = [
   './',
@@ -6,6 +6,7 @@ const CORE = [
   './manifest.webmanifest',
   './assets/berklith-tavern.jpg',
   './assets/rionnes-room.jpg',
+  './assets/barmaid-beer.png',
   './assets/intro-portrait.jpg',
   './assets/intro-landscape.jpg',
   './assets/icon-192.png',

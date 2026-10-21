@@ -57,3 +57,11 @@ PASS 4A.7 — DESTINATION NAVIGATION GRAPH
 - Only the route portion in the player's current scene is animated; off-screen travel is simulated.
 - The old duplicated witnessed departure/arrival route functions were removed.
 - Existing rAF locomotion, directional PNG assets, Dimension Gear timing, and sync effects remain intact.
+
+
+4B.1A NPC INTERACTION PROOF
+- Barmaid occupies Tavern SPOT_06 activity slot (64.3, 80.9, 44.5).
+- Character sprite is the tap surface; no marker/outline.
+- Tap boop -> rotating NPC line -> +1 world minute -> normal Dimension Gear agenda resolution.
+- Tavern stairs updated to latest Scene Stage Spot 3 coordinates.
+- Rionne navigation/presentation remains based on stable 4A.7.
