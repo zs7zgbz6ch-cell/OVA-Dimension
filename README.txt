@@ -17,3 +17,12 @@ THREE CASES
 RESET PROTOTYPE restores 17:20 and Barmaid to Tavern SPOT_02.
 
 This is a controlled test build, not a production-content pass.
+
+01D PASS 4A — DIMENSION GEAR
+- Rionne's 17:35 upstairs / 17:55 downstairs agenda is now a recurring daily schedule.
+- Agenda occurrences are reconciled from elapsed world-time intervals, independent of which interaction advanced time.
+- Multiple crossed occurrences are processed chronologically.
+- If the player remains in the Tavern, Rionne's 17:55 return is now witnessed as an authored stairs-to-bar route.
+- If the player is in Rionne's Room, the matching arrival/departure is witnessed there.
+- Scene re-entry synchronizes to current schedule state without replaying off-screen history.
+- Old one-shot agenda flags are no longer used to drive the routine.

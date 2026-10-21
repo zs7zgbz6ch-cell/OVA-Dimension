@@ -184,7 +184,7 @@ img {
     <img id="tavernRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
     <button class="scene-hotspot interactive" id="rionneTalk" style="left:31%;top:48%;width:62px;height:42px" type="button" data-rionne-talk="true">RIONNE +1</button>
     <div class="character-bubble" id="rionneBubble">Ah—I forgot something upstairs.</div>
-    <div class="dev-agenda-note">01D PASS 3 · RIONNE → ROOM · 17:35 / RETURN · 17:55</div>
+    <div class="dev-agenda-note">01D PASS 4A · DIMENSION GEAR · DAILY 17:35 / 17:55</div>
   </div>
   <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')">
     <img id="roomRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
@@ -317,16 +317,11 @@ function updateWorldTimeReadout(){const el=$('#worldTimeReadout');if(el)el.textC
 function setWorldTime(minute){worldMinute=minute;localStorage.setItem('ovad_world_time',String(worldMinute));updateWorldTimeReadout()}
 function advanceTime(minutes=1){setWorldTime(worldMinute+Math.max(0,Math.floor(minutes)))}
 
-// 01D Pass 3 — Rionne agenda + cross-scene synchronization.
-let interactionState='idle', actionHideTimer=null, agendaHideTimer=null;
-const agendaState={
- rionne1735:localStorage.getItem('ovad_agenda_rionne1735')==='1',
- rionne1755:localStorage.getItem('ovad_agenda_rionne1755')==='1'
-};
-let rionneWorld={location:localStorage.getItem('ovad_rionne_location')||(agendaState.rionne1735&&!agendaState.rionne1755?'room':'tavern'),spot:localStorage.getItem('ovad_rionne_spot')||(agendaState.rionne1735&&!agendaState.rionne1755?'spot_02_1792445282697':'spot_02_1792447350835')};
+// 01D Pass 4A — DIMENSION GEAR.
+// Player actions advance time. The world owns every agenda occurrence crossed by that time.
+let rionneWorld={location:localStorage.getItem('ovad_rionne_location')||'tavern',spot:localStorage.getItem('ovad_rionne_spot')||'spot_02_1792447350835'};
 function saveRionneWorld(){localStorage.setItem('ovad_rionne_location',rionneWorld.location);localStorage.setItem('ovad_rionne_spot',rionneWorld.spot)}
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-function crossedMinute(oldMinute,newMinute,targetMinute){return oldMinute<targetMinute && newMinute>=targetMinute}
 function setInteractionState(next){interactionState=next;$$('.scene-hotspot').forEach(el=>el.classList.toggle('busy',next!=='idle'))}
 function showAction(text,cost){clearTimeout(actionHideTimer);actionKicker.textContent=`INTERACTION · +${cost} MIN`;actionCopy.textContent=text;actionCard.classList.add('show')}
 function hideAction(){actionCard.classList.remove('show')}
@@ -341,59 +336,82 @@ function commitRionneRoom(){rionneWorld={location:'room',spot:'spot_01'};saveRio
 function commitRionneTavern(){rionneWorld={location:'tavern',spot:'spot_02_1792447350835'};saveRionneWorld()}
 async function witnessedRionneDeparture(){
  interactionState='presentation';
- rionneBubble.classList.add('show');await sleep(1250);rionneBubble.classList.remove('show');await sleep(260);
- // Behind bar -> front/depth transfer. This fade is authored depth grammar, not a teleport.
+ rionneBubble.textContent='Ah—I forgot something upstairs.';rionneBubble.classList.add('show');await sleep(1250);rionneBubble.classList.remove('show');await sleep(260);
  setTavernRionne(36.0945868946,68.2391705069,27,0,'opacity 420ms ease','assets/rionne-front.png');await sleep(470);
  setTavernRionne(29.1,73.2,32,0,'none','assets/rionne-walk-front-3q.png',false);void tavernRionne.offsetWidth;
  setTavernRionne(29.1,73.2,32,1,'opacity 420ms ease','assets/rionne-walk-front-3q.png',false);await sleep(500);
- // SPOT_04 -> SPOT_05: right + closer = 3/4 front, mirrored.
  setTavernRionne(46.1182336182,80.2995391705,45,1,'left 2000ms cubic-bezier(.22,.72,.24,1), top 2000ms cubic-bezier(.22,.72,.24,1), height 2000ms cubic-bezier(.22,.72,.24,1), opacity 140ms ease','assets/rionne-walk-front-3q.png',true);await sleep(2050);
- // SPOT_05 -> stairs: still right + closer.
  setTavernRionne(93.7561253561,95.3897081413,64.5,1,'left 2900ms cubic-bezier(.22,.72,.24,1), top 2900ms cubic-bezier(.22,.72,.24,1), height 2900ms cubic-bezier(.22,.72,.24,1), opacity 140ms ease','assets/rionne-walk-front-3q.png',true);await sleep(2950);
- // Ascending away = 3/4 back. Logical transfer commits at the boundary.
  setTavernRionne(94,43,28,0,'left 1700ms cubic-bezier(.28,.62,.32,1), top 1700ms cubic-bezier(.28,.62,.32,1), height 1700ms cubic-bezier(.28,.62,.32,1), opacity 1050ms ease 450ms','assets/rionne-walk-back-3q.png',true);await sleep(900);commitRionneRoom();await sleep(850);
 }
 async function witnessedRoomArrival(){
- interactionState='presentation';
+ interactionState='presentation';commitRionneRoom();
  setRoomRionne(90.2606837607,111.0619047619,111,0,'none','assets/rionne-walk-back-3q.png',false);void roomRionne.offsetWidth;
  setRoomRionne(90.2606837607,111.0619047619,111,1,'opacity 380ms ease','assets/rionne-walk-back-3q.png',false);await sleep(430);
- // Door -> window: left + farther = 3/4 back.
  setRoomRionne(47.5863247863,74,61.5,1,'left 2700ms cubic-bezier(.22,.72,.24,1), top 2700ms cubic-bezier(.22,.72,.24,1), height 2700ms cubic-bezier(.22,.72,.24,1)','assets/rionne-walk-back-3q.png',false);await sleep(2750);
  setRoomRionne(47.5863247863,74,61.5,1,'opacity 140ms ease','assets/rionne-front.png',false);rionneWorld.spot='spot_02_1792445282697';saveRionneWorld();
 }
-async function settleRoomArrival(fadeIn=false){
- setRoomRionne(47.5863247863,74,61.5,fadeIn?0:1,'none','assets/rionne-front.png',false);
- if(fadeIn){void roomRionne.offsetWidth;setRoomRionne(47.5863247863,74,61.5,1,'opacity 850ms ease','assets/rionne-front.png');await sleep(900)}
- rionneWorld.spot='spot_02_1792445282697';saveRionneWorld();
-}
-async function witnessedRionneReturn(){
+async function witnessedRoomDeparture(){
  interactionState='presentation';
- // Window -> room door: right + closer = 3/4 front mirrored.
+ setRoomRionne(47.5863247863,74,61.5,1,'none','assets/rionne-walk-front-3q.png',false);
  setRoomRionne(90.2606837607,111.0619047619,111,1,'left 2700ms cubic-bezier(.22,.72,.24,1), top 2700ms cubic-bezier(.22,.72,.24,1), height 2700ms cubic-bezier(.22,.72,.24,1)','assets/rionne-walk-front-3q.png',true);await sleep(2750);
  setRoomRionne(90.2606837607,111.0619047619,111,0,'opacity 650ms ease','assets/rionne-walk-front-3q.png',true);await sleep(700);commitRionneTavern();
 }
-async function evaluateAgendas(oldMinute,newMinute,mode='witnessed'){
- const up=17*60+35, down=17*60+55;
- if(!agendaState.rionne1735 && crossedMinute(oldMinute,newMinute,up)){
-   agendaState.rionne1735=true;localStorage.setItem('ovad_agenda_rionne1735','1');
-   // Presence means witnessed for this Rionne test: finish the player's interaction, then play it.
-   if(current==='tavern'){interactionState='post-action';await sleep(1000);await witnessedRionneDeparture()}
-   else {commitRionneRoom();if(current==='room'){interactionState='post-action';await sleep(1000);await witnessedRoomArrival()}}
+async function witnessedTavernArrival(){
+ interactionState='presentation';
+ // She crosses the stairs transfer into the visible Tavern, then follows the reverse authored route to work.
+ commitRionneTavern();
+ setTavernRionne(94,43,28,0,'none','assets/rionne-walk-front-3q.png',false);void tavernRionne.offsetWidth;
+ setTavernRionne(94,43,28,1,'opacity 360ms ease','assets/rionne-walk-front-3q.png',false);await sleep(380);
+ setTavernRionne(93.7561253561,95.3897081413,64.5,1,'left 1700ms cubic-bezier(.28,.62,.32,1), top 1700ms cubic-bezier(.28,.62,.32,1), height 1700ms cubic-bezier(.28,.62,.32,1)','assets/rionne-walk-front-3q.png',false);await sleep(1750);
+ // Left + farther: use the mirrored 3/4-back travel view.
+ setTavernRionne(46.1182336182,80.2995391705,45,1,'left 2850ms cubic-bezier(.22,.72,.24,1), top 2850ms cubic-bezier(.22,.72,.24,1), height 2850ms cubic-bezier(.22,.72,.24,1)','assets/rionne-walk-back-3q.png',true);await sleep(2900);
+ setTavernRionne(29.1,73.2,32,1,'left 1900ms cubic-bezier(.22,.72,.24,1), top 1900ms cubic-bezier(.22,.72,.24,1), height 1900ms cubic-bezier(.22,.72,.24,1)','assets/rionne-walk-back-3q.png',true);await sleep(1950);
+ // Authored depth transfer: front of bar -> behind bar.
+ setTavernRionne(29.1,73.2,32,0,'opacity 380ms ease','assets/rionne-walk-back-3q.png',true);await sleep(420);
+ setTavernRionne(36.0945868946,68.2391705069,27,0,'none','assets/rionne-front.png',false);void tavernRionne.offsetWidth;
+ setTavernRionne(36.0945868946,68.2391705069,27,1,'opacity 430ms ease','assets/rionne-front.png',false);await sleep(460);
+ rionneWorld.spot='spot_02_1792447350835';saveRionneWorld();
+}
+function agendaOccurrencesBetween(oldMinute,newMinute){
+ const events=[];
+ if(newMinute<=oldMinute)return events;
+ const firstDay=Math.floor(oldMinute/1440), lastDay=Math.floor(newMinute/1440);
+ for(let day=firstDay;day<=lastDay;day++){
+   const up=day*1440+17*60+35, down=day*1440+17*60+55;
+   if(oldMinute<up && newMinute>=up)events.push({at:up,kind:'rionne-up',day});
+   if(oldMinute<down && newMinute>=down)events.push({at:down,kind:'rionne-down',day});
  }
- if(!agendaState.rionne1755 && crossedMinute(oldMinute,newMinute,down)){
-   agendaState.rionne1755=true;localStorage.setItem('ovad_agenda_rionne1755','1');
-   if(current==='room'){interactionState='post-action';await sleep(1000);await witnessedRionneReturn()}
+ return events.sort((a,b)=>a.at-b.at);
+}
+async function performAgendaOccurrence(event){
+ if(event.kind==='rionne-up'){
+   if(current==='tavern'){interactionState='post-action';await sleep(1000);await witnessedRionneDeparture()}
+   else if(current==='room'){interactionState='post-action';await sleep(1000);await witnessedRoomArrival()}
+   else commitRionneRoom();
+ }else if(event.kind==='rionne-down'){
+   if(current==='room'){interactionState='post-action';await sleep(1000);await witnessedRoomDeparture()}
+   else if(current==='tavern'){interactionState='post-action';await sleep(1000);await witnessedTavernArrival()}
    else commitRionneTavern();
  }
 }
+async function evaluateAgendas(oldMinute,newMinute){
+ // Reconcile every world occurrence crossed by the elapsed interval, in chronological order.
+ const occurrences=agendaOccurrencesBetween(oldMinute,newMinute);
+ for(const occurrence of occurrences)await performAgendaOccurrence(occurrence);
+}
+function rionneShouldBeUpstairs(minute=worldMinute){
+ const tod=((minute%1440)+1440)%1440;
+ return tod>=17*60+35 && tod<17*60+55;
+}
 function syncRionnePresentation(){
- const upstairs=agendaState.rionne1735&&!agendaState.rionne1755&&worldMinute>=17*60+35&&worldMinute<17*60+55;
+ const upstairs=rionneShouldBeUpstairs();
  if(upstairs){
    if(rionneWorld.location!=='room')commitRionneRoom();
    setTavernRionne(36.0945868946,68.2391705069,27,0,'none','assets/rionne-front.png');
    setRoomRionne(47.5863247863,74,61.5,1,'none','assets/rionne-front.png');
  }else{
-   if(worldMinute>=17*60+55 && rionneWorld.location!=='tavern')commitRionneTavern();
+   if(rionneWorld.location!=='tavern')commitRionneTavern();
    setTavernRionne(36.0945868946,68.2391705069,27,1,'none','assets/rionne-front.png');
    setRoomRionne(47.5863247863,74,61.5,0,'none','assets/rionne-front.png');
  }
@@ -401,12 +419,12 @@ function syncRionnePresentation(){
 async function runSceneInteraction(el){
  if(interactionState!=='idle')return;
  const isRionne=el.dataset.rionneTalk==='true';
- if(isRionne && (rionneWorld.location!=='tavern'||agendaState.rionne1735))return;
+ if(isRionne && (rionneWorld.location!=='tavern'||rionneShouldBeUpstairs()))return;
  const cost=isRionne?1:Math.max(0,Number.parseInt(el.dataset.actionCost||'1',10)||1), oldMinute=worldMinute;
  const occupied=el.dataset.occupied==='true';
  setInteractionState('interaction');showAction(isRionne?'Rionne glances over from her work. “Need something?”':(el.dataset.actionText||'You take a moment.'),cost);
- if(occupied){await sleep(350);advanceTime(cost);await sleep(1250);hideAction();interactionState='resolve';await evaluateAgendas(oldMinute,worldMinute,'occupied')}
- else{await sleep(850);hideAction();interactionState='resolve';advanceTime(cost);await evaluateAgendas(oldMinute,worldMinute,'witnessed')}
+ if(occupied){await sleep(350);advanceTime(cost);await sleep(1250);hideAction();interactionState='resolve';await evaluateAgendas(oldMinute,worldMinute)}
+ else{await sleep(850);hideAction();interactionState='resolve';advanceTime(cost);await evaluateAgendas(oldMinute,worldMinute)}
  setInteractionState('idle');$$('.scene-hotspot').forEach(h=>h.classList.remove('busy'));
 }
 $$('.scene-hotspot').forEach(el=>el.addEventListener('click',()=>runSceneInteraction(el)));
@@ -424,10 +442,10 @@ $$('.loc').forEach(b=>b.addEventListener('click',()=>{target=b.dataset.location;
  $('#previewImg').src=d.img;$('#previewTitle').textContent=d.title;$('#previewSub').textContent=d.sub;preview.classList.add('open')}));
 $('#previewBack').addEventListener('click',()=>preview.classList.remove('open'));
 $('#goBtn').addEventListener('click',()=>{
- const moved=target!==current;
+ const moved=target!==current, travelOldMinute=worldMinute;
  // Travel is a hard cut hidden behind black — never a scene crossfade.
  fade.classList.add('on');
- setTimeout(()=>{
+ setTimeout(async ()=>{
    app.classList.add('travel-switch');
    showScene(target);
    if(moved)advanceTime(1);
@@ -439,16 +457,17 @@ $('#goBtn').addEventListener('click',()=>{
      app.classList.remove('travel-switch');
      requestAnimationFrame(()=>fade.classList.remove('on'));
    });
+   if(moved){await sleep(650);await evaluateAgendas(travelOldMinute,worldMinute);setInteractionState('idle')}
  },720);
 });
 $$('[data-action]').forEach(b=>b.addEventListener('click',()=>{
- if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:true,agendaRionne1735:agendaState.rionne1735,agendaRionne1755:agendaState.rionne1755,rionneWorld}));say('Prototype saved.')}
- if(b.dataset.action==='load'){let sv;try{sv=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(sv&&locations[sv.location]){showScene(sv.location);setWorldTime(Number.isFinite(sv.worldMinute)?sv.worldMinute:WORLD_START);agendaState.rionne1735=!!sv.agendaRionne1735;agendaState.rionne1755=!!sv.agendaRionne1755;localStorage.setItem('ovad_agenda_rionne1735',agendaState.rionne1735?'1':'0');localStorage.setItem('ovad_agenda_rionne1755',agendaState.rionne1755?'1':'0');rionneWorld=sv.rionneWorld||{location:'tavern',spot:'spot_02_1792447350835'};saveRionneWorld();syncRionnePresentation();closeMenu();say('Save loaded.')}else say('No save data yet.')}
+ if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:true,rionneWorld}));say('Prototype saved.')}
+ if(b.dataset.action==='load'){let sv;try{sv=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(sv&&locations[sv.location]){showScene(sv.location);setWorldTime(Number.isFinite(sv.worldMinute)?sv.worldMinute:WORLD_START);rionneWorld=sv.rionneWorld||{location:'tavern',spot:'spot_02_1792447350835'};saveRionneWorld();syncRionnePresentation();closeMenu();say('Save loaded.')}else say('No save data yet.')}
  if(b.dataset.action==='extra')say('Archive section coming later.')
 }));
 $('#resetBtn').addEventListener('click',()=>$('#confirm').classList.add('open'));
 $('#cancelReset').addEventListener('click',()=>$('#confirm').classList.remove('open'));
-$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');['ovad_agenda_barmaid1735','ovad_barmaid_location','ovad_barmaid_spot','ovad_agenda_rionne1735','ovad_agenda_rionne1755','ovad_rionne_location','ovad_rionne_spot'].forEach(k=>localStorage.removeItem(k));agendaState.rionne1735=false;agendaState.rionne1755=false;rionneWorld={location:'tavern',spot:'spot_02_1792447350835'};setWorldTime(WORLD_START);showScene('tavern');syncRionnePresentation();$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
+$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');['ovad_agenda_barmaid1735','ovad_barmaid_location','ovad_barmaid_spot','ovad_agenda_rionne1735','ovad_agenda_rionne1755','ovad_rionne_location','ovad_rionne_spot'].forEach(k=>localStorage.removeItem(k));rionneWorld={location:'tavern',spot:'spot_02_1792447350835'};setWorldTime(WORLD_START);showScene('tavern');syncRionnePresentation();$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
 $('#motionBtn').addEventListener('click',e=>{motion=!motion;e.currentTarget.textContent='MENU MOTION · '+(motion?'ON':'REDUCED');document.documentElement.style.setProperty('--motion',motion?'1':'0');say(motion?'Full menu motion.':'Reduced menu motion.')});
 
 // Startup presentation is separate from the live scene. Nothing playable is visible until the title sequence finishes.
