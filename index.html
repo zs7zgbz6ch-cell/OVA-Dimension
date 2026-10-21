@@ -190,7 +190,7 @@ img {
     <img id="tavernRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
     <button class="scene-hotspot interactive" id="rionneTalk" style="left:31%;top:48%;width:62px;height:42px" type="button" data-rionne-talk="true">RIONNE +1</button>
     <div class="character-bubble" id="rionneBubble">Ah—I forgot something upstairs.</div>
-    <div class="dev-agenda-note">01D PASS 4A.3 · WITNESS + SYNC · DIMENSION GEAR</div>
+    <div class="dev-agenda-note">01D PASS 4A.8 · MOVEMENT POLISH · DIMENSION GEAR</div>
   </div>
   <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')">
     <img id="roomRionne" src="assets/rionne-front.png" alt="Rionne" aria-hidden="true">
@@ -424,7 +424,7 @@ async function navigateRionneTo(destination){
      await fadeAt(tavernRionne,NAV_NODE['tavern.barIdle'].spot,1,0,420,RIONNE_POSE.front,false);
      await fadeAt(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,0,1,420,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
      // barTransfer is already reached by its transfer; walk the graph-resolved remainder to the stairs.
-     await walkThrough(tavernRionne,pts.slice(1),24);
+     await walkThrough(tavernRionne,pts.slice(1),17);
      place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
      place(tavernRionne,SPOT.tavern.stairsFar,0,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 1500ms ease 700ms',RIONNE_POSE.fullBack,false);await sleep(2500);
    }else if(start==='room.window'&&destination==='tavern.barIdle'){
@@ -433,7 +433,7 @@ async function navigateRionneTo(destination){
      place(tavernRionne,SPOT.tavern.stairsFar,0,'none');
      place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 800ms ease');await sleep(2450);
      place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'none');await sleep(TRANSFER_PAUSE);
-     await walkThrough(tavernRionne,pts.slice(0,-1),24);
+     await walkThrough(tavernRionne,pts.slice(0,-1),17);
      place(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
      await fadeAt(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,1,0,420,RIONNE_POSE.fullBack,false);
      await fadeAt(tavernRionne,NAV_NODE['tavern.barIdle'].spot,0,1,430,RIONNE_POSE.front,false);
@@ -442,9 +442,9 @@ async function navigateRionneTo(destination){
    const pts=navScenePoints(path,'room');
    if(start==='tavern.barIdle'&&destination==='room.window'){
      await fadeAt(roomRionne,NAV_NODE['room.door'].spot,0,1,420,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
-     await walkThrough(roomRionne,pts,22);place(roomRionne,NAV_NODE['room.window'].spot,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);
+     await walkThrough(roomRionne,pts,16);place(roomRionne,NAV_NODE['room.window'].spot,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);
    }else if(start==='room.window'&&destination==='tavern.barIdle'){
-     await walkThrough(roomRionne,pts,22);place(roomRionne,NAV_NODE['room.door'].spot,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
+     await walkThrough(roomRionne,pts,16);place(roomRionne,NAV_NODE['room.door'].spot,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
      await fadeAt(roomRionne,NAV_NODE['room.door'].spot,1,0,650,RIONNE_POSE.front,false);
    }
  }
@@ -506,7 +506,12 @@ async function walkThrough(el,points,pace=38){
  await new Promise(resolve=>{
    function frame(now){
      const raw=Math.min(1,(now-started)/duration);
-     const progress=smoothstep(raw), target=progress*total;
+     const eased=smoothstep(raw);
+     // Presentation-only footfall cadence: continuous motion with a tiny repeating
+     // speed pulse. It never stops, changes route timing/state, or moves off-path.
+     const stepCount=Math.max(2,Math.round(total/7));
+     const cadence=eased-(0.10*Math.sin(Math.PI*2*stepCount*eased)/(Math.PI*2*stepCount));
+     const progress=Math.max(0,Math.min(1,cadence)), target=progress*total;
      let run=0,leg=0;
      while(leg<seg.length-1 && run+seg[leg]<target){run+=seg[leg];leg++}
      const local=seg[leg]?Math.max(0,Math.min(1,(target-run)/seg[leg])):1;
@@ -551,15 +556,17 @@ function syncStreaksAt(p){
 async function syncOut(el,p){
  // Presentation shorthand only: the character already left in world state.
  const fx=syncStreaksAt(p), flip=(el.style.transform||'').includes('scaleX(-1)')?-1:1;
- fx.animate([{opacity:0,transform:'translate(-50%,-50%) scaleX(.72)'},{opacity:.9,offset:.28},{opacity:0,transform:'translate(-50%,-50%) scaleX(1.15)'}],{duration:390,easing:'ease-out',fill:'forwards'});
- const a=el.animate([{opacity:1,transform:`translate(-50%,-100%) scaleX(${flip})`},{opacity:.9,transform:`translate(-50%,-100%) scaleX(${1.04*flip})`,offset:.24},{opacity:0,transform:`translate(-50%,-100%) scaleX(${.72*flip})`}],{duration:360,easing:'ease-in',fill:'forwards'});
- try{await a.finished}catch(e){};a.cancel();place(el,p,0,'none',RIONNE_POSE.front,false);await sleep(90);fx.remove();
+ fx.animate([{opacity:0,transform:'translate(-50%,-50%) scaleX(.72)'},{opacity:.9,offset:.28},{opacity:0,transform:'translate(-50%,-50%) scaleX(1.15)'}],{duration:560,easing:'ease-out',fill:'forwards'});
+ await sleep(70);
+ const a=el.animate([{opacity:1,transform:`translate(-50%,-100%) scaleX(${flip})`},{opacity:.9,transform:`translate(-50%,-100%) scaleX(${1.04*flip})`,offset:.24},{opacity:0,transform:`translate(-50%,-100%) scaleX(${.72*flip})`}],{duration:500,easing:'ease-in-out',fill:'forwards'});
+ try{await a.finished}catch(e){};a.cancel();place(el,p,0,'none',RIONNE_POSE.front,false);await sleep(150);fx.remove();
 }
 async function syncIn(el,p){
  const fx=syncStreaksAt(p);place(el,p,0,'none',RIONNE_POSE.front,false);
- fx.animate([{opacity:0,transform:'translate(-50%,-50%) scaleX(1.12)'},{opacity:.85,offset:.25},{opacity:0,transform:'translate(-50%,-50%) scaleX(.78)'}],{duration:390,easing:'ease-out',fill:'forwards'});
- const a=el.animate([{opacity:0,transform:'translate(-50%,-100%) scaleX(.72)'},{opacity:.9,transform:'translate(-50%,-100%) scaleX(1.04)',offset:.72},{opacity:1,transform:'translate(-50%,-100%) scaleX(1)'}],{duration:390,easing:'ease-out',fill:'forwards'});
- try{await a.finished}catch(e){};a.cancel();place(el,p,1,'none',RIONNE_POSE.front,false);await sleep(80);fx.remove();
+ fx.animate([{opacity:0,transform:'translate(-50%,-50%) scaleX(1.12)'},{opacity:.85,offset:.25},{opacity:0,transform:'translate(-50%,-50%) scaleX(.78)'}],{duration:560,easing:'ease-out',fill:'forwards'});
+ await sleep(70);
+ const a=el.animate([{opacity:0,transform:'translate(-50%,-100%) scaleX(.72)'},{opacity:.9,transform:'translate(-50%,-100%) scaleX(1.04)',offset:.72},{opacity:1,transform:'translate(-50%,-100%) scaleX(1)'}],{duration:520,easing:'ease-out',fill:'forwards'});
+ try{await a.finished}catch(e){};a.cancel();place(el,p,1,'none',RIONNE_POSE.front,false);await sleep(150);fx.remove();
 }
 async function performMissedOccurrence(event){
  interactionState='sync';
