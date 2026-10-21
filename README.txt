@@ -65,3 +65,12 @@ PASS 4A.7 — DESTINATION NAVIGATION GRAPH
 - Tap boop -> rotating NPC line -> +1 world minute -> normal Dimension Gear agenda resolution.
 - Tavern stairs updated to latest Scene Stage Spot 3 coordinates.
 - Rionne navigation/presentation remains based on stable 4A.7.
+
+4B.1B — Major Character Interaction
+- Rionne is interactable while idle and player control is free.
+- Alpha-aware sprite hit testing; transparent sprite pixels do not trigger her.
+- Tap boop flows into an adaptive left/right OVA-D character cut-in.
+- Panel uses the authored Rionne bar portrait and avoids covering her scene position.
+- Observe / Talk / Give / Status / Leave proof options.
+- Talk proves options -> dialogue -> options without advancing Dimension Gear yet.
+- Built on the passing 4B.1A / 4A.7 navigation foundation.

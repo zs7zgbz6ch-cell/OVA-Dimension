@@ -1,4 +1,4 @@
-const CACHE = 'ovad-4b1a-npc-interaction';
+const CACHE = 'ovad-4b1b-character-panel';
 
 const CORE = [
   './',
@@ -7,6 +7,7 @@ const CORE = [
   './assets/berklith-tavern.jpg',
   './assets/rionnes-room.jpg',
   './assets/barmaid-beer.png',
+  './assets/rionne-interaction-bar.jpg',
   './assets/intro-portrait.jpg',
   './assets/intro-landscape.jpg',
   './assets/icon-192.png',
