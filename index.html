@@ -319,6 +319,7 @@ function advanceTime(minutes=1){setWorldTime(worldMinute+Math.max(0,Math.floor(m
 
 // 01D Pass 4A — DIMENSION GEAR.
 // Player actions advance time. The world owns every agenda occurrence crossed by that time.
+let interactionState='idle', actionHideTimer=null, agendaHideTimer=null;
 let rionneWorld={location:localStorage.getItem('ovad_rionne_location')||'tavern',spot:localStorage.getItem('ovad_rionne_spot')||'spot_02_1792447350835'};
 function saveRionneWorld(){localStorage.setItem('ovad_rionne_location',rionneWorld.location);localStorage.setItem('ovad_rionne_spot',rionneWorld.spot)}
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
