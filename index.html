@@ -175,7 +175,7 @@ img {
 @media(max-height:500px){#tavernRionne{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
 
 
-/* 01D Pass 4A.5 — missed-change synchronization punctuation. */
+/* 01D Pass 4A.6 — missed-change synchronization punctuation. */
 .sync-streaks{position:absolute;z-index:83;pointer-events:none;width:74px;height:76px;transform:translate(-50%,-50%);opacity:0}
 .sync-streaks i{position:absolute;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(248,225,184,.78),transparent);filter:drop-shadow(0 0 2px rgba(255,224,163,.35));transform-origin:right center}
 .sync-streaks i:nth-child(1){top:18%;width:64%;transform:translateX(5px)}.sync-streaks i:nth-child(2){top:34%;width:92%;transform:translateX(12px)}.sync-streaks i:nth-child(3){top:51%;width:72%;transform:translateX(2px)}.sync-streaks i:nth-child(4){top:68%;width:100%;transform:translateX(15px)}.sync-streaks i:nth-child(5){top:82%;width:58%;transform:translateX(7px)}
@@ -336,7 +336,7 @@ function setRionnePose(el,x,y,h,opacity=1,transition='none',src=null,flip=null){
  // Geometry/opacity updates must never silently change facing.
  // Facing belongs to the pose handoff only.
  el.style.transition=transition;el.style.left=x+'%';el.style.top=y+'%';el.style.height=h+'vh';el.style.width='auto';el.style.opacity=opacity;
- if(flip!==null)el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;
+ el.style.transform='translate(-50%,-100%)';
  if(src && !el.src.endsWith(src))el.src=src;
 }
 function setTavernRionne(x,y,h,opacity=1,transition='none',src=null,flip=false){setRionnePose(tavernRionne,x,y,h,opacity,transition,src,flip)}
@@ -349,8 +349,10 @@ function commitRionneTavern(){rionneWorld={location:'tavern',spot:'spot_02_17924
 const RIONNE_POSE={
  front:'assets/rionne-front.png',
  fullBack:'assets/rionne-back.png',
- walkFront:'assets/rionne-walk-front-3q.png',
- walkBack:'assets/rionne-walk-back-3q.png'
+ walkFrontLeft:'assets/rionne-walk-front-3q.png',
+ walkFrontRight:'assets/rionne-walk-front-3q-right.png',
+ walkBackLeft:'assets/rionne-walk-back-3q.png',
+ walkBackRight:'assets/rionne-walk-back-3q-right.png'
 };
 // Keep directional swaps resident before the first route begins; avoids a one-frame native-facing flash on iOS.
 Object.values(RIONNE_POSE).forEach(src=>{const img=new Image();img.decoding='async';img.src=src});
@@ -367,9 +369,11 @@ const SPOT={
 const TRANSFER_PAUSE=1000;
 function travelPose(a,b){
  const toward=b.h>a.h+.15;
- const src=toward?RIONNE_POSE.walkFront:RIONNE_POSE.walkBack;
- const flip=b.x>a.x+.05; // source art faces left; mirror only for rightward travel
- return {src,flip};
+ const right=b.x>a.x+.05;
+ const src=toward
+   ?(right?RIONNE_POSE.walkFrontRight:RIONNE_POSE.walkFrontLeft)
+   :(right?RIONNE_POSE.walkBackRight:RIONNE_POSE.walkBackLeft);
+ return {src,flip:false};
 }
 function place(el,p,opacity=1,transition='none',src=null,flip=null){setRionnePose(el,p.x,p.y,p.h,opacity,transition,src,flip)}
 function distance2D(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
@@ -391,11 +395,11 @@ async function setPoseStable(el,src,flip=false){
    try{if(probe.decode)await probe.decode()}catch(e){}
  }
  el.style.transition='none';
- // Commit facing before exposing the new directional drawing. On iOS, changing
- // src first can briefly paint the asset in its native (left-facing) orientation.
- el.style.transform=`translate(-50%,-100%) scaleX(${flip?-1:1})`;
+ // Direction is baked into the selected PNG. Runtime mirroring is intentionally
+ // avoided so Safari can never expose a native-facing frame during a handoff.
+ el.style.transform='translate(-50%,-100%)';
  if(src && !el.src.endsWith(src))el.src=src;
- st.src=src||st.src;st.flip=!!flip;
+ st.src=src||st.src;st.flip=false;
  // Commit the pose before locomotion/transfer starts.
  await new Promise(requestAnimationFrame);
 }

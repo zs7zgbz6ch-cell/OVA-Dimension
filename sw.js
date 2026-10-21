@@ -1,4 +1,4 @@
-const CACHE = 'ovad-01d-witness-sync-0013';
+const CACHE = 'ovad-01d-directional-assets-0014';
 
 const CORE = [
   './',
@@ -13,7 +13,9 @@ const CORE = [
   './assets/test-character-01.png',
   './assets/rionne-front.png',
   './assets/rionne-walk-front-3q.png',
+  './assets/rionne-walk-front-3q-right.png',
   './assets/rionne-walk-back-3q.png',
+  './assets/rionne-walk-back-3q-right.png',
   './assets/rionne-back.png',
   './manifest.webmanifest'
 ];
