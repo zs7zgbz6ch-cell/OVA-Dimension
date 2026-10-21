@@ -26,3 +26,18 @@ This is a controlled test build, not a production-content pass.
 - If the player is in Rionne's Room, the matching arrival/departure is witnessed there.
 - Scene re-entry synchronizes to current schedule state without replaying off-screen history.
 - Old one-shot agenda flags are no longer used to drive the routine.
+
+
+01D PASS 4A.1 — MOVEMENT GRAMMAR
+- Dimension Gear timing/schedule behavior remains unchanged.
+- Horizontal travel now derives facing from X direction: left stays left, right mirrors right.
+- Depth travel derives 3/4 front/back walking art from scale change.
+- SPOT_05 is a pass-through waypoint: SPOT_04 -> SPOT_05 -> SPOT_03 is one continuous walk.
+- Normal walking pace is slower and route duration is distance-based.
+- Transfer spots now follow: arrive -> slow/stop -> orient in full front/back -> pause -> cross transfer.
+- Tavern bar departure: fade behind bar, appear SPOT_04 full-front, pause, then walk.
+- Tavern stairs departure: arrive SPOT_03, switch full-back, pause, then ascend/shrink/fade.
+- Tavern return uses the inverse staging and correct left-facing return travel.
+- Room arrival: fade in at door full-back, pause, then walk to window.
+- Room exit: walk to door, stop full-front, pause, then fade through transfer.
+- Added rionne-back.png for authored full-back transfer choreography.

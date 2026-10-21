@@ -1,4 +1,4 @@
-const CACHE = 'ovad-01d-witnessed-0011';
+const CACHE = 'ovad-01d-movement-0012';
 
 const CORE = [
   './',
@@ -11,6 +11,10 @@ const CORE = [
   './assets/icon-192.png',
   './assets/icon-512.png',
   './assets/test-character-01.png',
+  './assets/rionne-front.png',
+  './assets/rionne-walk-front-3q.png',
+  './assets/rionne-walk-back-3q.png',
+  './assets/rionne-back.png',
   './manifest.webmanifest'
 ];
 
