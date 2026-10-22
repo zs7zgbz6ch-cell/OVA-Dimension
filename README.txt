@@ -1,11 +1,12 @@
-OVA-D 01D Pass 4B.6 — iPhone Character Screen Stabilization
+OVA-D 01D Pass 4B.7 — Character Card Pop & Framing
 
-Built from 4B.5 after tracing the final iPhone-landscape CSS cascade.
-- Fixes the old max-height:500px rule that was overriding the narrower character-card widths.
-- Normal character card is now genuinely narrower on iPhone landscape.
-- Observe card is also narrower and remains a distinct full-body composition.
-- Normal Rionne framing is controlled inside the iPhone-landscape rule so her upper-body crop no longer inherits the wrong desktop composition.
-- Dimension Gear, agenda logic, routes, dialogue progression and character interaction behavior otherwise unchanged.
+Built from 4B.6, the first later character-screen build confirmed live after the GitHub Pages deployment issue.
+- Normal character card is ~10% wider than 4B.6 and now lands centered on screen.
+- Observe card is ~5% wider than 4B.6 while retaining its separate full-body composition.
+- Tapping Rionne keeps the existing boop, then the card visually originates from her live scene position and pops/travels into the centered interaction position.
+- Normal Rionne art framing is now independent from Observe: substantially smaller and moved down so her head/face can remain visible in the menu composition.
+- Observe retains its dedicated full-body framing and portrait-orientation behavior.
+- Dimension Gear, agenda logic, routes, scene movement, witness/sync, dialogue progression and character interaction behavior otherwise unchanged.
 
 Changed files:
 - index.html
