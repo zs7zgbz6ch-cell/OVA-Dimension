@@ -1,4 +1,4 @@
-const CACHE = 'ovad-4b1c-character-menu-v1';
+const CACHE = 'ovad-4b2-character-screen-v1';
 
 const CORE = [
   './',
@@ -7,7 +7,7 @@ const CORE = [
   './assets/berklith-tavern.jpg',
   './assets/rionnes-room.jpg',
   './assets/barmaid-beer.png',
-  './assets/rionne-interaction-bar.jpg',
+  './assets/rionne-character-screen.png',
   './assets/intro-portrait.jpg',
   './assets/intro-landscape.jpg',
   './assets/icon-192.png',
