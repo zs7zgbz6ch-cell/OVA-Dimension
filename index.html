@@ -182,7 +182,7 @@ img {
 @media(max-height:500px){#tavernRionne{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
 
 
-/* 4B.4 — stable character screen framing. */
+/* 4B.6 — iPhone landscape character screen stabilization. */
 #tavernRionne,#roomRionne{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .rionne-panel,.rionne-character-card,.rionne-character-art{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-user-drag:none!important;touch-action:manipulation}
 #tavernRionne.rionne-interactive,#roomRionne.rionne-interactive{pointer-events:auto;cursor:pointer}
@@ -213,7 +213,7 @@ img {
 @keyframes rionneRotatePulse{0%,100%{opacity:.34}50%{opacity:.82}}.rionne-rotate-hint{position:absolute;z-index:7;left:50%;bottom:18px;transform:translateX(-50%);color:#ead8b7;font-size:clamp(7px,.72vw,9px);letter-spacing:.18em;white-space:nowrap;opacity:0;visibility:hidden;pointer-events:none;text-shadow:0 2px 8px #000}.rionne-rotate-icon{display:none}.rionne-panel.mode-observe .rionne-rotate-hint{visibility:visible;animation:rionneRotatePulse 2s ease-in-out infinite}@media(orientation:portrait){body.observe-active .rionne-rotate-hint{display:none}}
 body.observe-active .orientation-guard{display:none!important}
 @media(orientation:portrait){body.observe-active .rionne-panel{position:fixed}body.observe-active .rionne-panel.mode-observe .rionne-character-card{inset:max(2.5%,env(safe-area-inset-top)) max(3%,env(safe-area-inset-right)) max(2.5%,env(safe-area-inset-bottom)) max(3%,env(safe-area-inset-left));width:auto;height:auto}body.observe-active .rionne-panel.mode-observe .rionne-character-art{height:92%;bottom:0}body.observe-active .rionne-panel.mode-observe .rionne-back{bottom:max(18px,env(safe-area-inset-bottom))}}
-@media(max-height:500px){.rionne-character-card{top:3%;height:92%;width:min(29vw,330px);border-radius:15px}.rionne-options{left:9px;right:9px;bottom:9px;gap:5px}.rionne-option{padding:6px 7px}.rionne-card-info{top:10px;left:13px}.rionne-panel.mode-observe .rionne-character-card{height:96%;width:min(35vw,405px)}}
+@media(max-height:500px){.rionne-character-card{top:3%;height:92%;width:min(24.5vw,330px);border-radius:15px}.rionne-character-art{height:164%;bottom:-42%}.rionne-options{left:9px;right:9px;bottom:9px;gap:5px}.rionne-option{padding:6px 7px}.rionne-card-info{top:10px;left:13px}.rionne-panel.mode-observe .rionne-character-card{height:96%;width:min(30vw,405px)}.rionne-panel.mode-observe .rionne-character-art{height:96%;bottom:0}}
 
 /* 01D Pass 4A.6 — missed-change synchronization punctuation. */
 .sync-streaks{position:absolute;z-index:83;pointer-events:none;width:74px;height:76px;transform:translate(-50%,-50%);opacity:0}
