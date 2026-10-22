@@ -1,4 +1,4 @@
-const CACHE = 'ovad-4b1b-rionne-interaction-v2';
+const CACHE = 'ovad-4b1c-character-menu-v1';
 
 const CORE = [
   './',
