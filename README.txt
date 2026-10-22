@@ -12,3 +12,8 @@ Built by rolling back to the stable 4B.6 interaction layout, then selectively re
 Changed files:
 - index.html
 - README.txt
+
+
+4B.9 — Rionne framing micro-adjustment
+- Normal iPhone-landscape Rionne position only: bottom -25% -> -32%.
+- No other layout, Observe, animation, Dimension Gear, movement, agenda or interaction changes.
