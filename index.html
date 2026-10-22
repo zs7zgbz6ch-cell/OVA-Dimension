@@ -182,7 +182,7 @@ img {
 @media(max-height:500px){#tavernRionne{height:27vh}.character-bubble{top:23%;font-size:11px}.dev-agenda-note{font-size:7px}}
 
 
-/* 4B.2 — unified major-character screen. */
+/* 4B.3 — character screen polish: composition, observe hint, dialogue progression. */
 #tavernRionne,#roomRionne{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 #tavernRionne.rionne-interactive,#roomRionne.rionne-interactive{pointer-events:auto;cursor:pointer}
 @keyframes rionneBoop{0%,100%{scale:1 1;filter:brightness(1)}42%{scale:.965 1.025;filter:brightness(1.09) drop-shadow(0 7px 7px rgba(0,0,0,.3))}}
@@ -190,14 +190,15 @@ img {
 .rionne-panel{position:absolute;z-index:9300;inset:0;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}
 .rionne-panel.open{opacity:1;visibility:visible;pointer-events:auto}
 .rionne-panel-shade{position:absolute;inset:0;background:rgba(5,3,4,.22);backdrop-filter:blur(1.2px);-webkit-backdrop-filter:blur(1.2px)}
-.rionne-character-card{position:absolute;top:4%;height:90%;width:min(38vw,510px);overflow:hidden;border:1px solid rgba(231,194,123,.82);border-radius:20px;background:#211310 center/cover no-repeat;box-shadow:0 24px 72px rgba(0,0,0,.64),inset 0 0 0 1px rgba(255,238,197,.08);opacity:0;transform:translateY(9px) scale(.975);transition:transform .3s cubic-bezier(.2,.85,.2,1),opacity .2s ease,width .32s ease,height .32s ease,left .32s ease,right .32s ease,top .32s ease}
+.rionne-panel.mode-talk .rionne-panel-shade{cursor:pointer}
+.rionne-character-card{position:absolute;top:4%;height:90%;width:min(35vw,475px);overflow:hidden;border:1px solid rgba(231,194,123,.82);border-radius:20px;background:#211310 center/cover no-repeat;box-shadow:0 24px 72px rgba(0,0,0,.64),inset 0 0 0 1px rgba(255,238,197,.08);opacity:0;transform:translateY(9px) scale(.975);transition:transform .3s cubic-bezier(.2,.85,.2,1),opacity .2s ease,width .32s ease,height .32s ease,left .32s ease,right .32s ease,top .32s ease}
 .rionne-panel.open .rionne-character-card{opacity:1;transform:translateY(0) scale(1)}
-.rionne-panel.side-left .rionne-character-card{left:max(4vw,env(safe-area-inset-left))}.rionne-panel.side-right .rionne-character-card{right:max(4vw,env(safe-area-inset-right))}
+.rionne-panel.side-left .rionne-character-card{left:max(7vw,env(safe-area-inset-left))}.rionne-panel.side-right .rionne-character-card{right:max(7vw,env(safe-area-inset-right))}
 .rionne-character-card:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,8,8,.04) 30%,rgba(13,8,8,.16) 63%,rgba(13,8,8,.9) 100%);pointer-events:none;z-index:2}
-.rionne-character-art{position:absolute;z-index:1;left:50%;bottom:-25%;height:142%;width:auto;max-width:none;transform:translateX(-50%);transform-origin:50% 78%;filter:drop-shadow(0 13px 14px rgba(0,0,0,.34));transition:height .38s cubic-bezier(.2,.8,.2,1),bottom .38s cubic-bezier(.2,.8,.2,1),transform .16s ease,filter .16s ease}
+.rionne-character-art{position:absolute;z-index:1;left:50%;bottom:-17%;height:125%;width:auto;max-width:none;transform:translateX(-50%);transform-origin:50% 78%;filter:drop-shadow(0 13px 14px rgba(0,0,0,.34));transition:height .38s cubic-bezier(.2,.8,.2,1),bottom .38s cubic-bezier(.2,.8,.2,1),transform .16s ease,filter .16s ease}
 .rionne-character-art.poked{transform:translateX(-50%) scale(.975,1.018);filter:drop-shadow(0 10px 11px rgba(0,0,0,.3)) brightness(1.06)}
 .rionne-panel.side-right .rionne-character-art{transform:translateX(-50%) scaleX(-1)}.rionne-panel.side-right .rionne-character-art.poked{transform:translateX(-50%) scaleX(-1) scale(.975,1.018)}
-.rionne-card-info{position:absolute;z-index:4;left:18px;right:52px;top:15px;text-shadow:0 2px 8px #000}.rionne-name{font-size:clamp(17px,2.2vw,29px);letter-spacing:.18em;color:#f6e4bc}.rionne-role{margin-top:3px;font-size:clamp(7px,.85vw,10px);letter-spacing:.2em;color:#d1ae70}
+.rionne-card-info{position:absolute;z-index:4;left:18px;right:52px;top:15px;padding:7px 10px 8px;border-radius:10px;background:linear-gradient(90deg,rgba(20,11,10,.72),rgba(20,11,10,.2) 78%,transparent);text-shadow:0 2px 8px #000;transition:opacity .2s ease}.rionne-name{font-size:clamp(17px,2.2vw,29px);letter-spacing:.18em;color:#f6e4bc}.rionne-role{margin-top:3px;font-size:clamp(7px,.85vw,10px);letter-spacing:.2em;color:#d1ae70}
 .rionne-close{position:absolute;z-index:7;right:9px;top:8px;border:1px solid rgba(226,191,125,.25);background:rgba(15,10,12,.48);border-radius:50%;color:#ead7ae;font-size:18px;line-height:1;padding:6px 9px;cursor:pointer}
 .rionne-options{position:absolute;z-index:5;left:12px;right:12px;bottom:12px;display:grid;grid-template-columns:1fr 1fr;gap:7px;transition:opacity .18s ease,transform .18s ease}.rionne-option{appearance:none;border:1px solid rgba(230,196,132,.46);border-radius:999px;background:rgba(24,14,13,.68);box-shadow:inset 0 0 0 1px rgba(255,242,211,.035);color:#f6ead7;padding:8px 9px;font:inherit;font-size:clamp(9px,1.2vw,14px);letter-spacing:.14em;cursor:pointer;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}.rionne-option:active{scale:.97;background:rgba(112,72,37,.48);color:#ffe1a3}.rionne-option.leave{grid-column:1/-1}.rionne-panel.submode .rionne-options{opacity:0;transform:translateY(9px);pointer-events:none}
 .rionne-back{position:absolute;z-index:7;left:14px;bottom:14px;border:1px solid rgba(230,196,132,.5);border-radius:999px;background:rgba(20,12,12,.72);color:#f3e4c9;padding:8px 14px;font:inherit;font-size:clamp(9px,1vw,12px);letter-spacing:.14em;opacity:0;visibility:hidden;transform:translateY(7px);transition:.18s ease}.rionne-panel.submode .rionne-back{opacity:1;visibility:visible;transform:translateY(0)}
@@ -206,7 +207,9 @@ img {
 .rionne-panel.side-left .rionne-talk-bubble{transform:translate(4%,8px)}.rionne-panel.side-right .rionne-talk-bubble{transform:translate(-104%,8px)}
 .rionne-panel.mode-talk .rionne-talk-bubble{opacity:1;visibility:visible}.rionne-panel.side-left.mode-talk .rionne-talk-bubble{transform:translate(4%,0)}.rionne-panel.side-right.mode-talk .rionne-talk-bubble{transform:translate(-104%,0)}
 .rionne-side-panel{top:28%;width:min(28vw,360px);padding:16px;border-radius:16px}.rionne-panel.side-left .rionne-side-panel{right:max(5vw,env(safe-area-inset-right))}.rionne-panel.side-right .rionne-side-panel{left:max(5vw,env(safe-area-inset-left))}.rionne-panel.mode-give .rionne-side-panel,.rionne-panel.mode-status .rionne-side-panel{opacity:1;visibility:visible;transform:translateY(0)}.rionne-side-title{font-size:10px;letter-spacing:.22em;color:#d8b979;margin-bottom:8px}.rionne-side-copy{font-size:clamp(11px,1.35vw,15px);line-height:1.45;font-style:italic}
-.rionne-panel.mode-observe .rionne-character-card{top:2%;height:96%;width:min(46vw,610px)}.rionne-panel.mode-observe .rionne-character-art{height:96%;bottom:0}.rionne-panel.mode-observe .rionne-card-info{opacity:.2}.rionne-panel.mode-observe .rionne-character-card:before{background:linear-gradient(180deg,rgba(13,8,8,.02),rgba(13,8,8,.04) 78%,rgba(13,8,8,.5))}
+.rionne-panel.mode-observe .rionne-character-card{top:2%;height:96%;width:min(46vw,610px)}.rionne-panel.mode-observe .rionne-character-art{height:96%;bottom:0}.rionne-panel.mode-observe .rionne-card-info{opacity:1}.rionne-panel.mode-observe .rionne-character-card:before{background:linear-gradient(180deg,rgba(13,8,8,.02),rgba(13,8,8,.04) 78%,rgba(13,8,8,.5))}
+
+.rionne-rotate-hint{position:absolute;z-index:7;left:50%;bottom:17px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid rgba(230,196,132,.38);border-radius:999px;background:rgba(20,12,12,.62);color:#ead8b7;font-size:clamp(8px,.9vw,11px);letter-spacing:.1em;white-space:nowrap;opacity:0;visibility:hidden;transition:.18s ease;pointer-events:none}.rionne-rotate-icon{display:inline-block;font-size:15px;line-height:1}.rionne-panel.mode-observe .rionne-rotate-hint{opacity:.86;visibility:visible}@media(orientation:portrait){body.observe-active .rionne-rotate-hint{display:none}}
 body.observe-active .orientation-guard{display:none!important}
 @media(orientation:portrait){body.observe-active .rionne-panel{position:fixed}body.observe-active .rionne-panel.mode-observe .rionne-character-card{inset:max(2.5%,env(safe-area-inset-top)) max(3%,env(safe-area-inset-right)) max(2.5%,env(safe-area-inset-bottom)) max(3%,env(safe-area-inset-left));width:auto;height:auto}body.observe-active .rionne-panel.mode-observe .rionne-character-art{height:92%;bottom:0}body.observe-active .rionne-panel.mode-observe .rionne-back{bottom:max(18px,env(safe-area-inset-bottom))}}
 @media(max-height:500px){.rionne-character-card{top:3%;height:92%;width:min(39vw,430px);border-radius:15px}.rionne-options{left:9px;right:9px;bottom:9px;gap:5px}.rionne-option{padding:6px 7px}.rionne-card-info{top:10px;left:13px}.rionne-panel.mode-observe .rionne-character-card{height:96%;width:min(43vw,500px)}}
@@ -227,7 +230,7 @@ body.observe-active .orientation-guard{display:none!important}
     <img id="tavernBarmaid" class="interactive" src="assets/barmaid-beer.png" alt="Barmaid holding beer" draggable="false" data-character="barmaid" data-character-state="activity">
     <div class="npc-bubble" id="barmaidBubble" aria-live="polite"></div>
     <div class="character-bubble" id="rionneBubble">Ah—I forgot something upstairs.</div>
-    <div class="dev-agenda-note">4B.2 · CHARACTER SCREEN · DIMENSION GEAR</div>
+    <div class="dev-agenda-note">4B.3 · CHARACTER SCREEN POLISH · DIMENSION GEAR</div>
   </div>
   <div id="room" class="scene hidden" style="background-image:url('assets/rionnes-room.jpg')">
     <img id="roomRionne" src="assets/rionne-front.png" alt="Rionne" draggable="false" data-character="rionne">
@@ -249,6 +252,7 @@ body.observe-active .orientation-guard{display:none!important}
         <button class="rionne-option leave" type="button" data-rionne-action="leave">LEAVE</button>
       </div>
       <button class="rionne-back" id="rionneBack" type="button">BACK</button>
+      <div class="rionne-rotate-hint" id="rionneRotateHint"><span class="rionne-rotate-icon">↻</span><span>ROTATE FOR PORTRAIT VIEW</span></div>
     </section>
     <div class="rionne-talk-bubble" id="rionneTalkBubble"></div>
     <section class="rionne-side-panel" id="rionneSidePanel"><div class="rionne-side-title" id="rionneSideTitle"></div><div class="rionne-side-copy" id="rionneSideCopy"></div></section>
@@ -675,14 +679,17 @@ function refreshRionneInteraction(){
 function rionneAlphaHit(el,e){
  try{const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;if(x<0||x>1||y<0||y>1)return false;const c=rionneAlphaHit.canvas||(rionneAlphaHit.canvas=document.createElement('canvas'));c.width=el.naturalWidth;c.height=el.naturalHeight;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.clearRect(0,0,c.width,c.height);ctx.drawImage(el,0,0);return ctx.getImageData(Math.min(c.width-1,Math.max(0,Math.floor(x*c.width))),Math.min(c.height-1,Math.max(0,Math.floor(y*c.height))),1,1).data[3]>28}catch(_){return true}
 }
-let rionneMode='menu',rionnePokeTimer=null;
+let rionneMode='menu',rionnePokeTimer=null,rionneTalkIndex=0;
+const RIONNE_TALK={tavern:['“Mm? Need something, or are you just keeping me company?”','“It is busy tonight. Try not to get under anyone’s feet.”','“If you are staying, make yourself useful—or at least entertaining.”'],room:['“You found me. Give me a moment—I’m still looking for something.”','“I know it was here somewhere…”','“No, I am not admitting I misplaced it.”']};
+function showRionneTalkLine(){const lines=RIONNE_TALK[current]||RIONNE_TALK.tavern;rionneTalkBubble.textContent=lines[Math.min(rionneTalkIndex,lines.length-1)]}
+function advanceRionneTalk(){if(rionneMode!=='talk')return;const lines=RIONNE_TALK[current]||RIONNE_TALK.tavern;if(rionneTalkIndex<lines.length-1){rionneTalkIndex++;showRionneTalkLine()}else setRionneMode('menu')}
 function setRionneMode(mode='menu'){
  rionneMode=mode;rionnePanel.classList.remove('submode','mode-observe','mode-talk','mode-give','mode-status');document.body.classList.remove('observe-active');
  rionneTalkBubble.textContent='';rionneSideTitle.textContent='';rionneSideCopy.textContent='';
  if(mode==='menu')return;
  rionnePanel.classList.add('submode','mode-'+mode);
  if(mode==='observe')document.body.classList.add('observe-active');
- if(mode==='talk')rionneTalkBubble.textContent=current==='tavern'?'“Mm? Need something, or are you just keeping me company?”':'“You found me. Give me a moment—I’m still looking for something.”';
+ if(mode==='talk'){rionneTalkIndex=0;showRionneTalkLine()}
  if(mode==='give'){rionneSideTitle.textContent='GIVE';rionneSideCopy.textContent='Inventory will open here later.'}
  if(mode==='status'){rionneSideTitle.textContent='STATUS';rionneSideCopy.textContent='Rionne knows you. More personal information can be discovered and unlocked here later.'}
 }
@@ -696,7 +703,7 @@ async function openRionneInteraction(el,e){
 function closeRionneInteraction(){tavernRionne.classList.remove('rionne-boop');roomRionne.classList.remove('rionne-boop');rionneCharacterArt.classList.remove('poked');clearTimeout(rionnePokeTimer);setRionneMode('menu');rionnePanel.classList.remove('open');rionnePanel.setAttribute('aria-hidden','true');setInteractionState('idle')}
 function pokeRionne(){rionneCharacterArt.classList.remove('poked');void rionneCharacterArt.offsetWidth;rionneCharacterArt.classList.add('poked');clearTimeout(rionnePokeTimer);rionnePokeTimer=setTimeout(()=>rionneCharacterArt.classList.remove('poked'),170)}
 [tavernRionne,roomRionne].forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openRionneInteraction(el,e)}));
-$('#rionneClose').addEventListener('click',e=>{e.stopPropagation();closeRionneInteraction()});$('#rionnePanelShade').addEventListener('click',e=>{e.stopPropagation();closeRionneInteraction()});$('#rionneBack').addEventListener('click',e=>{e.stopPropagation();setRionneMode('menu')});rionneCharacterArt.addEventListener('click',e=>{e.stopPropagation();pokeRionne()});
+$('#rionneClose').addEventListener('click',e=>{e.stopPropagation();closeRionneInteraction()});$('#rionnePanelShade').addEventListener('click',e=>{e.stopPropagation();if(rionneMode==='talk')advanceRionneTalk()});$('#rionneBack').addEventListener('click',e=>{e.stopPropagation();setRionneMode('menu')});rionneCharacterCard.addEventListener('click',e=>{if(e.target.closest('button'))return;e.stopPropagation();if(rionneMode==='talk')advanceRionneTalk();else pokeRionne()});rionneTalkBubble.addEventListener('click',e=>{e.stopPropagation();advanceRionneTalk()});
 rionneOptions.addEventListener('click',e=>{const b=e.target.closest('[data-rionne-action]');if(!b)return;e.stopPropagation();const a=b.dataset.rionneAction;if(a==='leave')return closeRionneInteraction();setRionneMode(a)});
 
 const BARMAID_LINES=[

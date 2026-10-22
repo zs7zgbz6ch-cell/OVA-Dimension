@@ -1,4 +1,4 @@
-const CACHE = 'ovad-4b2-character-screen-v1';
+const CACHE = 'ovad-4b3-character-screen-polish-v1';
 
 const CORE = [
   './',
