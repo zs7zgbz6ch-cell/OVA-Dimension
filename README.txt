@@ -1,10 +1,13 @@
-OVA-D 01D Pass 4B.4 — Stable Character Screen Framing
+OVA-D 01D Pass 4B.5 — Character Screen Stabilization
 
-Built from passing 4B.3.
-- Narrows the normal Rionne character card and moves it closer toward the scene body / screen center.
-- Refines the normal menu crop so Rionne reads as a closer character portrait while keeping her head visible.
-- Keeps Observe as the dedicated full-body composition.
-- Simplifies the header to RIONNE + current area label (BERKLITH TAVERN for the current tavern/room area).
-- Makes the Observe rotation hint a subtle blinking text treatment, matching the intro language; no icon or pill.
-- Retains global iOS selection/callout suppression so native browser inspection UI is not part of gameplay.
-- Talk progression, poke behavior, Barmaid dialogue anchoring, Dimension Gear, agenda, movement, witness/sync and navigation unchanged.
+Built from passing 4B.4.
+- Character card narrowed by roughly 15% in landscape.
+- Observe card expansion narrowed by roughly 15% as well.
+- Normal character-screen portrait reframed closer/downward so Rionne's face and upper body are the intended focus.
+- Observe keeps its full-body composition and blinking ROTATE FOR PORTRAIT VIEW hint.
+- Added explicit selection/callout/drag suppression to the character-screen surfaces to prevent the native iOS magnifier from taking over the interaction.
+- Dimension Gear, agenda logic, routes, scene movement, dialogue progression and character interaction behavior otherwise unchanged.
+
+Changed files:
+- index.html
+- README.txt
