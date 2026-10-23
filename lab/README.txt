@@ -39,3 +39,6 @@ Workflow
 
 PATCH LAYOUT
 This package intentionally contains the Lab under /lab/. Upload/replace these files inside the repository lab folder; do not replace the root OVA-D game index.html.
+
+
+v0.7.2: simplified tools (removed Duplicate, Save Project, Copy Spots, Copy Scene) and made the existing tools panel safely scrollable in portrait with a sticky Close header. World data structure unchanged.
