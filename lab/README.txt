@@ -1,4 +1,4 @@
-OVA-D LAB v0.7 — World Stage
+OVA-D LAB v0.7.1 — World Stage
 
 Purpose
 Scene Stage owns world geography. It does not own characters, NPCs, agendas, dialogue, activities, or gameplay.
@@ -19,7 +19,7 @@ Rules
 - Cross-scene travel should normally connect TRANSFER spots.
 - OVA-D should consume exported spots/connections instead of recreating coordinates or route edges by hand.
 
-v0.7 changes
+v0.7.1 changes
 - Removed custom spot naming.
 - Removed duplicate spot identity (name vs internal ID).
 - New/duplicated spots use stable sequential SPOT_XX IDs.
@@ -35,3 +35,7 @@ Workflow
 4. For scene-to-scene travel, connect the relevant transfer spots.
 5. Export the project.
 6. OVA-D consumes this world data; character/NPC agendas choose destinations within it.
+
+
+PATCH LAYOUT
+This package intentionally contains the Lab under /lab/. Upload/replace these files inside the repository lab folder; do not replace the root OVA-D game index.html.
