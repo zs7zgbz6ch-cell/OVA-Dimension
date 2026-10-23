@@ -1,19 +1,10 @@
-OVA-D 01D Pass 4B.8 — Character-Aware Landing
+OVA-D 01D Pass 4B.10 — Rionne Lower Framing
 
-Built by rolling back to the stable 4B.6 interaction layout, then selectively reapplying only the useful presentation ideas from 4B.7.
-- Restores 4B.6 Observe geometry and protects portrait Observe from landscape landing transforms.
-- Character card lands near screen center with only a gentle bias toward Rionne's tapped scene position.
-- Opening presentation still originates from Rionne: boop, pop/travel inward, settle.
-- Normal Rionne framing is independently lowered and reduced so her face/head have breathing room.
-- Observe keeps its separate full-body composition.
-- Tavern/room character-card backgrounds now use authored background positions independent of the world viewport.
-- Dimension Gear, agenda logic, routes, movement, dialogue progression, witness/sync and navigation unchanged.
+Built directly from 4B.9.
+- Changes only the normal iPhone-landscape Rionne character-art vertical position from bottom:-32% to bottom:-42%.
+- Character-art height remains 138%.
+- Card size, landing, background composition, Observe framing, portrait Observe, dialogue, Dimension Gear, agenda, movement and witness/sync behavior unchanged.
 
 Changed files:
 - index.html
 - README.txt
-
-
-4B.9 — Rionne framing micro-adjustment
-- Normal iPhone-landscape Rionne position only: bottom -25% -> -32%.
-- No other layout, Observe, animation, Dimension Gear, movement, agenda or interaction changes.
