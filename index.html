@@ -358,8 +358,8 @@ body.observe-active .orientation-guard{display:none!important}
     </div>
   </div>
 
-<script>
-(()=>{
+<script type="module">
+(async()=>{
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const overlay=$('#overlay'), preview=$('#preview'), fade=$('#fade'), toast=$('#toast');
 const welcome=$('#welcomeScreen'), startupBlack=$('#startupBlack'), holdRing=$('#holdRing'), holdProgress=$('#holdProgress'), app=$('#app');
@@ -388,8 +388,8 @@ function advanceTime(minutes=1){setWorldTime(worldMinute+Math.max(0,Math.floor(m
 // 01D Pass 4A — DIMENSION GEAR.
 // Player actions advance time. The world owns every agenda occurrence crossed by that time.
 let interactionState='idle', actionHideTimer=null, agendaHideTimer=null;
-let rionneWorld={location:localStorage.getItem('ovad_rionne_location')||'tavern',spot:localStorage.getItem('ovad_rionne_spot')||'BERKLITH_TAVERN/SPOT_04'};
-function saveRionneWorld(){localStorage.setItem('ovad_rionne_location',rionneWorld.location);localStorage.setItem('ovad_rionne_spot',rionneWorld.spot)}
+const ENTITY_WORLD={rionne:{location:localStorage.getItem('ovad_rionne_location')||'tavern',spot:localStorage.getItem('ovad_rionne_spot')||'BERKLITH_TAVERN/SPOT_04'}};
+function saveEntityWorld(entityId){const state=ENTITY_WORLD[entityId];if(!state)return;localStorage.setItem(`ovad_${entityId}_location`,state.location);localStorage.setItem(`ovad_${entityId}_spot`,state.spot)}
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function setInteractionState(next){interactionState=next;$$('.scene-hotspot').forEach(el=>el.classList.toggle('busy',next!=='idle'));if(tavernBarmaid)tavernBarmaid.classList.toggle('busy',next!=='idle');refreshRionneInteraction()}
 function showAction(text,cost){clearTimeout(actionHideTimer);actionKicker.textContent=`INTERACTION · +${cost} MIN`;actionCopy.textContent=text;actionCard.classList.add('show')}
@@ -418,32 +418,10 @@ const RIONNE_POSE={
 Object.values(RIONNE_POSE).forEach(src=>{const img=new Image();img.decoding='async';img.src=src});
 // 4D.1 — WORLD DATA AUTHORITY.
 // Navigable geography is generated from the World Stage export. Presentation-only targets stay outside it.
-const WORLD_STAGE={
- version:'OVA-D_WORLD_STAGE_0.7',
- scenes:{
-  BERKLITH_TAVERN:{id:'BERKLITH_TAVERN',spots:[
-   {id:'SPOT_01',type:'transfer',x:54.3,y:67.5,scale:25.5},
-   {id:'SPOT_02',type:'transfer',x:94.42051282051281,y:94.89431643625193,scale:68},
-   {id:'SPOT_03',type:'waypoint',x:49.8931623931624,y:81.83563748079877,scale:45},
-   {id:'SPOT_04',type:'activity',x:36.1,y:68.4,scale:26.5},
-   {id:'SPOT_05',type:'activity',x:27,y:67.5,scale:25.5},
-   {id:'SPOT_06',type:'transfer',x:30.1,y:73,scale:34.5}
-  ]},
-  RIONNES_ROOM:{id:'RIONNES_ROOM',spots:[
-   {id:'SPOT_01',type:'transfer',x:87.6,y:107,scale:107},
-   {id:'SPOT_02',type:'idle',x:47.8,y:75.8,scale:63}
-  ]}
- },
- connections:[
-  [{scene:'RIONNES_ROOM',spot:'SPOT_01'},{scene:'BERKLITH_TAVERN',spot:'SPOT_02'}],
-  [{scene:'RIONNES_ROOM',spot:'SPOT_01'},{scene:'RIONNES_ROOM',spot:'SPOT_02'}],
-  [{scene:'BERKLITH_TAVERN',spot:'SPOT_03'},{scene:'BERKLITH_TAVERN',spot:'SPOT_01'}],
-  [{scene:'BERKLITH_TAVERN',spot:'SPOT_03'},{scene:'BERKLITH_TAVERN',spot:'SPOT_02'}],
-  [{scene:'BERKLITH_TAVERN',spot:'SPOT_03'},{scene:'BERKLITH_TAVERN',spot:'SPOT_06'}],
-  [{scene:'BERKLITH_TAVERN',spot:'SPOT_06'},{scene:'BERKLITH_TAVERN',spot:'SPOT_04'}],
-  [{scene:'BERKLITH_TAVERN',spot:'SPOT_06'},{scene:'BERKLITH_TAVERN',spot:'SPOT_05'}]
- ]
-};
+const WORLD_STAGE=await fetch('./world/world-stage.json',{cache:'no-store'}).then(response=>{
+ if(!response.ok)throw new Error(`World Stage load failed: ${response.status}`);
+ return response.json();
+});
 const SCENE_ID={tavern:'BERKLITH_TAVERN',room:'RIONNES_ROOM'};
 const SCENE_VIEW={BERKLITH_TAVERN:'tavern',RIONNES_ROOM:'room'};
 const nodeId=(scene,spot)=>`${scene}/${spot}`;
@@ -452,7 +430,7 @@ for(const scene of Object.values(WORLD_STAGE.scenes))for(const spot of scene.spo
  NAV_NODE[nodeId(scene.id,spot.id)]={scene:scene.id,spot:{x:spot.x,y:spot.y,h:spot.scale},type:spot.type,spotId:spot.id};
 }
 const NAV_EDGE=[];
-for(const [a,b] of WORLD_STAGE.connections){const A=nodeId(a.scene,a.spot),B=nodeId(b.scene,b.spot);NAV_EDGE.push([A,B],[B,A])}
+for(const connection of WORLD_STAGE.connections){const {a,b}=connection;const A=nodeId(a.scene,a.spot),B=nodeId(b.scene,b.spot);NAV_EDGE.push([A,B],[B,A])}
 const WORLD_POS={
  tavern:{
   exit:NAV_NODE['BERKLITH_TAVERN/SPOT_01'].spot,
@@ -481,17 +459,17 @@ const LEGACY_RIONNE_SPOT={
  'room.door':'RIONNES_ROOM/SPOT_01','room.window':'RIONNES_ROOM/SPOT_02',
  'spot_01':'RIONNES_ROOM/SPOT_02','spot_01_1792445282697':'RIONNES_ROOM/SPOT_02','spot_02_1792445282697':'RIONNES_ROOM/SPOT_02','spot_02_1792447350835':'BERKLITH_TAVERN/SPOT_04'
 };
-function normalizeRionneWorld(world=rionneWorld){
+function normalizeRionneWorld(world=ENTITY_WORLD.rionne){
  const raw=world&&world.spot;let spot=LEGACY_RIONNE_SPOT[raw]||raw;
  const fallback=(world&&world.location==='room')?'RIONNES_ROOM/SPOT_02':'BERKLITH_TAVERN/SPOT_04';
  if(!NAV_NODE[spot])spot=fallback;
  return {location:SCENE_VIEW[NAV_NODE[spot].scene],spot};
 }
-rionneWorld=normalizeRionneWorld(rionneWorld);saveRionneWorld();
-function rionneNode(){const normalized=normalizeRionneWorld(rionneWorld);if(normalized.spot!==rionneWorld.spot||normalized.location!==rionneWorld.location){rionneWorld=normalized;saveRionneWorld()}return normalized.spot}
-function commitRionneDestination(id){const n=NAV_NODE[id];if(!n)throw new Error(`Unknown Rionne destination: ${id}`);rionneWorld={location:SCENE_VIEW[n.scene],spot:id};saveRionneWorld()}
-function commitRionneRoom(){commitRionneDestination('RIONNES_ROOM/SPOT_02')}
-function commitRionneTavern(){commitRionneDestination('BERKLITH_TAVERN/SPOT_04')}
+ENTITY_WORLD.rionne=normalizeRionneWorld(ENTITY_WORLD.rionne);saveEntityWorld('rionne');
+function entityNode(entityId){const state=ENTITY_WORLD[entityId];if(!state)return null;const normalized=entityId==='rionne'?normalizeRionneWorld(state):state;if(normalized.spot!==state.spot||normalized.location!==state.location){ENTITY_WORLD[entityId]=normalized;saveEntityWorld(entityId)}return normalized.spot}
+function commitEntityDestination(entityId,id){const n=NAV_NODE[id];if(!n)throw new Error(`Unknown entity destination: ${id}`);ENTITY_WORLD[entityId]={...ENTITY_WORLD[entityId],location:SCENE_VIEW[n.scene],spot:id};saveEntityWorld(entityId)}
+function rionneNode(){return entityNode('rionne')}
+function commitRionneDestination(id){commitEntityDestination('rionne',id)}
 async function navigateRionneTo(destination){
  const start=rionneNode(),path=navPath(start,destination);interactionState='presentation';
  const UP='RIONNES_ROOM/SPOT_02',DOWN='BERKLITH_TAVERN/SPOT_04';
@@ -656,21 +634,15 @@ async function evaluateAgendas(oldMinute,newMinute){
    else await performMissedOccurrence(occurrence);
  }
 }
-function rionneShouldBeUpstairs(minute=worldMinute){
- const tod=((minute%1440)+1440)%1440;
- return tod>=17*60+35 && tod<17*60+55;
-}
+// Presentation reads world truth; it never derives or changes entity position from the clock.
 function syncRionnePresentation(){
- const upstairs=rionneShouldBeUpstairs();
- if(upstairs){
-   if(rionneWorld.location!=='room')commitRionneRoom();
-   place(tavernRionne,WORLD_POS.tavern.barActivity,0,'none',RIONNE_POSE.front,false);
-   place(roomRionne,WORLD_POS.room.window,1,'none',RIONNE_POSE.front,false);
- }else{
-   if(rionneWorld.location!=='tavern')commitRionneTavern();
-   place(tavernRionne,WORLD_POS.tavern.barActivity,1,'none',RIONNE_POSE.front,false);
-   place(roomRionne,WORLD_POS.room.window,0,'none',RIONNE_POSE.front,false);
- }
+ const node=NAV_NODE[rionneNode()];
+ const inTavern=node&&node.scene==='BERKLITH_TAVERN';
+ const inRoom=node&&node.scene==='RIONNES_ROOM';
+ const tavernPos=inTavern?node.spot:WORLD_POS.tavern.barActivity;
+ const roomPos=inRoom?node.spot:WORLD_POS.room.window;
+ place(tavernRionne,tavernPos,inTavern?1:0,'none',RIONNE_POSE.front,false);
+ place(roomRionne,roomPos,inRoom?1:0,'none',RIONNE_POSE.front,false);
 }
 function characterElementVisible(el){return !!el&&Number.parseFloat(getComputedStyle(el).opacity)>.5}
 function characterElementScene(el){const scene=el&&el.closest('.scene');return scene?scene.id:null}
@@ -789,13 +761,13 @@ $('#goBtn').addEventListener('click',()=>{
  },720);
 });
 $$('[data-action]').forEach(b=>b.addEventListener('click',()=>{
- if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:true,rionneWorld}));say('Prototype saved.')}
- if(b.dataset.action==='load'){let sv;try{sv=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(sv&&locations[sv.location]){showScene(sv.location);setWorldTime(Number.isFinite(sv.worldMinute)?sv.worldMinute:WORLD_START);rionneWorld=normalizeRionneWorld(sv.rionneWorld||{location:'tavern',spot:'BERKLITH_TAVERN/SPOT_04'});saveRionneWorld();syncRionnePresentation();closeMenu();say('Save loaded.')}else say('No save data yet.')}
+ if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:true,rionneWorld:ENTITY_WORLD.rionne}));say('Prototype saved.')}
+ if(b.dataset.action==='load'){let sv;try{sv=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(sv&&locations[sv.location]){showScene(sv.location);setWorldTime(Number.isFinite(sv.worldMinute)?sv.worldMinute:WORLD_START);ENTITY_WORLD.rionne=normalizeRionneWorld(sv.rionneWorld||{location:'tavern',spot:'BERKLITH_TAVERN/SPOT_04'});saveEntityWorld('rionne');syncRionnePresentation();closeMenu();say('Save loaded.')}else say('No save data yet.')}
  if(b.dataset.action==='extra')say('Archive section coming later.')
 }));
 $('#resetBtn').addEventListener('click',()=>$('#confirm').classList.add('open'));
 $('#cancelReset').addEventListener('click',()=>$('#confirm').classList.remove('open'));
-$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');['ovad_agenda_barmaid1735','ovad_barmaid_location','ovad_barmaid_spot','ovad_agenda_rionne1735','ovad_agenda_rionne1755','ovad_rionne_location','ovad_rionne_spot'].forEach(k=>localStorage.removeItem(k));rionneWorld={location:'tavern',spot:'BERKLITH_TAVERN/SPOT_04'};setWorldTime(WORLD_START);showScene('tavern');syncRionnePresentation();$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
+$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');['ovad_agenda_barmaid1735','ovad_barmaid_location','ovad_barmaid_spot','ovad_agenda_rionne1735','ovad_agenda_rionne1755','ovad_rionne_location','ovad_rionne_spot'].forEach(k=>localStorage.removeItem(k));ENTITY_WORLD.rionne={location:'tavern',spot:'BERKLITH_TAVERN/SPOT_04'};setWorldTime(WORLD_START);showScene('tavern');syncRionnePresentation();$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
 $('#motionBtn').addEventListener('click',e=>{motion=!motion;e.currentTarget.textContent='MENU MOTION · '+(motion?'ON':'REDUCED');document.documentElement.style.setProperty('--motion',motion?'1':'0');say(motion?'Full menu motion.':'Reduced menu motion.')});
 
 // Startup presentation is separate from the live scene. Nothing playable is visible until the title sequence finishes.

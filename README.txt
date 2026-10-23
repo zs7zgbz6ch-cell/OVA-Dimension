@@ -1,49 +1,36 @@
-OVA-D 01D Pass 4C.0 — System Consistency Cleanup
+OVA-D 4D.2 — Entity World State Authority
 
-Built from passing 4B.10. No new gameplay or visual feature work.
+Built directly from 4D.1 World Graph Foundation.
+No new gameplay or visual feature work.
 
-Interaction contract
-- Player must be free (interactionState === idle).
-- Character must be logically present in the current scene.
-- Character must be at a semantic idle or activity node/state.
-- Character presentation must actually be visible.
-- Transfer and waypoint states are not interactable.
+WORLD AUTHORITY
+- Runtime World data is loaded from world/world-stage.json.
+- index.html no longer contains a second copy of scene spots or connections.
+- Navigation graph is generated from the World Stage export at startup.
 
-Rionne consistency fixes
-- Rionne world position now stores canonical navigation node IDs: tavern.barIdle / room.window.
-- Fixes upstairs Rionne being non-interactable at room.window.
-- Removes raw Stage spot-ID comparisons from Rionne interaction eligibility.
-- Tavern and Room Rionne now use the same semantic interaction rule.
-- Old localStorage/save values using historical spot IDs are migrated automatically.
-- Rionne destination commits now resolve through NAV_NODE instead of writing scene-specific raw IDs.
+ENTITY WORLD STATE
+- ENTITY_WORLD is the runtime registry for logical entity positions.
+- entityNode(entityId) reads canonical logical position.
+- commitEntityDestination(entityId, destination) is the generic position write boundary.
+- Rionne now uses this entity-state layer.
+- Historical Rionne save values are still migrated at the save boundary.
 
-Generic character cleanup
-- canInteractCharacter() is no longer hardcoded to the Tavern scene.
-- Generic character eligibility now checks current scene + visibility + idle/activity semantic state.
-- Existing Test Barmaid behavior remains compatible.
+PRESENTATION AUTHORITY FIX
+- Removed rionneShouldBeUpstairs().
+- syncRionnePresentation() no longer derives Rionne's position from world time.
+- Changing scenes cannot commit Rionne upstairs/downstairs.
+- Presentation reads Rionne's actual entity node and displays that truth.
+- Agenda/navigation remain responsible for changing logical position.
 
-Audit notes (recorded, intentionally not changed here)
-- Some Dimension Gear presentation phases still assign interactionState directly rather than through setInteractionState(). Eligibility checks remain safe, but this can be normalized in a later timing-focused cleanup.
-- Current prototype still contains character-specific presentation/dialogue code by design; 4C.0 does not prematurely generalize those systems.
+TARGET REGRESSION
+1. Start at 17:20 with Rionne at Tavern SPOT_04.
+2. Cross 17:35 and let her go to RIONNES_ROOM/SPOT_02.
+3. Player returns downstairs before 17:55.
+4. Cross 17:55.
+5. Rionne must return from the Room through the stairs and bar transfer to Tavern SPOT_04.
+6. She must NOT appear at the bar first and then walk back toward the stairs.
 
-Acceptance test
-1. Let Rionne go upstairs to room.window.
-2. Enter Rionne's room while player control is free.
-3. Tap visible Rionne.
-4. She should boop and open the same character screen used downstairs.
-5. Observe / Talk / Back / Leave should behave normally.
-6. During movement/transfer/presentation she should remain non-interactable.
-
-Visual framing, character card landing, Observe layouts, movement, agenda timing, witness/sync and Dimension Gear timings are unchanged from 4B.10.
-
-Changed files:
-- index.html
-- README.txt
-
-4D.1 WORLD GRAPH FOUNDATION
-- world/world-stage.json preserves the authoritative World Stage export for BERKLITH_TAVERN and RIONNES_ROOM.
-- Runtime navigation nodes/edges are generated from the same World Stage scene/spot/connection data rather than a separately handwritten route graph.
-- Runtime node identity is SCENE_ID/SPOT_XX.
-- Old semantic Rionne spot names exist only in a compatibility map for older local saves.
-- stairsFar remains presentation-only because it is an animation target, not a logical world position.
-- This pass intentionally does not redesign Agenda, Actions, entity state, Character Card, or synchronization.
+BOUNDARY FOR NEXT PASSES
+- Rionne's authored movement poses/performance are still character-specific presentation code.
+- Agenda occurrence definitions are still prototype-specific.
+- Actions/save/UI will be generalized in later passes only after this state authority passes regression.

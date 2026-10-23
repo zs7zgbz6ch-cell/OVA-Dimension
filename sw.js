@@ -1,9 +1,10 @@
-const CACHE = 'ovad-4b3-character-screen-polish-v1';
+const CACHE = 'ovad-4d2-entity-world-state-v1';
 
 const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './world/world-stage.json',
   './assets/berklith-tavern.jpg',
   './assets/rionnes-room.jpg',
   './assets/barmaid-beer.png',
