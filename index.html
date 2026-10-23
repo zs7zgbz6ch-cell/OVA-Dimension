@@ -388,7 +388,7 @@ function advanceTime(minutes=1){setWorldTime(worldMinute+Math.max(0,Math.floor(m
 // 01D Pass 4A — DIMENSION GEAR.
 // Player actions advance time. The world owns every agenda occurrence crossed by that time.
 let interactionState='idle', actionHideTimer=null, agendaHideTimer=null;
-let rionneWorld={location:localStorage.getItem('ovad_rionne_location')||'tavern',spot:localStorage.getItem('ovad_rionne_spot')||'tavern.barIdle'};
+let rionneWorld={location:localStorage.getItem('ovad_rionne_location')||'tavern',spot:localStorage.getItem('ovad_rionne_spot')||'BERKLITH_TAVERN/SPOT_04'};
 function saveRionneWorld(){localStorage.setItem('ovad_rionne_location',rionneWorld.location);localStorage.setItem('ovad_rionne_spot',rionneWorld.spot)}
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function setInteractionState(next){interactionState=next;$$('.scene-hotspot').forEach(el=>el.classList.toggle('busy',next!=='idle'));if(tavernBarmaid)tavernBarmaid.classList.toggle('busy',next!=='idle');refreshRionneInteraction()}
@@ -403,8 +403,6 @@ function setRionnePose(el,x,y,h,opacity=1,transition='none',src=null,flip=null){
 }
 function setTavernRionne(x,y,h,opacity=1,transition='none',src=null,flip=false){setRionnePose(tavernRionne,x,y,h,opacity,transition,src,flip)}
 function setRoomRionne(x,y,h,opacity=1,transition='none',src=null,flip=false){setRionnePose(roomRionne,x,y,h,opacity,transition,src,flip)}
-function commitRionneRoom(){rionneWorld={location:'room',spot:'room.window'};saveRionneWorld()}
-function commitRionneTavern(){rionneWorld={location:'tavern',spot:'tavern.barIdle'};saveRionneWorld()}
 // 01D Pass 4A.1 — MOVEMENT GRAMMAR.
 // X chooses left/right. Scale chooses 3/4 front/back while travelling.
 // Waypoints shape one continuous walk; transfer spots stop, orient, pause, then cross.
@@ -418,114 +416,105 @@ const RIONNE_POSE={
 };
 // Keep directional swaps resident before the first route begins; avoids a one-frame native-facing flash on iOS.
 Object.values(RIONNE_POSE).forEach(src=>{const img=new Image();img.decoding='async';img.src=src});
-const SPOT={
+// 4D.1 — WORLD DATA AUTHORITY.
+// Navigable geography is generated from the World Stage export. Presentation-only targets stay outside it.
+const WORLD_STAGE={
+ version:'OVA-D_WORLD_STAGE_0.7',
+ scenes:{
+  BERKLITH_TAVERN:{id:'BERKLITH_TAVERN',spots:[
+   {id:'SPOT_01',type:'transfer',x:54.3,y:67.5,scale:25.5},
+   {id:'SPOT_02',type:'transfer',x:94.42051282051281,y:94.89431643625193,scale:68},
+   {id:'SPOT_03',type:'waypoint',x:49.8931623931624,y:81.83563748079877,scale:45},
+   {id:'SPOT_04',type:'activity',x:36.1,y:68.4,scale:26.5},
+   {id:'SPOT_05',type:'activity',x:27,y:67.5,scale:25.5},
+   {id:'SPOT_06',type:'transfer',x:30.1,y:73,scale:34.5}
+  ]},
+  RIONNES_ROOM:{id:'RIONNES_ROOM',spots:[
+   {id:'SPOT_01',type:'transfer',x:87.6,y:107,scale:107},
+   {id:'SPOT_02',type:'idle',x:47.8,y:75.8,scale:63}
+  ]}
+ },
+ connections:[
+  [{scene:'RIONNES_ROOM',spot:'SPOT_01'},{scene:'BERKLITH_TAVERN',spot:'SPOT_02'}],
+  [{scene:'RIONNES_ROOM',spot:'SPOT_01'},{scene:'RIONNES_ROOM',spot:'SPOT_02'}],
+  [{scene:'BERKLITH_TAVERN',spot:'SPOT_03'},{scene:'BERKLITH_TAVERN',spot:'SPOT_01'}],
+  [{scene:'BERKLITH_TAVERN',spot:'SPOT_03'},{scene:'BERKLITH_TAVERN',spot:'SPOT_02'}],
+  [{scene:'BERKLITH_TAVERN',spot:'SPOT_03'},{scene:'BERKLITH_TAVERN',spot:'SPOT_06'}],
+  [{scene:'BERKLITH_TAVERN',spot:'SPOT_06'},{scene:'BERKLITH_TAVERN',spot:'SPOT_04'}],
+  [{scene:'BERKLITH_TAVERN',spot:'SPOT_06'},{scene:'BERKLITH_TAVERN',spot:'SPOT_05'}]
+ ]
+};
+const SCENE_ID={tavern:'BERKLITH_TAVERN',room:'RIONNES_ROOM'};
+const SCENE_VIEW={BERKLITH_TAVERN:'tavern',RIONNES_ROOM:'room'};
+const nodeId=(scene,spot)=>`${scene}/${spot}`;
+const NAV_NODE={};
+for(const scene of Object.values(WORLD_STAGE.scenes))for(const spot of scene.spots){
+ NAV_NODE[nodeId(scene.id,spot.id)]={scene:scene.id,spot:{x:spot.x,y:spot.y,h:spot.scale},type:spot.type,spotId:spot.id};
+}
+const NAV_EDGE=[];
+for(const [a,b] of WORLD_STAGE.connections){const A=nodeId(a.scene,a.spot),B=nodeId(b.scene,b.spot);NAV_EDGE.push([A,B],[B,A])}
+const WORLD_POS={
  tavern:{
-  barIdle:{x:36.0945868946,y:68.2391705069,h:27},
-  barTransfer:{x:29.1,y:73.2,h:32},
-  waypoint:{x:46.1182336182,y:80.2995391705,h:45},
-  stairs:{x:94.2547008547,y:100.7660522273,h:64.5},
-  barmaidActivity:{x:64.3,y:80.9,h:44.5},
+  exit:NAV_NODE['BERKLITH_TAVERN/SPOT_01'].spot,
+  stairs:NAV_NODE['BERKLITH_TAVERN/SPOT_02'].spot,
+  waypoint:NAV_NODE['BERKLITH_TAVERN/SPOT_03'].spot,
+  barActivity:NAV_NODE['BERKLITH_TAVERN/SPOT_04'].spot,
+  barActivity2:NAV_NODE['BERKLITH_TAVERN/SPOT_05'].spot,
+  barTransfer:NAV_NODE['BERKLITH_TAVERN/SPOT_06'].spot,
+  // Presentation-only depth target; not part of navigable World Stage geography.
   stairsFar:{x:94,y:43,h:28}
  },
- room:{door:{x:90.2606837607,y:111.0619047619,h:111},window:{x:47.5863247863,y:74,h:61.5}}
+ room:{door:NAV_NODE['RIONNES_ROOM/SPOT_01'].spot,window:NAV_NODE['RIONNES_ROOM/SPOT_02'].spot}
 };
 const TRANSFER_PAUSE=1000;
-// 01D Pass 4A.7 — NAVIGATION GRAPH.
-// Agenda code names a destination. The graph owns how spots connect; presentation owns how visible edges are performed.
-const NAV_NODE={
- 'tavern.barIdle':{scene:'tavern',spot:SPOT.tavern.barIdle,type:'idle'},
- 'tavern.barTransfer':{scene:'tavern',spot:SPOT.tavern.barTransfer,type:'transfer'},
- 'tavern.waypoint':{scene:'tavern',spot:SPOT.tavern.waypoint,type:'waypoint'},
- 'tavern.stairs':{scene:'tavern',spot:SPOT.tavern.stairs,type:'transfer'},
- 'room.door':{scene:'room',spot:SPOT.room.door,type:'transfer'},
- 'room.window':{scene:'room',spot:SPOT.room.window,type:'idle'}
-};
-const NAV_EDGE=[
- ['tavern.barIdle','tavern.barTransfer','barTransfer'],
- ['tavern.barTransfer','tavern.barIdle','barTransfer'],
- ['tavern.barTransfer','tavern.waypoint','walk'],
- ['tavern.waypoint','tavern.barTransfer','walk'],
- ['tavern.waypoint','tavern.stairs','walk'],
- ['tavern.stairs','tavern.waypoint','walk'],
- ['tavern.stairs','room.door','stairsTransfer'],
- ['room.door','tavern.stairs','stairsTransfer'],
- ['room.door','room.window','walk'],
- ['room.window','room.door','walk']
-];
 function navPath(start,goal){
  if(start===goal)return [start];
  const q=[start],prev=new Map([[start,null]]);
- while(q.length){
-   const at=q.shift();
-   for(const [a,b] of NAV_EDGE){
-     if(a!==at||prev.has(b))continue;
-     prev.set(b,at);if(b===goal){q.length=0;break}q.push(b);
-   }
- }
+ while(q.length){const at=q.shift();for(const [a,b] of NAV_EDGE){if(a!==at||prev.has(b))continue;prev.set(b,at);if(b===goal){q.length=0;break}q.push(b)}}
  if(!prev.has(goal))throw new Error(`No navigation route: ${start} -> ${goal}`);
  const out=[];for(let at=goal;at!==null;at=prev.get(at))out.push(at);return out.reverse();
 }
-function navEdgeKind(a,b){const e=NAV_EDGE.find(([x,y])=>x===a&&y===b);return e?e[2]:null}
-function navScenePoints(path,scene){
- return path.filter(id=>NAV_NODE[id].scene===scene).map(id=>NAV_NODE[id].spot);
-}
-// 4C.0 — canonical character world position. Legacy Stage spot IDs are migrated once, then logic uses navigation node IDs.
+function navScenePoints(path,viewScene){const sceneId=SCENE_ID[viewScene]||viewScene;return path.filter(id=>NAV_NODE[id].scene===sceneId).map(id=>NAV_NODE[id].spot)}
+// Compatibility exists only at the save boundary. Runtime geography uses World Stage IDs.
+const LEGACY_RIONNE_SPOT={
+ 'tavern.barIdle':'BERKLITH_TAVERN/SPOT_04','tavern.barTransfer':'BERKLITH_TAVERN/SPOT_06','tavern.waypoint':'BERKLITH_TAVERN/SPOT_03','tavern.stairs':'BERKLITH_TAVERN/SPOT_02',
+ 'room.door':'RIONNES_ROOM/SPOT_01','room.window':'RIONNES_ROOM/SPOT_02',
+ 'spot_01':'RIONNES_ROOM/SPOT_02','spot_01_1792445282697':'RIONNES_ROOM/SPOT_02','spot_02_1792445282697':'RIONNES_ROOM/SPOT_02','spot_02_1792447350835':'BERKLITH_TAVERN/SPOT_04'
+};
 function normalizeRionneWorld(world=rionneWorld){
- const location=world&&world.location==='room'?'room':'tavern';
- const raw=world&&world.spot;
- const legacyRoom=['spot_01','spot_01_1792445282697','spot_02_1792445282697'];
- const legacyTavern=['spot_02_1792447350835'];
- let spot=raw;
- if(location==='room'&&(legacyRoom.includes(raw)||!NAV_NODE[raw]))spot='room.window';
- if(location==='tavern'&&(legacyTavern.includes(raw)||!NAV_NODE[raw]))spot='tavern.barIdle';
- const node=NAV_NODE[spot];
- if(!node||node.scene!==location)spot=location==='room'?'room.window':'tavern.barIdle';
- return {location,spot};
+ const raw=world&&world.spot;let spot=LEGACY_RIONNE_SPOT[raw]||raw;
+ const fallback=(world&&world.location==='room')?'RIONNES_ROOM/SPOT_02':'BERKLITH_TAVERN/SPOT_04';
+ if(!NAV_NODE[spot])spot=fallback;
+ return {location:SCENE_VIEW[NAV_NODE[spot].scene],spot};
 }
 rionneWorld=normalizeRionneWorld(rionneWorld);saveRionneWorld();
-function rionneNode(){
- const normalized=normalizeRionneWorld(rionneWorld);
- if(normalized.spot!==rionneWorld.spot||normalized.location!==rionneWorld.location){rionneWorld=normalized;saveRionneWorld()}
- return normalized.spot;
-}
-function commitRionneDestination(id){
- const n=NAV_NODE[id];if(!n)throw new Error(`Unknown Rionne destination: ${id}`);
- rionneWorld={location:n.scene,spot:id};saveRionneWorld();
-}
+function rionneNode(){const normalized=normalizeRionneWorld(rionneWorld);if(normalized.spot!==rionneWorld.spot||normalized.location!==rionneWorld.location){rionneWorld=normalized;saveRionneWorld()}return normalized.spot}
+function commitRionneDestination(id){const n=NAV_NODE[id];if(!n)throw new Error(`Unknown Rionne destination: ${id}`);rionneWorld={location:SCENE_VIEW[n.scene],spot:id};saveRionneWorld()}
+function commitRionneRoom(){commitRionneDestination('RIONNES_ROOM/SPOT_02')}
+function commitRionneTavern(){commitRionneDestination('BERKLITH_TAVERN/SPOT_04')}
 async function navigateRionneTo(destination){
- const start=rionneNode(),path=navPath(start,destination);
- interactionState='presentation';
- // The route is resolved globally. Only the currently visible scene performs its portion.
+ const start=rionneNode(),path=navPath(start,destination);interactionState='presentation';
+ const UP='RIONNES_ROOM/SPOT_02',DOWN='BERKLITH_TAVERN/SPOT_04';
  if(current==='tavern'){
-   const pts=navScenePoints(path,'tavern');
-   if(start==='tavern.barIdle'&&destination==='room.window'){
-     rionneBubble.textContent='Ah—I forgot something upstairs.';rionneBubble.classList.add('show');await sleep(1250);rionneBubble.classList.remove('show');await sleep(260);
-     await fadeAt(tavernRionne,NAV_NODE['tavern.barIdle'].spot,1,0,420,RIONNE_POSE.front,false);
-     await fadeAt(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,0,1,420,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
-     // barTransfer is already reached by its transfer; walk the graph-resolved remainder to the stairs.
-     await walkThrough(tavernRionne,pts.slice(1),24);
-     place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
-     place(tavernRionne,SPOT.tavern.stairsFar,0,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 1500ms ease 700ms',RIONNE_POSE.fullBack,false);await sleep(2500);
-   }else if(start==='room.window'&&destination==='tavern.barIdle'){
-     // The incoming stairs connection is part of the resolved path; begin at its visible Tavern endpoint.
-     await setPoseStable(tavernRionne,RIONNE_POSE.front,false);
-     place(tavernRionne,SPOT.tavern.stairsFar,0,'none');
-     place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 800ms ease');await sleep(2450);
-     place(tavernRionne,NAV_NODE['tavern.stairs'].spot,1,'none');await sleep(TRANSFER_PAUSE);
-     await walkThrough(tavernRionne,pts.slice(0,-1),24);
-     place(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
-     await fadeAt(tavernRionne,NAV_NODE['tavern.barTransfer'].spot,1,0,420,RIONNE_POSE.fullBack,false);
-     await fadeAt(tavernRionne,NAV_NODE['tavern.barIdle'].spot,0,1,430,RIONNE_POSE.front,false);
-   }
+  const pts=navScenePoints(path,'tavern');
+  if(start===DOWN&&destination===UP){
+   rionneBubble.textContent='Ah—I forgot something upstairs.';rionneBubble.classList.add('show');await sleep(1250);rionneBubble.classList.remove('show');await sleep(260);
+   await fadeAt(tavernRionne,WORLD_POS.tavern.barActivity,1,0,420,RIONNE_POSE.front,false);
+   await fadeAt(tavernRionne,WORLD_POS.tavern.barTransfer,0,1,420,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
+   await walkThrough(tavernRionne,pts.slice(1),24);
+   place(tavernRionne,WORLD_POS.tavern.stairs,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+   place(tavernRionne,WORLD_POS.tavern.stairsFar,0,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 1500ms ease 700ms',RIONNE_POSE.fullBack,false);await sleep(2500);
+  }else if(start===UP&&destination===DOWN){
+   await setPoseStable(tavernRionne,RIONNE_POSE.front,false);place(tavernRionne,WORLD_POS.tavern.stairsFar,0,'none');
+   place(tavernRionne,WORLD_POS.tavern.stairs,1,'left 2400ms ease-in-out, top 2400ms ease-in-out, height 2400ms ease-in-out, opacity 800ms ease');await sleep(2450);
+   place(tavernRionne,WORLD_POS.tavern.stairs,1,'none');await sleep(TRANSFER_PAUSE);await walkThrough(tavernRionne,pts.slice(0,-1),24);
+   place(tavernRionne,WORLD_POS.tavern.barTransfer,1,'none');await crossfadePose(tavernRionne,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
+   await fadeAt(tavernRionne,WORLD_POS.tavern.barTransfer,1,0,420,RIONNE_POSE.fullBack,false);await fadeAt(tavernRionne,WORLD_POS.tavern.barActivity,0,1,430,RIONNE_POSE.front,false);
+  }
  }else if(current==='room'){
-   const pts=navScenePoints(path,'room');
-   if(start==='tavern.barIdle'&&destination==='room.window'){
-     await fadeAt(roomRionne,NAV_NODE['room.door'].spot,0,1,420,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);
-     await walkThrough(roomRionne,pts,22);place(roomRionne,NAV_NODE['room.window'].spot,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);
-   }else if(start==='room.window'&&destination==='tavern.barIdle'){
-     await walkThrough(roomRionne,pts,22);place(roomRionne,NAV_NODE['room.door'].spot,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);
-     await fadeAt(roomRionne,NAV_NODE['room.door'].spot,1,0,650,RIONNE_POSE.front,false);
-   }
+  const pts=navScenePoints(path,'room');
+  if(start===DOWN&&destination===UP){await fadeAt(roomRionne,WORLD_POS.room.door,0,1,420,RIONNE_POSE.fullBack,false);await sleep(TRANSFER_PAUSE);await walkThrough(roomRionne,pts,22);place(roomRionne,WORLD_POS.room.window,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false)}
+  else if(start===UP&&destination===DOWN){await walkThrough(roomRionne,pts,22);place(roomRionne,WORLD_POS.room.door,1,'none');await crossfadePose(roomRionne,RIONNE_POSE.front,false);await sleep(TRANSFER_PAUSE);await fadeAt(roomRionne,WORLD_POS.room.door,1,0,650,RIONNE_POSE.front,false)}
  }
  commitRionneDestination(destination);
 }
@@ -644,19 +633,19 @@ async function performMissedOccurrence(event){
  interactionState='sync';
  if(event.kind==='rionne-up'){
    // Reality changes first. Only the currently visible stale presentation is corrected.
-   commitRionneDestination('room.window');
-   if(current==='tavern' && Number.parseFloat(getComputedStyle(tavernRionne).opacity)>.05)await syncOut(tavernRionne,SPOT.tavern.barIdle);
-   else if(current==='room' && Number.parseFloat(getComputedStyle(roomRionne).opacity)<.95)await syncIn(roomRionne,SPOT.room.window);
+   commitRionneDestination('RIONNES_ROOM/SPOT_02');
+   if(current==='tavern' && Number.parseFloat(getComputedStyle(tavernRionne).opacity)>.05)await syncOut(tavernRionne,WORLD_POS.tavern.barActivity);
+   else if(current==='room' && Number.parseFloat(getComputedStyle(roomRionne).opacity)<.95)await syncIn(roomRionne,WORLD_POS.room.window);
  }else{
-   commitRionneDestination('tavern.barIdle');
-   if(current==='room' && Number.parseFloat(getComputedStyle(roomRionne).opacity)>.05)await syncOut(roomRionne,SPOT.room.window);
-   else if(current==='tavern' && Number.parseFloat(getComputedStyle(tavernRionne).opacity)<.95)await syncIn(tavernRionne,SPOT.tavern.barIdle);
+   commitRionneDestination('BERKLITH_TAVERN/SPOT_04');
+   if(current==='room' && Number.parseFloat(getComputedStyle(roomRionne).opacity)>.05)await syncOut(roomRionne,WORLD_POS.room.window);
+   else if(current==='tavern' && Number.parseFloat(getComputedStyle(tavernRionne).opacity)<.95)await syncIn(tavernRionne,WORLD_POS.tavern.barActivity);
  }
 }
 async function performWitnessedOccurrence(event){
  interactionState='post-action';await sleep(1000);
  // Dimension Gear expresses intent only. Navigation resolves every intermediate spot/transfer.
- await navigateRionneTo(event.kind==='rionne-up'?'room.window':'tavern.barIdle');
+ await navigateRionneTo(event.kind==='rionne-up'?'RIONNES_ROOM/SPOT_02':'BERKLITH_TAVERN/SPOT_04');
 }
 async function evaluateAgendas(oldMinute,newMinute){
  const occurrences=agendaOccurrencesBetween(oldMinute,newMinute);
@@ -675,12 +664,12 @@ function syncRionnePresentation(){
  const upstairs=rionneShouldBeUpstairs();
  if(upstairs){
    if(rionneWorld.location!=='room')commitRionneRoom();
-   setTavernRionne(36.0945868946,68.2391705069,27,0,'none','assets/rionne-front.png');
-   setRoomRionne(47.5863247863,74,61.5,1,'none','assets/rionne-front.png');
+   place(tavernRionne,WORLD_POS.tavern.barActivity,0,'none',RIONNE_POSE.front,false);
+   place(roomRionne,WORLD_POS.room.window,1,'none',RIONNE_POSE.front,false);
  }else{
    if(rionneWorld.location!=='tavern')commitRionneTavern();
-   setTavernRionne(36.0945868946,68.2391705069,27,1,'none','assets/rionne-front.png');
-   setRoomRionne(47.5863247863,74,61.5,0,'none','assets/rionne-front.png');
+   place(tavernRionne,WORLD_POS.tavern.barActivity,1,'none',RIONNE_POSE.front,false);
+   place(roomRionne,WORLD_POS.room.window,0,'none',RIONNE_POSE.front,false);
  }
 }
 function characterElementVisible(el){return !!el&&Number.parseFloat(getComputedStyle(el).opacity)>.5}
@@ -689,7 +678,7 @@ function semanticCharacterStateAllowed(state){return ['idle','activity'].include
 function rionneIsInteractable(){
  if(interactionState!=='idle')return false;
  const node=NAV_NODE[rionneNode()];
- if(!node||node.scene!==current||!semanticCharacterStateAllowed(node.type))return false;
+ if(!node||SCENE_VIEW[node.scene]!==current||!semanticCharacterStateAllowed(node.type))return false;
  const el=current==='room'?roomRionne:current==='tavern'?tavernRionne:null;
  return characterElementVisible(el);
 }
@@ -801,12 +790,12 @@ $('#goBtn').addEventListener('click',()=>{
 });
 $$('[data-action]').forEach(b=>b.addEventListener('click',()=>{
  if(b.dataset.action==='save'){localStorage.setItem('ovad_save',JSON.stringify({location:current,worldMinute,metRionne:true,rionneWorld}));say('Prototype saved.')}
- if(b.dataset.action==='load'){let sv;try{sv=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(sv&&locations[sv.location]){showScene(sv.location);setWorldTime(Number.isFinite(sv.worldMinute)?sv.worldMinute:WORLD_START);rionneWorld=normalizeRionneWorld(sv.rionneWorld||{location:'tavern',spot:'tavern.barIdle'});saveRionneWorld();syncRionnePresentation();closeMenu();say('Save loaded.')}else say('No save data yet.')}
+ if(b.dataset.action==='load'){let sv;try{sv=JSON.parse(localStorage.getItem('ovad_save'))}catch(e){};if(sv&&locations[sv.location]){showScene(sv.location);setWorldTime(Number.isFinite(sv.worldMinute)?sv.worldMinute:WORLD_START);rionneWorld=normalizeRionneWorld(sv.rionneWorld||{location:'tavern',spot:'BERKLITH_TAVERN/SPOT_04'});saveRionneWorld();syncRionnePresentation();closeMenu();say('Save loaded.')}else say('No save data yet.')}
  if(b.dataset.action==='extra')say('Archive section coming later.')
 }));
 $('#resetBtn').addEventListener('click',()=>$('#confirm').classList.add('open'));
 $('#cancelReset').addEventListener('click',()=>$('#confirm').classList.remove('open'));
-$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');['ovad_agenda_barmaid1735','ovad_barmaid_location','ovad_barmaid_spot','ovad_agenda_rionne1735','ovad_agenda_rionne1755','ovad_rionne_location','ovad_rionne_spot'].forEach(k=>localStorage.removeItem(k));rionneWorld={location:'tavern',spot:'tavern.barIdle'};setWorldTime(WORLD_START);showScene('tavern');syncRionnePresentation();$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
+$('#confirmReset').addEventListener('click',()=>{localStorage.removeItem('ovad_save');localStorage.removeItem('ovad_current');localStorage.removeItem('ovad_world_time');['ovad_agenda_barmaid1735','ovad_barmaid_location','ovad_barmaid_spot','ovad_agenda_rionne1735','ovad_agenda_rionne1755','ovad_rionne_location','ovad_rionne_spot'].forEach(k=>localStorage.removeItem(k));rionneWorld={location:'tavern',spot:'BERKLITH_TAVERN/SPOT_04'};setWorldTime(WORLD_START);showScene('tavern');syncRionnePresentation();$('#confirm').classList.remove('open');closeMenu();say('Prototype reset.')});
 $('#motionBtn').addEventListener('click',e=>{motion=!motion;e.currentTarget.textContent='MENU MOTION · '+(motion?'ON':'REDUCED');document.documentElement.style.setProperty('--motion',motion?'1':'0');say(motion?'Full menu motion.':'Reduced menu motion.')});
 
 // Startup presentation is separate from the live scene. Nothing playable is visible until the title sequence finishes.

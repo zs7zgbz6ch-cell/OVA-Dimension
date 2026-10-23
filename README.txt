@@ -39,3 +39,11 @@ Visual framing, character card landing, Observe layouts, movement, agenda timing
 Changed files:
 - index.html
 - README.txt
+
+4D.1 WORLD GRAPH FOUNDATION
+- world/world-stage.json preserves the authoritative World Stage export for BERKLITH_TAVERN and RIONNES_ROOM.
+- Runtime navigation nodes/edges are generated from the same World Stage scene/spot/connection data rather than a separately handwritten route graph.
+- Runtime node identity is SCENE_ID/SPOT_XX.
+- Old semantic Rionne spot names exist only in a compatibility map for older local saves.
+- stairsFar remains presentation-only because it is an animation target, not a logical world position.
+- This pass intentionally does not redesign Agenda, Actions, entity state, Character Card, or synchronization.
