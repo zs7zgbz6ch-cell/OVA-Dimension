@@ -3,7 +3,7 @@
   "name": "OVA-D LAB",
   "short_name": "OVA-D LAB",
   "description": "OVA-D internal Scene Stage for blocking and spot placement.",
-  "start_url": "./index.html?stage=v02",
+  "start_url": "./index.html?stage=v08",
   "scope": "./",
   "display": "standalone",
   "orientation": "landscape",
