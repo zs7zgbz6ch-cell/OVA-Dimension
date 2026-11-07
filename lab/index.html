@@ -33,14 +33,14 @@ body.ui-hidden #uiToggle{display:block;position:fixed;z-index:90;right:max(8px,e
 .controls-row{margin:0}.control{grid-template-columns:13px minmax(55px,1fr) 35px 23px 23px;gap:3px}.control label,.control output{font-size:8px}.nudge{height:24px}
 #uiToggle{display:block!important;position:fixed!important;z-index:90;right:max(8px,env(safe-area-inset-right));bottom:max(7px,env(safe-area-inset-bottom));height:31px;background:rgba(13,9,5,.82);backdrop-filter:blur(10px)}
 body:not(.ui-hidden) #uiToggle{bottom:max(7px,env(safe-area-inset-bottom))}body.ui-hidden #uiToggle{bottom:max(7px,env(safe-area-inset-bottom))}
-#toolsPanel{display:none;position:fixed;z-index:55;right:max(8px,env(safe-area-inset-right));bottom:48px;width:min(410px,92vw);padding:9px;border:1px solid rgba(224,184,103,.55);border-radius:13px;background:rgba(13,9,5,.94);backdrop-filter:blur(16px)}#toolsPanel.open{display:block}.tools-title{display:flex;align-items:center;justify-content:space-between;font-size:9px;letter-spacing:.1em;margin-bottom:7px}.tools-section{padding-top:7px;margin-top:7px;border-top:1px solid rgba(224,184,103,.2)}.tools-label{font-size:7px;letter-spacing:.13em;opacity:.72;margin-bottom:5px}.tools-section #spotType,.tools-section .conn-select{width:100%;margin-bottom:6px}.tools-actions{display:flex;gap:5px;flex-wrap:wrap}.tools-actions .btn{flex:1;min-width:max-content}
+#toolsPanel{display:none;position:fixed;z-index:55;right:max(8px,env(safe-area-inset-right));bottom:48px;width:min(410px,92vw);padding:9px;border:1px solid rgba(224,184,103,.55);border-radius:13px;background:rgba(13,9,5,.94);backdrop-filter:blur(16px)}#toolsPanel.open{display:block}.tools-title{display:flex;align-items:center;justify-content:space-between;font-size:9px;letter-spacing:.1em;margin-bottom:7px}.tools-section{padding-top:7px;margin-top:7px;border-top:1px solid rgba(224,184,103,.2)}.tools-label{font-size:7px;letter-spacing:.13em;opacity:.72;margin-bottom:5px}.tools-section #spotType,.tools-section .conn-select{width:100%;margin-bottom:6px}.tools-actions{display:flex;gap:5px;flex-wrap:wrap}.tools-actions .btn{flex:1;min-width:max-content}.tools-hint{font-size:8px;line-height:1.45;opacity:.76;margin:0 0 5px}.conn-select:disabled{opacity:.55}
 body.ui-hidden #toolsPanel{display:none}.topbar{z-index:20}
 @media(max-width:760px){#editor{right:max(82px,calc(env(safe-area-inset-right) + 74px));padding:5px 6px}.compact-head{margin-bottom:4px}.compact-head #sceneSelect{min-width:115px;max-width:185px}.control{grid-template-columns:11px minmax(42px,1fr) 31px 21px 21px}.nudge{height:22px}.controls-row{gap:4px}#toolsPanel{bottom:45px;width:min(390px,94vw)}}
 @media(orientation:landscape){#toolsPanel{top:max(44px,calc(env(safe-area-inset-top) + 36px));bottom:max(48px,calc(env(safe-area-inset-bottom) + 41px));max-height:none;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.tools-title{position:sticky;top:-9px;z-index:3;margin:-9px -9px 7px;padding:9px;background:rgba(13,9,5,.98);border-bottom:1px solid rgba(224,184,103,.2)}}
 </style></head><body>
 <div id="rotateNotice"><div class="rotate-card"><div class="rotate-title">ROTATE TO EDIT WORLD STAGE</div><div class="rotate-copy">World Stage is designed for landscape editing.</div></div></div>
 <div id="scene"><div class="vignette"></div></div>
-<div class="topbar"><div class="badge">OVA-D LAB · WORLD STAGE · v0.8.1</div><div class="status" id="status"></div></div>
+<div class="topbar"><div class="badge">OVA-D LAB · WORLD STAGE · v0.8.2</div><div class="status" id="status"></div></div>
 <div id="editor">
 <div class="compact-head"><select id="sceneSelect" class="btn primary"></select><div id="spotSummary"></div><button class="btn" id="more">⋯</button></div>
 <div class="row controls-row">
@@ -52,7 +52,7 @@ body.ui-hidden #toolsPanel{display:none}.topbar{z-index:20}
 <button class="btn" id="uiToggle">HIDE UI</button>
 <div id="toolsPanel">
 <div class="tools-title"><span>SCENE / SPOT TOOLS</span><button class="btn" id="closeTools">CLOSE</button></div>
-<div class="tools-section"><div class="tools-label">SPOT</div><select id="spotType" class="btn"><option value="unset">TYPE: UNSET</option><option value="idle">TYPE: IDLE</option><option value="waypoint">TYPE: WAYPOINT</option><option value="transfer">TYPE: TRANSFER</option><option value="tofrom">TYPE: TO/FROM</option><option value="activity">TYPE: ACTIVITY</option></select><div class="tools-actions"><button class="btn primary" id="add">+ SPOT</button><button class="btn danger" id="remove">DELETE</button></div></div><div class="tools-section"><div class="tools-label">CONNECTION FROM SELECTED SPOT</div><select id="connectScene" class="conn-select"></select><select id="connectSpot" class="conn-select"></select><div class="tools-actions"><button class="btn primary" id="addConnection">CONNECT</button><button class="btn danger" id="removeConnection">REMOVE SELECTED</button></div><select id="connectionList" class="conn-select" size="3"></select></div>
+<div class="tools-section"><div class="tools-label">SPOT</div><select id="spotType" class="btn"><option value="unset">TYPE: UNSET</option><option value="idle">TYPE: IDLE</option><option value="waypoint">TYPE: WAYPOINT</option><option value="transfer">TYPE: TRANSFER</option><option value="tofrom">TYPE: TO/FROM</option><option value="activity">TYPE: ACTIVITY</option></select><div class="tools-actions"><button class="btn primary" id="add">+ SPOT</button><button class="btn danger" id="remove">DELETE</button></div></div><div class="tools-section"><div class="tools-label">CONNECTION FROM SELECTED SPOT</div><select id="connectScene" class="conn-select"></select><select id="connectSpot" class="conn-select"></select><div class="tools-actions"><button class="btn primary" id="addConnection">CONNECT</button><button class="btn danger" id="removeConnection">REMOVE SELECTED</button></div><div class="tools-label">CONNECTED SPOTS</div><select id="connectionList" class="conn-select" aria-label="Connected spots"></select><div class="tools-label">SELECTED CONNECTION · MOVEMENT</div><select id="connectionMovement" class="conn-select" aria-label="Connection movement type" disabled><option value="walk">WALK</option><option value="fade">FADE</option></select><div class="tools-hint" id="connectionHint">Choose a connected spot to edit its movement.</div></div>
 <div class="tools-section"><div class="tools-label">SCENE</div><div class="tools-actions"><button class="btn" id="newScene">+ SCENE</button><button class="btn" id="labels">LABELS: ON</button><button class="btn danger" id="reset">RESET SCENE</button></div></div>
 <div class="tools-section"><div class="tools-label">WORLD DATA</div><div class="tools-actions"><button class="btn primary" id="exportProject">EXPORT WORLD</button><button class="btn" id="importProject">IMPORT</button></div></div>
 </div><div id="toast"></div>
@@ -63,13 +63,26 @@ const scene=document.querySelector('#scene'),status=document.querySelector('#sta
 const DEFAULTS=[
 {id:'SPOT_01',type:'unset',x:26.44,y:66.55,scale:25},{id:'SPOT_02',type:'unset',x:35.4,y:67.74,scale:27},{id:'SPOT_03',type:'unset',x:45.52,y:80.7,scale:42},{id:'SPOT_04',type:'unset',x:94.47,y:95.82,scale:66},{id:'SPOT_05',type:'unset',x:31.1,y:72.87,scale:35},{id:'SPOT_06',type:'unset',x:54.33,y:68.5,scale:23},{id:'SPOT_07',type:'unset',x:23.86,y:103.14,scale:73},{id:'SPOT_08',type:'unset',x:48.38,y:117.5,scale:95},{id:'SPOT_09',type:'unset',x:76.3,y:70.34,scale:24.5}];
 const NEUTRAL=()=>({id:'SPOT_01',type:'unset',x:50,y:75,scale:45});
-let project={version:'OVA-D_WORLD_STAGE_0.8.1',activeScene:'BERKLITH_TAVERN',scenes:{},connections:[]},state=null,drag=null,toastTimer;
+let project={version:'OVA-D_WORLD_STAGE_0.8.2',activeScene:'BERKLITH_TAVERN',scenes:{},connections:[]},state=null,drag=null,toastTimer;
 function toast(t){toastEl.textContent=t;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1200)}
 function canonicalSpotId(s,i){let raw=String(s?.id||s?.name||'').toUpperCase();let m=raw.match(/SPOT[_-]?(\d+)/);return m?'SPOT_'+String(+m[1]).padStart(2,'0'):'SPOT_'+String(i+1).padStart(2,'0')}
 function norm(s,i=0){let {transition,destination,name,...clean}=s||{};return {id:canonicalSpotId(s,i),type:clean.type||'unset',x:+clean.x||0,y:+clean.y||0,scale:+clean.scale||45}}
 function normalizeScene(raw,idHint){let id=(raw?.id||idHint||'SCENE').toUpperCase();let spots=(raw?.spots||[]);if(!Array.isArray(spots))spots=Object.entries(spots).map(([id,v])=>({id,...v}));spots=spots.map(norm);if(!spots.length)spots=[NEUTRAL()];let selected=canonicalSpotId({id:raw?.selected||spots[0].id},0);if(!spots.some(x=>x.id===selected))selected=spots[0].id;return {id,background:raw?.background||'',spots,selected,labels:raw?.labels!==false}}
 function sceneData(id='BERKLITH_TAVERN',spots=DEFAULTS,bg='assets/berklith-tavern.jpg'){return normalizeScene({id,background:bg,spots,selected:spots[0]?.id||'SPOT_01',labels:true},id)}
-function migrateProject(p){let out={version:'OVA-D_WORLD_STAGE_0.8.1',activeScene:p?.activeScene||'BERKLITH_TAVERN',scenes:{},connections:[]};if(p?.scenes)Object.entries(p.scenes).forEach(([id,sc])=>out.scenes[id]=normalizeScene(sc,id));if(Array.isArray(p?.connections))out.connections=p.connections.filter(c=>c?.a?.scene&&c?.a?.spot&&c?.b?.scene&&c?.b?.spot).map(c=>({a:{scene:String(c.a.scene).toUpperCase(),spot:canonicalSpotId({id:c.a.spot},0)},b:{scene:String(c.b.scene).toUpperCase(),spot:canonicalSpotId({id:c.b.spot},0)}}));out.connections=cleanConnections(out.connections,out.scenes);if(!out.scenes[out.activeScene])out.activeScene=Object.keys(out.scenes)[0]||'BERKLITH_TAVERN';return out}
+// Connections default to walking; To/From links are presentation-only.
+function connectionMovement(connection, scenes = project.scenes) {
+  if (isPresentationConnection(connection, scenes)) return 'tofrom';
+  return connection?.movement === 'fade' ? 'fade' : 'walk';
+}
+function normalizeConnection(connection, scenes = project.scenes) {
+  const result = {
+    a: { scene: String(connection.a.scene).toUpperCase(), spot: canonicalSpotId({ id: connection.a.spot }, 0) },
+    b: { scene: String(connection.b.scene).toUpperCase(), spot: canonicalSpotId({ id: connection.b.spot }, 0) }
+  };
+  if (connectionMovement(connection, scenes) === 'fade') result.movement = 'fade';
+  return result;
+}
+function migrateProject(p){let out={version:'OVA-D_WORLD_STAGE_0.8.2',activeScene:p?.activeScene||'BERKLITH_TAVERN',scenes:{},connections:[]};if(p?.scenes)Object.entries(p.scenes).forEach(([id,sc])=>out.scenes[id]=normalizeScene(sc,id));if(Array.isArray(p?.connections))out.connections=p.connections.filter(c=>c?.a?.scene&&c?.a?.spot&&c?.b?.scene&&c?.b?.spot).map(c=>normalizeConnection(c,out.scenes));out.connections=cleanConnections(out.connections,out.scenes);if(!out.scenes[out.activeScene])out.activeScene=Object.keys(out.scenes)[0]||'BERKLITH_TAVERN';return out}
 // To/From is a presentation-only endpoint, never a route node.
 function spotAt(endpoint,scenes=project.scenes){return scenes?.[endpoint?.scene]?.spots?.find(s=>s.id===endpoint.spot)}
 function isPresentationConnection(c,scenes=project.scenes){return spotAt(c.a,scenes)?.type==='tofrom'||spotAt(c.b,scenes)?.type==='tofrom'}
@@ -86,11 +99,11 @@ function validConnection(c,connections=[],scenes=project.scenes){
 }
 function cleanConnections(connections,scenes=project.scenes){
  const result=[];
- for(const c of connections||[]){if(validConnection(c,result,scenes)&&!result.some(x=>sameConnection(x,c.a,c.b)))result.push(c)}
+ for(const c of connections||[]){if(validConnection(c,result,scenes)&&!result.some(x=>sameConnection(x,c.a,c.b)))result.push(normalizeConnection(c,scenes))}
  return result;
 }
 function loadProject(){for(const k of [KEY,PREV_KEY,OLDER_PROJECT_KEY]){try{let p=JSON.parse(localStorage.getItem(k));if(p?.scenes&&Object.keys(p.scenes).length){project=migrateProject(p);persist();return}}catch(e){}} let old=null;for(const k of [OLD_KEY,OLDER_KEY]){try{let v=JSON.parse(localStorage.getItem(k));if(v?.spots?.length){old=v;break}}catch(e){}} let sc=old?sceneData(old.scene||'BERKLITH_TAVERN',old.spots,'assets/berklith-tavern.jpg'):sceneData();project.scenes[sc.id]=sc;project.activeScene=sc.id;persist()}
-function persist(){project.version='OVA-D_WORLD_STAGE_0.8.1';project.connections=project.connections||[];if(state){project.scenes[state.id]=JSON.parse(JSON.stringify(state));project.activeScene=state.id}localStorage.setItem(KEY,JSON.stringify(project))}
+function persist(){project.version='OVA-D_WORLD_STAGE_0.8.2';project.connections=project.connections||[];if(state){project.scenes[state.id]=JSON.parse(JSON.stringify(state));project.activeScene=state.id}localStorage.setItem(KEY,JSON.stringify(project))}
 function activate(id){let s=project.scenes[id];if(!s)return;state=JSON.parse(JSON.stringify(s));state.spots=(state.spots||[]).map((x,i)=>norm(x,i));if(!state.spots.length)state.spots=[NEUTRAL()];if(!state.spots.some(x=>x.id===state.selected))state.selected=state.spots[0].id;scene.style.backgroundImage=`url('${state.background||''}')`;refreshScenes();render()}
 function refreshScenes(){let e=document.querySelector('#sceneSelect');e.innerHTML='';Object.keys(project.scenes).sort().forEach(id=>{let o=document.createElement('option');o.value=id;o.textContent=id;e.appendChild(o)});e.value=state?.id||project.activeScene}
 function sel(){return state.spots.find(s=>s.id===state.selected)||state.spots[0]}
@@ -111,15 +124,83 @@ document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{let [k,d]=b.
 function copyText(t,msg){navigator.clipboard?.writeText(t).then(()=>toast(msg)).catch(()=>{let a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast(msg)})}
 document.querySelector('#sceneSelect').onchange=e=>{persist();activate(e.target.value)};
 document.querySelector('#newScene').onclick=()=>{let id=prompt('New scene ID (example: RIONNES_ROOM)');if(!id)return;id=id.trim().toUpperCase().replace(/\s+/g,'_').replace(/[^A-Z0-9_-]/g,'');if(!id)return;if(project.scenes[id])return toast('SCENE EXISTS');let bg=prompt('Background asset path','assets/rionnes-room.jpg');if(bg===null)return;persist();project.scenes[id]=sceneData(id,[NEUTRAL()],bg.trim());project.activeScene=id;localStorage.setItem(KEY,JSON.stringify(project));activate(id);toast('SCENE CREATED')};
-function productionWorld(){persist();let scenes={};Object.entries(project.scenes||{}).forEach(([id,raw])=>{let sc=normalizeScene(raw,id);scenes[id]={id:sc.id,background:sc.background,spots:sc.spots.map((spot,i)=>norm(spot,i))}});let connections=cleanConnections(project.connections,project.scenes).map(c=>({a:{scene:String(c.a.scene).toUpperCase(),spot:canonicalSpotId({id:c.a.spot},0)},b:{scene:String(c.b.scene).toUpperCase(),spot:canonicalSpotId({id:c.b.spot},0)}}));return {version:'OVA-D_WORLD_STAGE_0.8.1',scenes,connections}}
+function productionWorld(){persist();let scenes={};Object.entries(project.scenes||{}).forEach(([id,raw])=>{let sc=normalizeScene(raw,id);scenes[id]={id:sc.id,background:sc.background,spots:sc.spots.map((spot,i)=>norm(spot,i))}});let connections=cleanConnections(project.connections,project.scenes).map(c=>normalizeConnection(c,project.scenes));return {version:'OVA-D_WORLD_STAGE_0.8.2',scenes,connections}}
 document.querySelector('#exportProject').onclick=()=>copyText(JSON.stringify(productionWorld(),null,2),'WORLD COPIED');
 function sameEnd(a,b){return a?.scene===b?.scene&&a?.spot===b?.spot}
 function sameConnection(c,a,b){return (sameEnd(c.a,a)&&sameEnd(c.b,b))||(sameEnd(c.a,b)&&sameEnd(c.b,a))}
 function endpointLabel(e){return e.scene+' / '+e.spot}
-function refreshConnectionUI(){let sceneSel=document.querySelector('#connectScene'),spotSel=document.querySelector('#connectSpot'),list=document.querySelector('#connectionList');if(!sceneSel||!state)return;let oldScene=sceneSel.value;sceneSel.innerHTML='';Object.keys(project.scenes).sort().forEach(id=>{let o=document.createElement('option');o.value=id;o.textContent=id;sceneSel.appendChild(o)});sceneSel.value=project.scenes[oldScene]?oldScene:state.id;let target=project.scenes[sceneSel.value];spotSel.innerHTML='';(target?.spots||[]).forEach(s=>{let o=document.createElement('option');o.value=s.id;o.textContent=s.id+' · '+(s.type||'unset').toUpperCase();spotSel.appendChild(o)});list.innerHTML='';let here={scene:state.id,spot:sel().id};(project.connections||[]).forEach((c,i)=>{if(sameEnd(c.a,here)||sameEnd(c.b,here)){let other=sameEnd(c.a,here)?c.b:c.a,o=document.createElement('option');o.value=i;o.textContent=(isPresentationConnection(c)?'⇄ TO/FROM ':'↔ ')+endpointLabel(other);list.appendChild(o)}})}
+function refreshConnectionUI() {
+  const sceneSelect = document.querySelector('#connectScene');
+  const spotSelect = document.querySelector('#connectSpot');
+  const list = document.querySelector('#connectionList');
+  if (!state) return;
+
+  const previousScene = sceneSelect.value;
+  const previousSpot = spotSelect.value;
+  const previousConnection = list.value;
+  sceneSelect.replaceChildren();
+  for (const sceneId of Object.keys(project.scenes).sort()) {
+    sceneSelect.add(new Option(sceneId, sceneId));
+  }
+  sceneSelect.value = project.scenes[previousScene] ? previousScene : state.id;
+
+  spotSelect.replaceChildren();
+  for (const spot of project.scenes[sceneSelect.value]?.spots || []) {
+    spotSelect.add(new Option(`${spot.id} · ${spot.type.toUpperCase()}`, spot.id));
+  }
+  if ([...spotSelect.options].some(option => option.value === previousSpot)) {
+    spotSelect.value = previousSpot;
+  }
+
+  const here = { scene: state.id, spot: sel().id };
+  const connected = (project.connections || []).flatMap((connection, index) => {
+    if (!sameEnd(connection.a, here) && !sameEnd(connection.b, here)) return [];
+    const other = sameEnd(connection.a, here) ? connection.b : connection.a;
+    const movement = connectionMovement(connection);
+    const label = movement === 'tofrom' ? 'TO/FROM' : movement.toUpperCase();
+    return [{ index, text: `${endpointLabel(other)} · ${label}` }];
+  });
+
+  list.replaceChildren();
+  list.add(new Option(`CONNECTED SPOTS (${connected.length})`, ''));
+  for (const connection of connected) {
+    list.add(new Option(connection.text, String(connection.index)));
+  }
+  if (connected.some(connection => String(connection.index) === previousConnection)) {
+    list.value = previousConnection;
+  }
+  updateConnectionMovementUI();
+}
+function updateConnectionMovementUI() {
+  const list = document.querySelector('#connectionList');
+  const movementSelect = document.querySelector('#connectionMovement');
+  const hint = document.querySelector('#connectionHint');
+  const index = list.value === '' ? -1 : Number(list.value);
+  const connection = project.connections?.[index];
+  const movement = connection ? connectionMovement(connection) : null;
+  movementSelect.disabled = !connection || movement === 'tofrom';
+  movementSelect.value = movement === 'fade' ? 'fade' : 'walk';
+  hint.textContent = movement === 'tofrom'
+    ? 'To/From links are visual markers, not walking or fading routes.'
+    : connection
+      ? 'WALK follows the path. FADE transitions between these two spots in either direction.'
+      : 'Choose a connected spot to edit its movement.';
+}
+document.querySelector('#connectionList').addEventListener('change', updateConnectionMovementUI);
+document.querySelector('#connectionMovement').addEventListener('change', event => {
+  const list = document.querySelector('#connectionList');
+  if (list.value === '') return;
+  const connection = project.connections?.[Number(list.value)];
+  if (!connection || isPresentationConnection(connection)) return;
+  if (event.target.value === 'fade') connection.movement = 'fade';
+  else delete connection.movement;
+  save(true);
+  refreshConnectionUI();
+  toast('CONNECTION UPDATED');
+});
 document.querySelector('#connectScene').onchange=refreshConnectionUI;
 document.querySelector('#addConnection').onclick=()=>{let a={scene:state.id,spot:sel().id},b={scene:document.querySelector('#connectScene').value,spot:document.querySelector('#connectSpot').value};if(!b.scene||!b.spot)return toast('CHOOSE TARGET');if(sameEnd(a,b))return toast('SAME SPOT');if((project.connections||[]).some(c=>sameConnection(c,a,b)))return toast('ALREADY CONNECTED');persist();if(!validConnection({a,b},project.connections,project.scenes))return toast('INVALID TO/FROM LINK');project.connections=project.connections||[];project.connections.push({a,b});save(true);refreshConnectionUI();toast('CONNECTED')};
-document.querySelector('#removeConnection').onclick=()=>{let list=document.querySelector('#connectionList'),i=+list.value;if(!Number.isInteger(i)||!project.connections?.[i])return toast('SELECT CONNECTION');project.connections.splice(i,1);save(true);refreshConnectionUI();toast('CONNECTION REMOVED')};
+document.querySelector('#removeConnection').onclick=()=>{let list=document.querySelector('#connectionList'),i=Number(list.value);if(list.value===''||!Number.isInteger(i)||!project.connections?.[i])return toast('SELECT CONNECTION');project.connections.splice(i,1);save(true);refreshConnectionUI();toast('CONNECTION REMOVED')};
 const ib=document.querySelector('#importBox'),it=document.querySelector('#importText');document.querySelector('#importProject').onclick=()=>{it.value='';ib.style.display='grid';it.focus()};document.querySelector('#cancelImport').onclick=()=>ib.style.display='none';
 document.querySelector('#doImport').onclick=()=>{try{let d=JSON.parse(it.value);persist();if(d.version==='OVA-D_WORLD_SCENE_0.7'&&d.scene?.id){let sc=normalizeScene(d.scene,d.scene.id);project.scenes[sc.id]=sc;project.connections=[...(project.connections||[]).filter(c=>c.a.scene!==sc.id&&c.b.scene!==sc.id),...(d.connections||[])];project.activeScene=sc.id}else if(d.scenes&&Object.keys(d.scenes).length){project=migrateProject(d)}else if(d.scene&&d.spots){let spots=Object.entries(d.spots).map(([id,v],i)=>norm({id,...v},i));let sc=sceneData(d.scene,spots,'');project.scenes[sc.id]=sc;project.activeScene=sc.id}else throw 0;project=migrateProject(project);localStorage.setItem(KEY,JSON.stringify(project));ib.style.display='none';activate(project.activeScene);toast('IMPORT COMPLETE')}catch(e){toast('INVALID JSON')}};
 const uiToggle=document.querySelector('#uiToggle'),toolsPanel=document.querySelector('#toolsPanel');document.querySelector('#more').onclick=()=>toolsPanel.classList.toggle('open');document.querySelector('#closeTools').onclick=()=>toolsPanel.classList.remove('open');uiToggle.onclick=()=>{let hiding=!document.body.classList.contains('ui-hidden');document.body.classList.toggle('ui-hidden',hiding);toolsPanel.classList.remove('open');uiToggle.textContent=hiding?'SHOW UI':'HIDE UI'};
